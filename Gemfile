@@ -61,5 +61,3 @@ gem 'figaro'
 # Bootstrap
 gem 'bootstrap', '~> 5.3.3'
 gem 'jquery-rails'
-
-gem 'sprockets-rails', :require => 'sprockets/railtie'
