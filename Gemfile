@@ -57,3 +57,7 @@ gem 'google-api-client', require: 'google/apis/drive_v3'
 
 # Auth
 gem 'figaro'
+
+# Bootstrap
+gem 'bootstrap', '~> 4.4.1'
+gem 'jquery-rails'
