@@ -10,7 +10,7 @@ gem 'sqlite3', '~> 1.4.2'
 # Use Puma as the app server
 gem 'puma', '~> 5.0'
 # Use SCSS for stylesheets
-gem 'sass-rails', '>= 6'
+gem 'dartsass-sprockets'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
 gem 'webpacker', '~> 5.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -59,5 +59,5 @@ gem 'google-api-client', require: 'google/apis/drive_v3'
 gem 'figaro'
 
 # Bootstrap
-gem 'bootstrap', '~> 4.4.1'
+gem 'bootstrap', '~> 5.3.3'
 gem 'jquery-rails'
