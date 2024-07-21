@@ -1,0 +1,10 @@
+<h1> myDrive </h1>
+<% if session[:user_id] %>
+  <%= form_with url: '/upload', local: true, multipart: true do |form| %>
+    <%= form.file_field :file %>
+    <%= form.submit 'Upload to Google Drive' %>
+  <% end %>
+  <%= link_to 'Sign out', signout_path %>
+<% else %>
+  <%= link_to 'Sign in with Google', '/auth/google_oauth2' %>
+<% end %>
