@@ -1,10 +1,96 @@
-<h1> myDrive </h1>
-<% if session[:user_id] %>
-  <%= form_with url: '/upload', local: true, multipart: true do |form| %>
-    <%= form.file_field :file %>
-    <%= form.submit 'Upload to Google Drive' %>
-  <% end %>
-  <%= link_to 'Sign out', signout_path %>
-<% else %>
-  <%= link_to 'Sign in with Google', '/auth/google_oauth2' %>
-<% end %>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">MyDrive</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+      </ul>
+      <form class="d-flex" role="search">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+      <ul class="navbar-nav ml-auto">
+        <!-- Language Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Language
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#">English</a></li>
+            <li><a class="dropdown-item" href="#">Spanish</a></li>
+            <li><a class="dropdown-item" href="#">French</a></li>
+            <li><a class="dropdown-item" href="#">German</a></li>
+          </ul>
+        </li>
+        <% if session[:user_id] %>
+          <li class="nav-item">
+            <%= form_with url: '/upload', local: true, multipart: true, class: 'form-inline' do |form| %>
+              <%= form.file_field :file, class: 'form-control me-2' %>
+              <%= form.submit 'Upload to Google Drive', class: 'btn btn-outline-primary' %>
+            <% end %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Sign out', signout_path, class: 'nav-link' %>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<h1 class="text-center">SCEGLI L ARCHIVIO GIUSTO PER LE TUE ESIGENZE</h1>
+<div>
+  <img src="<%= asset_path('myDrive.jpg') %>" class="img-fluid" alt="Logo" style="width: 10%; display: block; margin-left: auto; margin-right: auto">
+</div>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac tincidunt tincidunt, justo nunc ultrices nunc, id aliquam nisl nunc id nunc. Sed auctor, nunc id tincidunt lacinia, nunc nunc aliquet nunc, id aliquam nunc nunc id nunc. Sed auctor, nunc id tincidunt lacinia, nunc nunc aliquet nunc, id aliquam nunc nunc id nunc.</p>
+
+<div class="row row-cols-1 row-cols-md-4 g-4">
+  <div class="col">
+    <div class="card">
+      <img src="<%= asset_path('myDrive.jpg') %>" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Funzionalità</h5>
+        <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <img src="<%= asset_path('myDrive.jpg') %>" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Funzionalità</h5>
+        <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <img src="<%= asset_path('myDrive.jpg') %>" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Funzionalità</h5>
+        <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <img src="<%= asset_path('myDrive.jpg') %>" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Funzionalità</h5>
+        <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+      </div>
+    </div>
+  </div>
+</div>
