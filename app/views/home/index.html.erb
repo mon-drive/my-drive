@@ -1,54 +1,15 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">MyDrive</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-      </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-      <ul class="navbar-nav ml-auto">
-        <!-- Language Dropdown -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Language
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">English</a></li>
-            <li><a class="dropdown-item" href="#">Spanish</a></li>
-            <li><a class="dropdown-item" href="#">French</a></li>
-            <li><a class="dropdown-item" href="#">German</a></li>
-          </ul>
-        </li>
-        <% if session[:user_id] %>
-          <li class="nav-item">
-            <%= form_with url: '/upload', local: true, multipart: true, class: 'form-inline' do |form| %>
-              <%= form.file_field :file, class: 'form-control me-2' %>
-              <%= form.submit 'Upload to Google Drive', class: 'btn btn-outline-primary' %>
-            <% end %>
-          </li>
-          <li class="nav-item">
-            <%= link_to 'Sign out', signout_path, class: 'nav-link' %>
-          </li>
-        <% else %>
-          <li class="nav-item">
-            <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-  </div>
-</nav>
+
+<% content_for :navbar_custom_content do %>
+  <a class="nav-link" href="<%= pricing_path %>">Plans</a>
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Language
+  </a>
+  <% if session[:user_id] %>
+    <a class="nav-link" href="<%= signout_path %>">Logout</a>
+  <% else %>
+    <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
+  <% end %>
+<% end %>
 
 <h1 class="text-center">SCEGLI L ARCHIVIO GIUSTO PER LE TUE ESIGENZE</h1>
 <div>

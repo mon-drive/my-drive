@@ -5,5 +5,4 @@ Rails.application.routes.draw do
   get 'signout', to: 'sessions#destroy', as: 'signout'
   post 'upload', to: 'drive#upload'
   get 'pricing', to: 'pages#pricing'
-
 end
