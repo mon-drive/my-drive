@@ -14,11 +14,19 @@
   <% end %>
 <% end %>
 
+<% if notice %>
+  <div class="alert alert-info">
+    <%= notice %>
+  </div>
+<% end %>
+
 <h1 class="text-center">SCEGLI L ARCHIVIO GIUSTO PER LE TUE ESIGENZE</h1>
+
 <div>
   <img src="<%= asset_path('myDrive.jpg') %>" class="img-fluid" alt="Logo" style="width: 10%; display: block; margin-left: auto; margin-right: auto">
 </div>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac tincidunt tincidunt, justo nunc ultrices nunc, id aliquam nisl nunc id nunc. Sed auctor, nunc id tincidunt lacinia, nunc nunc aliquet nunc, id aliquam nunc nunc id nunc. Sed auctor, nunc id tincidunt lacinia, nunc nunc aliquet nunc, id aliquam nunc nunc id nunc.</p>
+
 
 <div class="row row-cols-1 row-cols-md-4 g-4">
   <div class="col">

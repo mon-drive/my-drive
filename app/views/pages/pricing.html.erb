@@ -15,7 +15,10 @@
             <li>Characteristics 2</li>
             <li>Characteristics 3</li>
           </ul>
-          <%= link_to 'Select', payment_path(plan: 'free'), class: 'btn btn-primary' %>
+          <%= form_with url: payment_complete_path, method: :post do %>
+            <%= hidden_field_tag :plan, 'free' %>
+            <%= submit_tag 'Select', class: 'btn btn-primary' %>
+          <% end %>
         </div>
       </div>
     </div>
