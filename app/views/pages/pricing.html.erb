@@ -1,20 +1,21 @@
 <!-- app/views/pages/pricing.html.erb -->
 <div class="container text-center mt-5">
-  <h1>Scegli il tuo piano</h1>
+  <h1>Choose your plan</h1>
 
   <div class="row justify-content-center mt-4">
     <div class="col-md-4">
       <div class="card">
         <div class="card-header">
-          <h2>Gratuito</h2>
+          <h2>Free</h2>
         </div>
         <div class="card-body">
-          <p class="card-text">0€ al mese</p>
+          <p class="card-text">0€/month</p>
           <ul class="list-unstyled">
-            <li>Caratteristica 1</li>
-            <li>Caratteristica 2</li>
-            <li>Caratteristica 3</li>
+            <li>Characteristics 1</li>
+            <li>Characteristics 2</li>
+            <li>Characteristics 3</li>
           </ul>
+          <%= link_to 'Select', payment_path(plan: 'free'), class: 'btn btn-primary' %>
         </div>
       </div>
     </div>
@@ -25,12 +26,13 @@
           <h2>Premium</h2>
         </div>
         <div class="card-body">
-          <p class="card-text">10€ al mese</p>
+          <p class="card-text">10€/month</p>
           <ul class="list-unstyled">
-            <li>Caratteristica premium 1</li>
-            <li>Caratteristica premium 2</li>
-            <li>Caratteristica premium 3</li>
+            <li>Premium Characteristics 1</li>
+            <li>Premium Characteristics 2</li>
+            <li>Premium Characteristics 3</li>
           </ul>
+          <%= link_to 'Select', payment_path(plan: 'premium'), class: 'btn btn-primary' %>
         </div>
       </div>
     </div>
