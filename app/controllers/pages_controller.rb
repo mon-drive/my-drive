@@ -53,7 +53,7 @@ class PagesController < ApplicationController
 
   def authenticate_user
     # Here you can check if the user is authenticated, e.g., by checking session or current_user
-    redirect_to root_path, notice: 'Sei già loggato.' if session[:user_id].present?
+    redirect_to root_path, notice: 'Sei già loggatoo' if session[:user_id].present?
   end
 
   def create_real_charge(token, amount)
