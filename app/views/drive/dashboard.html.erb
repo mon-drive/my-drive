@@ -1,0 +1,48 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar per la navigazione -->
+    <div class="col-md-2 bg-light sidebar">
+      <h4>Navigation</h4>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Root</a>
+        </li>
+        <% @items.each do |item| %>
+          <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+            <li class="nav-item">
+              <a class="nav-link" href="#"><%= item.name %></a>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+
+    <!-- Contenuto principale -->
+    <div class="col-md-10">
+      <h2>My Drive</h2>
+      <div class="row">
+        <% @items.each do |item| %>
+          <div class="col-md-3 mb-4">
+            <div class="card">
+              <div class="card-body text-center">
+                <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                  <i class="fas fa-folder fa-3x mb-2"></i>
+                <% else %>
+                  <i class="fas fa-file fa-3x mb-2"></i>
+                <% end %>
+                <h5 class="card-title"><%= item.name %></h5>
+                <!-- Link o altre azioni per i file e le cartelle -->
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <%= form_with url: '/upload', local: true, multipart: true do |form| %>
+    <%= form.file_field :file %>
+    <%= form.submit 'Upload to Google Drive' %>
+  <% end %>

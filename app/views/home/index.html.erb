@@ -1,7 +1,7 @@
 
 <% content_for :navbar_custom_content do %>
   <% if session[:user_id] %>
-  <a class="nav-link" href="<%= pricing_path %>">Access Drive</a>
+  <a class="nav-link" href="<%= dashboard_path %>">Access Drive</a>
   <% end %>
   <a class="nav-link" href="<%= pricing_path %>">Plans</a>
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

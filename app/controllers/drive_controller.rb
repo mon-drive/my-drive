@@ -4,6 +4,20 @@ class DriveController < ApplicationController
     require 'google/apis/drive_v3'
     require 'googleauth'
 
+    def initialize_drive_service
+      drive_service = Google::Apis::DriveV3::DriveService.new
+      drive_service.authorization = google_credentials
+      drive_service
+    end
+
+    def dashboard
+      drive_service = initialize_drive_service
+
+      # method to get all files and folders
+      @items = get_all_files_and_folders(drive_service)
+    end
+
+
     def upload
       # Initialize the API
       drive_service = Google::Apis::DriveV3::DriveService.new
@@ -26,6 +40,26 @@ class DriveController < ApplicationController
     end
 
     private
+
+    def get_all_files_and_folders(drive_service)
+      all_items = []
+      next_page_token = nil
+
+      begin
+        response = drive_service.list_files(
+          q: "",
+          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          spaces: 'drive',
+          page_token: next_page_token
+        )
+        puts response.to_json # Aggiungi questa linea per vedere la risposta completa
+
+        all_items.concat(response.files)
+        next_page_token = response.next_page_token
+      end while next_page_token.present?
+
+      all_items
+    end
 
     def file_params
       params.require(:file)
