@@ -4,17 +4,12 @@ class DriveController < ApplicationController
     require 'google/apis/drive_v3'
     require 'googleauth'
 
-    def initialize_drive_service
-      drive_service = Google::Apis::DriveV3::DriveService.new
-      drive_service.authorization = google_credentials
-      drive_service
-    end
-
     def dashboard
       drive_service = initialize_drive_service
-
-      # method to get all files and folders
-      @items = get_all_files_and_folders(drive_service)
+      @current_folder = params[:folder_id] || 'root'
+      @items = get_files_and_folders_in_folder(drive_service, @current_folder)
+      @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
+      @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
     end
 
 
@@ -41,25 +36,44 @@ class DriveController < ApplicationController
 
     private
 
-    def get_all_files_and_folders(drive_service)
+    def initialize_drive_service
+      drive_service = Google::Apis::DriveV3::DriveService.new
+      drive_service.authorization = google_credentials
+      drive_service
+    end
+
+    def get_files_and_folders_in_folder(drive_service, folder_id)
       all_items = []
       next_page_token = nil
 
       begin
         response = drive_service.list_files(
-          q: "",
+          q: "'#{folder_id}' in parents and trashed = false",
           fields: 'nextPageToken, files(id, name, mimeType, parents)',
           spaces: 'drive',
           page_token: next_page_token
         )
-        puts response.to_json # Aggiungi questa linea per vedere la risposta completa
-
         all_items.concat(response.files)
         next_page_token = response.next_page_token
       end while next_page_token.present?
 
       all_items
     end
+
+    def get_parent_folder(drive_service, folder_id)
+      return if folder_id == 'root'
+
+      folder = drive_service.get_file(folder_id, fields: 'id, name, parents')
+      parents = folder.parents || []
+
+      parents.empty? ? nil : drive_service.get_file(parents.first, fields: 'id, name')
+    end
+
+    def get_folder_name(drive_service, folder_id)
+      folder = drive_service.get_file(folder_id, fields: 'name')
+      folder.name
+    end
+
 
     def file_params
       params.require(:file)
