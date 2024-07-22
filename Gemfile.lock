@@ -120,6 +120,8 @@ GEM
       rexml
     google-apis-discovery_v1 (0.17.0)
       google-apis-core (>= 0.15.0, < 2.a)
+    google-apis-drive_v3 (0.51.0)
+      google-apis-core (>= 0.15.0, < 2.a)
     google-apis-generator (0.15.0)
       activesupport (>= 5.0)
       gems (~> 1.2)
@@ -323,6 +325,7 @@ DEPENDENCIES
   dartsass-sprockets
   figaro
   google-api-client
+  google-apis-drive_v3 (~> 0.51.0)
   jbuilder (~> 2.7)
   jquery-rails
   listen (~> 3.3)
@@ -331,7 +334,6 @@ DEPENDENCIES
   rack-mini-profiler (~> 2.0)
   rails (~> 6.1.7, >= 6.1.7.7)
   selenium-webdriver (>= 4.0.0.rc1)
-  sprockets-rails
   sqlite3 (~> 1.4.2)
   tzinfo-data
   web-console (>= 4.1.0)

@@ -53,7 +53,8 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 # Google API
 gem 'omniauth-google-oauth2'
-gem 'google-api-client', require: 'google/apis/drive_v3'
+gem 'google-apis-drive_v3', '~> 0.51.0'
+gem 'google-api-client'
 
 # Auth
 gem 'figaro'

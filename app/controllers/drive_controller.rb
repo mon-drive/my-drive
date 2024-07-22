@@ -1,34 +1,42 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
-  
+
     require 'google/apis/drive_v3'
     require 'googleauth'
-  
+
     def upload
       # Initialize the API
       drive_service = Google::Apis::DriveV3::DriveService.new
-  
+
       # Use the stored token to authorize
       drive_service.authorization = google_credentials
-  
-      # Upload file to Google Drive
-      metadata = {
-        name: params[:file].original_filename,
-        mime_type: params[:file].content_type
-      }
-  
-      file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
-      redirect_to root_path, notice: 'File uploaded to Google Drive successfully'
+
+      # Verify file is present
+      if params[:file].present?
+        # Upload file to Google Drive
+        metadata = {
+          name: params[:file].original_filename,
+          mime_type: params[:file].content_type
+        }
+        file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
+        redirect_to root_path, notice: 'File uploaded to Google Drive successfully'
+      else
+        redirect_to root_path, alert: 'No file selected'
+      end
     end
-  
+
     private
-  
+
+    def file_params
+      params.require(:file)
+    end
+
     def google_credentials
       token = current_user.oauth_token
       refresh_token = current_user.refresh_token
       client_id = ENV['GOOGLE_CLIENT_ID']
       client_secret = ENV['GOOGLE_CLIENT_SECRET']
-  
+
       Signet::OAuth2::Client.new(
         client_id: client_id,
         client_secret: client_secret,
@@ -46,9 +54,8 @@ class DriveController < ApplicationController
         end
       end
     end
-  
+
     def authenticate_user!
       redirect_to root_path unless current_user
     end
   end
-  
