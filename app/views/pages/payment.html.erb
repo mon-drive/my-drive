@@ -123,10 +123,10 @@
             <p id="total_amount"><strong>9.99€</strong></p>
           <% end %>
           <!-- Pulsante "Paga" per piani a pagamento -->
-            <form method="post" action="<%= payment_complete_path %>">
-                <input type="hidden" name="plan" value="<%= @plan %>">
-                <button type="submit" class="btn btn-primary">Paga</button>
-            </form>
+            <%= form_with url: payment_complete_path, method: :post do |form| %>
+              <%= form.hidden_field :plan, value: @plan %>
+              <%= form.submit 'Paga', class: 'btn btn-primary' %>
+            <% end %>
         </div>
       </div>
     </div>
