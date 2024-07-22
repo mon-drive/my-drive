@@ -19,4 +19,7 @@ Rails.application.routes.draw do
   # Rotta per completare il pagamento
   post 'payment_complete', to: 'pages#payment_complete', as: 'payment_complete'
 
+  # Rotta per processare il pagamento
+  post 'process_payment', to: 'pages#process_payment'
+  
 end

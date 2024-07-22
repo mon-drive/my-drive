@@ -38,66 +38,54 @@
       <!-- Parte sinistra: Dati di pagamento -->
       <div class="col-md-8">
         <h2>Pagamento</h2>
-
-          <!-- Selezione del piano e frequenza -->
-          <div class="mb-3">
-            <h4>Seleziona la frequenza di pagamento</h4>
-            <div class="d-flex">
-              <div class="btn-toggle" id="monthly_btn" data-value="monthly">
-                Fatturazione Mensile
-                <span class="price">9.99€</span>
-              </div>
-              <div class="btn-separator"></div>
-              <div class="btn-toggle" id="annual_btn" data-value="annual">
-                Fatturazione Annuale
-                <span class="price">99.00€</span>
-              </div>
+        <!-- Selezione del piano e frequenza -->
+        <div class="mb-3">
+          <h4>Seleziona la frequenza di pagamento</h4>
+          <div class="d-flex">
+            <div class="btn-toggle" id="monthly_btn" data-value="monthly">
+              Fatturazione Mensile
+              <span class="price">9.99€</span>
+            </div>
+            <div class="btn-separator"></div>
+            <div class="btn-toggle" id="annual_btn" data-value="annual">
+              Fatturazione Annuale
+              <span class="price">99.00€</span>
             </div>
           </div>
+        </div>
 
-          <!-- Opzioni di pagamento -->
-          <div class="mb-4">
-            <h4>Metodo di pagamento</h4>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
-              <label class="form-check-label" for="credit_card">
-                Pagamento con Carta
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal">
-              <label class="form-check-label" for="paypal">
-                Pagamento con PayPal
-              </label>
-            </div>
+        <!-- Opzioni di pagamento -->
+        <div class="mb-4">
+          <h4>Metodo di pagamento</h4>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
+            <label class="form-check-label" for="credit_card">
+              Pagamento con Carta
+            </label>
           </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal">
+            <label class="form-check-label" for="paypal">
+              Pagamento con PayPal
+            </label>
+          </div>
+        </div>
 
-          <!-- Form di pagamento con carta -->
-          <div id="credit_card_form" class="payment-form">
-            <h4>Dettagli della carta</h4>
-            <form>
-              <div class="form-group">
-                <label for="card_number">Numero della carta</label>
-                <input type="text" class="form-control" id="card_number" placeholder="Numero della carta">
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-8">
-                  <label for="card_expiry">Data di scadenza</label>
-                  <input type="text" class="form-control" id="card_expiry" placeholder="MM/YY">
-                </div>
-                <div class="form-group col-md-4">
-                  <label for="card_cvc">CVC</label>
-                  <input type="text" class="form-control" id="card_cvc" placeholder="CVC">
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <!-- Pulsante di pagamento PayPal -->
-          <div id="paypal_button" class="payment-form" style="display: none;">
-            <h4>Pagamento PayPal</h4>
-            <a href="https://www.paypal.com" class="btn btn-primary">Paga con PayPal</a>
-          </div>
+        <div id="credit_card_form" class="payment-form">
+          <h4>Dettagli della carta</h4>
+          <form id="payment-form" action="/process_payment" method="post">
+            <div id="card-element"><!-- Stripe.js injects the Card Element --></div>
+            <input type="hidden" name="amount" id="amount" value="999"> <!-- Default to monthly amount -->
+            <button id="submit" class="btn btn-primary mt-3">Paga</button>
+            <div id="card-errors" role="alert"></div>
+          </form>
+        </div>
+        
+        <!-- Pulsante di pagamento PayPal -->
+        <div id="paypal_button" class="payment-form" style="display: none;">
+          <h4>Pagamento PayPal</h4>
+          <a href="https://www.paypal.com" class="btn btn-primary">Paga con PayPal</a>
+        </div>
       </div>
 
       <!-- Separatore verticale -->
@@ -111,13 +99,12 @@
         <div class="border p-3 mb-3">
           <h4>Piano MyDrive</h4>
           <p><strong><%= @plan == 'premium' ? 'Premium' : 'Free' %></strong></p>
-            <h5>Totale</h5>
-            <p id="total_amount">9.99€</p>
-          <!-- Pulsante "Paga" per piani a pagamento -->
-            <%= form_with url: payment_complete_path, method: :post do |form| %>
-              <%= form.hidden_field :plan, value: @plan %>
-              <%= form.submit 'Paga', class: 'btn btn-primary' %>
-            <% end %>
+          <h5>Totale</h5>
+          <p id="total_amount">9.99€</p>
+          <%= form_with url: payment_complete_path, method: :post do |form| %>
+            <%= form.hidden_field :plan, value: @plan %>
+            <%= form.submit 'Paga', class: 'btn btn-primary' %>
+          <% end %>
         </div>
       </div>
     </div>
@@ -127,6 +114,7 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
   <script>
     $(document).ready(function() {
       // Gestione della selezione dei pulsanti di frequenza
@@ -136,6 +124,7 @@
         var selectedFrequency = $(this).data('value');
         var total = selectedFrequency === 'monthly' ? '9.99€' : '99.00€';
         $('#total_amount').text(total);
+        $('#amount').val(selectedFrequency === 'monthly' ? '999' : '9900'); // Update amount value
       });
 
       // Mostra/Nascondi form di pagamento e aggiorna il totale
@@ -150,6 +139,36 @@
       });
 
       // Imposta il valore predefinito per la frequenza di pagamento
-      $('.btn-toggle').first().click();  // Clicca il primo pulsante per impostare il totale iniziale
+      $('.btn-toggle').first().click(); // Clicca il primo pulsante per impostare il totale iniziale
+
+      // Stripe 
+      var stripe = Stripe('<%= Figaro.env.stripe_publishable_key %>');
+      var elements = stripe.elements();
+      var cardElement = elements.create('card');
+      cardElement.mount('#card-element');
+
+      var form = document.getElementById('payment-form');
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        stripe.createToken(cardElement).then(function(result) {
+          if (result.error) {
+            var errorElement = document.getElementById('card-errors');
+            errorElement.textContent = result.error.message;
+          } else {
+            stripeTokenHandler(result.token);
+          }
+        });
+      });
+
+      function stripeTokenHandler(token) {
+        var form = document.getElementById('payment-form');
+        var hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'stripeToken');
+        hiddenInput.setAttribute('value', token.id);
+        form.appendChild(hiddenInput);
+        form.submit();
+      }
     });
   </script>

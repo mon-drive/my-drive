@@ -62,3 +62,6 @@ gem 'figaro'
 # Bootstrap
 gem 'bootstrap', '~> 5.3.3'
 gem 'jquery-rails'
+
+# Stripe
+gem 'stripe'

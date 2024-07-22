@@ -1,15 +1,17 @@
 class PagesController < ApplicationController
-  before_action :authenticate_user, only: [:payment_complete]
+  before_action :authenticate_user, only: [:payment_complete, :process_payment]
 
   def pricing
     # logica per la pagina di pricing, se necessaria
   end
+
   def payment
     @plan = params[:plan]
     if @plan.nil?
       redirect_to pricing_path, alert: 'Nessun piano selezionato.'
     end
   end
+
   def payment_complete
     plan = params[:plan]
     if plan == 'free'
@@ -31,6 +33,22 @@ class PagesController < ApplicationController
     end
   end
 
+  def process_payment
+    token = params[:stripeToken]
+    amount = params[:amount].to_i
+
+    if token
+      charge = create_real_charge(token, amount)
+      if charge
+        redirect_to root_path, notice: 'Payment was successfully processed.'
+      else
+        redirect_to root_path, alert: 'Payment failed. Please try again.'
+      end
+    else
+      redirect_to root_path, alert: 'Payment failed. Please try again.'
+    end
+  end
+
   private
 
   def authenticate_user
@@ -38,4 +56,19 @@ class PagesController < ApplicationController
     redirect_to root_path, notice: 'Sei già loggato.' if session[:user_id].present?
   end
 
+  def create_real_charge(token, amount)
+    begin
+      charge = Stripe::Charge.create({
+        amount: amount, # Amount in cents
+        currency: 'eur',
+        source: token,
+        description: 'MyDrive Payment',
+      })
+      charge
+    rescue Stripe::CardError => e
+      # The card has been declined
+      Rails.logger.error "Stripe error: #{e.message}"
+      nil
+    end
+  end
 end
