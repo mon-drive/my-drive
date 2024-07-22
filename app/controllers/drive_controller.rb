@@ -4,12 +4,56 @@ class DriveController < ApplicationController
     require 'google/apis/drive_v3'
     require 'googleauth'
 
+    require 'httparty'
+    require 'json'
+
     def dashboard
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
       @items = get_files_and_folders_in_folder(drive_service, @current_folder)
       @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
       @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
+    end
+
+    def scan
+      file_id = params[:file]
+
+      response = upload_scan(file_id)
+      if response.code == 200
+        scan_id = JSON.parse(response.body)['data']['id']
+        analyze_response = analyze(scan_id)
+        if analyze_response.code == 200
+          malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
+          suspicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['suspicious']
+          if malicious_count > 0 || suspicious_count > 0
+            redirect_to root_path, notice: 'File is malicious or SUS'
+          else
+            redirect_to root_path, notice: 'File is safe'
+          end
+        else
+          error = JSON.parse(analyze_response.body)['error']['message']
+          redirect_to root_path, alert: "Error: #{error}"
+        end
+      else
+        error = JSON.parse(response.body)['error']['message']
+        redirect_to root_path, alert: "Error: #{error}"
+      end
+
+    end
+
+
+    def upload_scan(file)
+      api_key=Figaro.env.VIRUSTOTAL_API_KEY
+      HTTParty.post('https://www.virustotal.com/api/v3/files',
+      headers: { 'x-apikey' => api_key },
+      body: { file: file }
+      )
+    end
+
+    def analyze(id)
+      api_key = Figaro.env.VIRUSTOTAL_API_KEY
+      url = "https://www.virustotal.com/api/v3/analyses/#{id}"
+      HTTParty.get(url, headers: { 'x-apikey' => api_key })
     end
 
 

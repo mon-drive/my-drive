@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   get 'signout', to: 'sessions#destroy', as: 'signout'
 
   # Route for uploading file
-  post 'upload', to: 'drive#upload'
+  post 'upload', to: 'drive#scan'
 
   # Route for pricing page
   get 'pricing', to: 'pages#pricing'
