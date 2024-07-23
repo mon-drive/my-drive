@@ -10,6 +10,7 @@ class DriveController < ApplicationController
     def dashboard
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
+      @all_items = get_files_and_folders(drive_service)
       @items = get_files_and_folders_in_folder(drive_service, @current_folder)
       @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
       @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
@@ -101,6 +102,24 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: "'#{folder_id}' in parents and trashed = false",
+          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          spaces: 'drive',
+          page_token: next_page_token
+        )
+        all_items.concat(response.files)
+        next_page_token = response.next_page_token
+      end while next_page_token.present?
+
+      all_items
+    end
+
+    def get_files_and_folders(drive_service)
+      all_items = []
+      next_page_token = nil
+
+      begin
+        response = drive_service.list_files(
+          q: 'trashed = false',
           fields: 'nextPageToken, files(id, name, mimeType, parents)',
           spaces: 'drive',
           page_token: next_page_token
