@@ -61,4 +61,5 @@ gem 'figaro'
 
 # Bootstrap
 gem 'bootstrap', '~> 5.3.3'
+gem 'bootstrap-icons', '~> 1.0', '>= 1.0.14'
 gem 'jquery-rails'
