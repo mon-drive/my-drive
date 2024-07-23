@@ -4,6 +4,12 @@
   </div>
 <% end %>
 
+<% if alert %>
+  <div class="alert alert-danger">
+    <%= alert %>
+  </div>
+<% end %>
+
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2">
@@ -49,7 +55,7 @@
 
 
 
-  <%= form_with url: '/upload', local: true, multipart: true do |form| %>
-    <%= form.file_field :file %>
-    <%= form.submit 'Upload to Google Drive' %>
-  <% end %>
+<%= form_with url: '/upload', local: true, multipart: true do |form| %>
+  <%= form.file_field :file %>
+  <%= form.submit 'Upload to Google Drive' %>
+<% end %>
