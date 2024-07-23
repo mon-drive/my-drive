@@ -17,11 +17,11 @@
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
         <li><a class="dropdown-item" href="#">Impostazioni</a></li>
-        <li><a class="dropdown-item" href="#">Esci</a></li>
+        <li><a class="dropdown-item" href="<%= signout_path %>">Esci</a></li>
       </ul>
     </div>
 
-    <a class="nav-link" href="#">Premium</a>
+    <%= link_to 'Premium', payment_path(plan: 'premium'), class: 'nav-link' %>
     
   </div>
 <% end %>
