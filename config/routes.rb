@@ -21,5 +21,5 @@ Rails.application.routes.draw do
 
   # Rotta per processare il pagamento
   post 'process_payment', to: 'pages#process_payment'
-  
+
 end

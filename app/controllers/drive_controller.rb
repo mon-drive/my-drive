@@ -7,7 +7,6 @@ class DriveController < ApplicationController
     def upload
       # Initialize the API
       drive_service = Google::Apis::DriveV3::DriveService.new
-
       # Use the stored token to authorize
       drive_service.authorization = google_credentials
 

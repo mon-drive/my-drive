@@ -13,40 +13,24 @@ class PagesController < ApplicationController
   end
 
   def payment_complete
-    plan = params[:plan]
-    if plan == 'free'
-      if session[:user_id].present?
-        # User is logged in
-        redirect_to root_path, notice: 'Sei già loggato.'
-      else
-        # User is not logged in
-        redirect_to '/auth/google_oauth2'
-      end
-    else
-      # Logica per completare l'iscrizione, ad esempio:
-      # - Aggiornare l'utente con il piano selezionato
-      # - Inviare una conferma via email
-      # - Eseguire altre azioni necessarie
-
-      # Redirect alla homepage o a una pagina di conferma
-      redirect_to root_path, notice: "Iscrizione completata con successo."
-    end
-  end
-
-  def process_payment
     token = params[:stripeToken]
     amount = params[:amount].to_i
 
-    if token
-      charge = create_real_charge(token, amount)
-      if charge
-        redirect_to root_path, notice: 'Payment was successfully processed.'
-      else
-        redirect_to root_path, alert: 'Payment failed. Please try again.'
-      end
-    else
-      redirect_to root_path, alert: 'Payment failed. Please try again.'
+    begin
+      charge = Stripe::Charge.create({
+        amount: amount,
+        currency: 'eur',
+        description: 'Pagamento mensile',
+        source: token,
+      })
+
+      flash[:notice] = "Pagamento effettuato con successo!"
+    rescue Stripe::CardError => e
+      flash[:alert] = e.message
     end
+
+    redirect_to root_path
+
   end
 
   private
