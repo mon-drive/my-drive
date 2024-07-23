@@ -1,3 +1,15 @@
+<% if notice %>
+  <div class="alert alert-info">
+    <%= notice %>
+  </div>
+<% end %>
+
+<% if alert %>
+  <div class="alert alert-danger">
+    <%= alert %>
+  </div>
+<% end %>
+
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav w-100 d-flex justify-content-between align-items-center">
     <div class="d-flex flex-grow-1 justify-content-center">
@@ -71,7 +83,7 @@
 
 
 
-  <%= form_with url: '/upload', local: true, multipart: true do |form| %>
-    <%= form.file_field :file %>
-    <%= form.submit 'Upload to Google Drive' %>
-  <% end %>
+<%= form_with url: '/upload', local: true, multipart: true do |form| %>
+  <%= form.file_field :file %>
+  <%= form.submit 'Upload to Google Drive' %>
+<% end %>

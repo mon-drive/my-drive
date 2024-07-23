@@ -64,3 +64,6 @@ gem 'bootstrap', '~> 5.3.3'
 gem 'bootstrap-icons', '~> 1.0', '>= 1.0.14'
 gem 'jquery-rails'
 gem 'popper_js', '~> 2.11', '>= 2.11.8'
+
+# VirusTotal
+gem 'httparty'

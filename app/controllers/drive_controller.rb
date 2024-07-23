@@ -4,12 +4,64 @@ class DriveController < ApplicationController
     require 'google/apis/drive_v3'
     require 'googleauth'
 
+    require 'httparty'
+    require 'json'
+
     def dashboard
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
       @items = get_files_and_folders_in_folder(drive_service, @current_folder)
       @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
       @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
+    end
+
+    #carica il file su virustotal e se non è infetto lo carica su google drive
+    def scan
+      file_id = params[:file]
+
+      response = upload_scan(file_id)
+      #se la risposta è 200 allora il file è stato caricato correttamente
+      if response.code == 200
+        scan_id = JSON.parse(response.body)['data']['id']
+        analyze_response = analyze(scan_id)
+        #se la risposta è 200 allora il file è stato analizzato correttamente
+        if analyze_response.code == 200
+          malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
+          suspicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['suspicious']
+          #se il file è infetto non lo carica su google drive
+          if malicious_count > 0 || suspicious_count > 0
+            redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca e sospetto su #{suspicious_count} motori di ricerca"
+          else
+            upload()
+          end
+        else
+          error = JSON.parse(analyze_response.body)['error']['message']
+          redirect_to dashboard_path, alert: "Error: #{error}"
+        end
+      else
+        error = JSON.parse(response.body)['error']['message']
+        redirect_to dashboard_path, alert: "Error: #{error}"
+      end
+
+    end
+
+    #carica il file su virustotal
+    def upload_scan(file)
+      api_key=Figaro.env.VIRUSTOTAL_API_KEY
+      url="https://www.virustotal.com/api/v3/files"
+      HTTParty.post(url,
+        headers: { 'x-apikey' => api_key },
+        body: { file: file }
+      )
+    end
+
+    #analizza il file su virustotal partendo dall'id ottenuto dopo l'upload su virustotal
+    def analyze(id)
+      api_key = Figaro.env.VIRUSTOTAL_API_KEY
+      url = "https://www.virustotal.com/api/v3/analyses/#{id}"
+      HTTParty.get(url,
+        headers: { 'x-apikey' => api_key }
+      )
     end
 
 
