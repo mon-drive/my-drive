@@ -26,17 +26,17 @@ class DriveController < ApplicationController
           malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
           suspicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['suspicious']
           if malicious_count > 0 || suspicious_count > 0
-            redirect_to root_path, notice: 'File is malicious or SUS'
+            redirect_to dashboard_path, notice: 'File infetto, non è possibile caricarlo'
           else
-            redirect_to root_path, notice: 'File is safe'
+            upload()
           end
         else
           error = JSON.parse(analyze_response.body)['error']['message']
-          redirect_to root_path, alert: "Error: #{error}"
+          redirect_to root_path, notice: "Error: #{error}"
         end
       else
         error = JSON.parse(response.body)['error']['message']
-        redirect_to root_path, alert: "Error: #{error}"
+        redirect_to root_path, notice: "Error: #{error}"
       end
 
     end
