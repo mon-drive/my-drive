@@ -1,0 +1,86 @@
+<div class="container mt-5">
+    <div class="settings-container">
+        <div class="settings-sidebar">
+        <%= link_to dashboard_path, class: 'btn btn-link text-decoration-none text-dark' do %>
+            Tutti i file
+        <% end %>
+        </div>
+        <div class="settings-content">
+        <h4>INFORMAZIONI DI BASE</h4>
+        <hr>
+        <div class="settings-item">
+            <h5>Nome</h5>
+            <div>
+            <span id="nome"><%= @user.name %></span>
+            <a id="edit-name" onclick="editName()">Modifica</a>
+            </div>
+        </div>
+        <hr>
+        <div class="settings-item">
+            <h5>Indirizzo mail</h5>
+            <div>
+            <span id="mail"><%= @user.email %></span>
+            </div>
+        </div>
+        <hr>
+        <h4>ELIMINA ACCOUNT</h4>
+        <hr>
+        <div class="settings-item">
+            <h5>Elimina il mio Drive</h5>
+            <a id="delete-account" onclick="deleteAccount()">Elimina Account</a>
+        </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .settings-container {
+      display: flex;
+    }
+    .settings-sidebar {
+      width: 30%;
+      padding: 20px;
+      border-right: 1px solid #ddd;
+    }
+    .settings-content {
+      width: 70%;
+      padding: 20px;
+    }
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .settings-item h5 {
+      margin: 0;
+    } 
+    .settings-item a {
+        cursor: pointer;
+        color: #007bff;
+        text-decoration: underline; /* Aggiunge la sottolineatura per evidenziare il link */
+    }
+
+    .settings-item a:hover {
+        text-decoration: underline;
+        color: #0056b3; /* Colore del link al passaggio del mouse */
+    }
+  </style>
+
+
+<script>
+function editName() {
+    const newName = prompt('Inserisci il nuovo nome:');
+    if (newName) {
+    // Esegui l'aggiornamento del nome tramite AJAX o altra logica
+    document.getElementById('nome').textContent = newName;
+    }
+}
+
+function deleteAccount() {
+    if (confirm('Sei sicuro di voler eliminare il tuo account?')) {
+    // Esegui la logica di eliminazione dell'account
+    alert('Account eliminato');
+    }
+}
+</script>

@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  get 'settings/show'
+  get 'settings/update'
   root 'home#index'
 
   # Route for OmniAuth
@@ -32,5 +34,9 @@ Rails.application.routes.draw do
       get 'properties'
     end
   end
+
+  # Settings route
+  get 'settings', to: 'drive#setting'
+
 
 end

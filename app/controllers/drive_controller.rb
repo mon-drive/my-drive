@@ -17,6 +17,12 @@ class DriveController < ApplicationController
       @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
     end
 
+    def setting
+      # Logica per le impostazioni
+      drive_service = initialize_drive_service
+      @user = current_user
+    end
+
     def rename
       if @item.update(item_params)
         respond_to do |format|
