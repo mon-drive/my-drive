@@ -24,4 +24,13 @@ Rails.application.routes.draw do
   # Dashboard route
   get 'dashboard', to: 'drive#dashboard', as: 'dashboard'
 
+  resources :items, controller: 'drive', only: [] do
+    member do
+      patch 'rename'
+      get 'share'
+      get 'export'
+      get 'properties'
+    end
+  end
+
 end

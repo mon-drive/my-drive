@@ -1,5 +1,6 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
+    before_action :set_item, only: [:rename, :share, :export, :properties]
 
     require 'google/apis/drive_v3'
     require 'googleauth'
@@ -15,6 +16,33 @@ class DriveController < ApplicationController
       @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
       @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
     end
+
+    def rename
+      if @item.update(item_params)
+        respond_to do |format|
+          format.json { render json: { success: true, name: @item.name } }
+        end
+      else
+        respond_to do |format|
+          format.json { render json: { success: false, errors: @item.errors.full_messages } }
+        end
+      end
+    end
+
+    def share
+      # Logica per condividere l'elemento
+    end
+
+    def export
+      # Logica per esportare l'elemento
+    end
+
+    def properties
+      respond_to do |format|
+        format.json { render json: { success: true, properties: @item.attributes } }
+      end
+    end
+
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
@@ -177,4 +205,13 @@ class DriveController < ApplicationController
     def authenticate_user!
       redirect_to root_path unless current_user
     end
+
+    def set_item
+      @item = Item.find(params[:id])
+    end
+
+    def item_params
+      params.require(:item).permit(:name)
+    end
+
   end

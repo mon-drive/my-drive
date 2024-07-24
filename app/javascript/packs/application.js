@@ -16,9 +16,13 @@ import Rails from "@rails/ujs"
 import Turbolinks from "turbolinks";
 import * as ActiveStorage from "@rails/activestorage"
 import "channels"
-
 import "bootstrap"
 import "bootstrap-icons/font/bootstrap-icons.css"
+import $ from 'jquery';
+
+// Make jQuery available globally
+window.$ = $;
+window.jQuery = $;
 
 Rails.start()
 ActiveStorage.start()

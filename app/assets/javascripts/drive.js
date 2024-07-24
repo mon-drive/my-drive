@@ -35,3 +35,58 @@ document.addEventListener('turbolinks:load', function () {
     });
   });
 });
+
+$(document).on('turbolinks:load', function() {
+  // Rename
+  $('.rename-item').on('click', function() {
+    var itemId = $(this).data('id');
+    var itemName = prompt('Inserisci il nuovo nome:');
+    if (itemName) {
+      $.ajax({
+        url: '/items/' + itemId + '/rename',
+        type: 'PATCH',
+        data: {
+          item: { name: itemName }
+        },
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            $('#item-name-' + itemId).text(response.name);
+          } else {
+            alert('Errore: ' + response.errors.join(', '));
+          }
+        }
+      });
+    }
+  });
+
+  // Share
+  $('.share-item').on('click', function() {
+    // Implementa la logica di condivisione
+  });
+
+  // Export
+  $('.export-item').on('click', function() {
+    // Implementa la logica di esportazione
+  });
+
+  // Properties
+  $('.properties-item').on('click', function() {
+    var itemId = $(this).data('id');
+    $.ajax({
+      url: '/items/' + itemId + '/properties',
+      type: 'GET',
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          var properties = response.properties;
+          var propertiesText = '';
+          for (var key in properties) {
+            propertiesText += key + ': ' + properties[key] + '\n';
+          }
+          alert(propertiesText);
+        }
+      }
+    });
+  });
+});
