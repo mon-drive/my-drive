@@ -126,6 +126,9 @@ class DriveController < ApplicationController
     def initialize_drive_service
       drive_service = Google::Apis::DriveV3::DriveService.new
       drive_service.authorization = google_credentials
+      puts '\n\n\n\n\nRefresh Token' # Debug
+      puts current_user.refresh_token # Debug
+      puts "\n\n\n\n\n"
       drive_service
     end
 
@@ -197,14 +200,12 @@ class DriveController < ApplicationController
         access_token: token,
         refresh_token: refresh_token
       ).tap do |client|
-        if client.expired?
-          client.fetch_access_token!
-          current_user.update(
-            oauth_token: client.access_token,
-            refresh_token: client.refresh_token,
-            oauth_expires_at: Time.at(client.expires_at)
-          )
-        end
+        client.fetch_access_token!
+        current_user.update(
+          oauth_token: client.access_token,
+          refresh_token: client.refresh_token,
+          oauth_expires_at: Time.at(client.expires_at)
+        )
       end
     end
 
