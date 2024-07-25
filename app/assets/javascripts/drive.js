@@ -90,3 +90,15 @@ $(document).on('turbolinks:load', function() {
     });
   });
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('search-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var query = document.getElementById('search-input').value;
+    var url = new URL(this.action);
+    url.searchParams.set('search', query);
+    window.location.href = url.toString();
+  });
+});
+

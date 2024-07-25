@@ -38,5 +38,4 @@ Rails.application.routes.draw do
   # Settings route
   get 'settings', to: 'drive#setting'
 
-
 end

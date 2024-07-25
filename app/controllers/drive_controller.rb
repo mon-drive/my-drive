@@ -12,9 +12,15 @@ class DriveController < ApplicationController
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
       @all_items = get_files_and_folders(drive_service)
-      @items = get_files_and_folders_in_folder(drive_service, @current_folder)
       @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
       @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
+      @root_folder_name = get_root_name(drive_service)
+      if params[:search].present?
+        @current_folder = 'null'
+        @items = search_files(drive_service, params[:search])
+      else
+        @items = get_files_and_folders_in_folder(drive_service, @current_folder)
+      end
     end
 
     def setting
@@ -48,7 +54,6 @@ class DriveController < ApplicationController
         format.json { render json: { success: true, properties: @item.attributes } }
       end
     end
-
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
@@ -150,6 +155,24 @@ class DriveController < ApplicationController
       all_items
     end
 
+    def search_files(drive_service, query)
+      all_items = []
+      next_page_token = nil
+
+      begin
+        response = drive_service.list_files(
+          q: "name contains '#{query}'",
+          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          spaces: 'drive',
+          page_token: next_page_token
+        )
+        all_items.concat(response.files)
+        next_page_token = response.next_page_token
+      end while next_page_token.present?
+
+      all_items
+    end
+
     def get_files_and_folders(drive_service)
       all_items = []
       next_page_token = nil
@@ -182,6 +205,10 @@ class DriveController < ApplicationController
       folder.name
     end
 
+    def get_root_name(drive_service)
+      folder = drive_service.get_file('root', fields: 'name')
+      folder.name
+    end
 
     def file_params
       params.require(:file)
