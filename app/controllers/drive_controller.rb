@@ -12,14 +12,23 @@ class DriveController < ApplicationController
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
       @all_items = get_files_and_folders(drive_service)
-      @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
-      @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
+      if params[:folder_id] == 'bin'
+        @current_folder_name = 'Cestino'
+      else
+        @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
+        @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
+      end
       @root_folder_name = get_root_name(drive_service)
       if params[:search].present?
         @current_folder = 'null'
         @items = search_files(drive_service, params[:search])
       else
-        @items = get_files_and_folders_in_folder(drive_service, @current_folder)
+        if params[:folder_id] == 'bin'
+          @current_folder = 'bin'
+          @items = get_files_and_folders_in_bin(drive_service)
+        else
+          @items = get_files_and_folders_in_folder(drive_service, @current_folder)
+        end
       end
     end
 
@@ -155,13 +164,31 @@ class DriveController < ApplicationController
       all_items
     end
 
+    def get_files_and_folders_in_bin(drive_service)
+      all_items = []
+      next_page_token = nil
+
+      begin
+        response = drive_service.list_files(
+          q: "trashed = true",
+          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          spaces: 'drive',
+          page_token: next_page_token
+        )
+        all_items.concat(response.files)
+        next_page_token = response.next_page_token
+      end while next_page_token.present?
+
+      all_items
+    end
+
     def search_files(drive_service, query)
       all_items = []
       next_page_token = nil
 
       begin
         response = drive_service.list_files(
-          q: "name contains '#{query}'",
+          q: "name contains '#{query}' and trashed = false",
           fields: 'nextPageToken, files(id, name, mimeType, parents)',
           spaces: 'drive',
           page_token: next_page_token
