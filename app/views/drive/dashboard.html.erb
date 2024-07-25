@@ -1,23 +1,41 @@
 <% if notice %>
-  <div class="alert alert-info">
-    <%= notice %>
-  </div>
-<% end %>
-
-<% if alert %>
-  <div class="modal" id="md_alert" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="alert alert-danger">
-            <%= alert %>
-          </div>
-        </div>
+  <div class="modal fade" id="md_notice" data-bs-backdrop="false">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <%= alert %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="close_md" onclick="chiudi_alert('md_notice')">ok</button>
       </div>
     </div>
   </div>
+</div>
   <script>
-    modal = new Modal(document.getElementById('md_alert'));
+    modal = new bootstrap.Modal(document.getElementById('md_notice'));
+    modal.show();
+  </script>
+
+<% end %>
+
+<% if alert %>
+  <div class="modal fade" id="md_alert" data-bs-backdrop="false">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" style="color: red;">Attenzione</h5>
+      </div>
+      <div class="modal-body">
+        <%= alert %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id="close_md" onclick="chiudi_alert('md_alert')">ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <script>
+    modal = new bootstrap.Modal(document.getElementById('md_alert'));
     modal.show();
   </script>
 

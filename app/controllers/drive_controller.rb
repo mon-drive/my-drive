@@ -71,9 +71,9 @@ class DriveController < ApplicationController
       #se la risposta è 200 allora il file è stato caricato correttamente
       if response.code == 200
         scan_id = JSON.parse(response.body)['data']['id']
-        sleep(10)
+        sleep(5)
         analyze_response = analyze(scan_id)
-        sleep(10)
+        sleep(2)
         #se la risposta è 200 allora il file è stato analizzato correttamente
         if analyze_response.code == 200
           malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
@@ -83,15 +83,15 @@ class DriveController < ApplicationController
             redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca e sospetto su #{suspicious_count} motori di ricerca"
           else
             upload(file_id)
-            #redirect_to dashboard_path, notice: "File caricato correttamente"
+            redirect_to dashboard_path, notice: "File caricato con successo"
           end
         else
           error = JSON.parse(analyze_response.body)['error']['message']
-          redirect_to dashboard_path, alert: "Error: #{error}"
+          redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
         end
       else
         error = JSON.parse(response.body)['error']['message']
-        redirect_to dashboard_path, alert: "Error: #{error}"
+        redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
       end
 
     end
@@ -131,7 +131,7 @@ class DriveController < ApplicationController
         mime_type: params[:file].content_type
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
-      redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
+      #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
     end
 
     private

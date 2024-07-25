@@ -102,3 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+function chiudi_alert(id){
+  modal = document.getElementById(id);
+  modal.style.display = 'none';
+}
