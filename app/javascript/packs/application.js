@@ -19,7 +19,8 @@ import "channels"
 import "bootstrap"
 import "bootstrap-icons/font/bootstrap-icons.css"
 import $ from 'jquery';
-
+import * as bootstrap from 'bootstrap';
+window.Modal = bootstrap.Modal;
 // Make jQuery available globally
 window.$ = $;
 window.jQuery = $;

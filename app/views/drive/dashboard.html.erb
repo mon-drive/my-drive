@@ -5,9 +5,22 @@
 <% end %>
 
 <% if alert %>
-  <div class="alert alert-danger">
-    <%= alert %>
+  <div class="modal" id="md_alert" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="alert alert-danger">
+            <%= alert %>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+  <script>
+    modal = new Modal(document.getElementById('md_alert'));
+    modal.show();
+  </script>
+
 <% end %>
 
 <% content_for :navbar_custom_content do %>
