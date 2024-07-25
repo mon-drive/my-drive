@@ -67,12 +67,13 @@ class DriveController < ApplicationController
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
-
       response = upload_scan(file_id)
       #se la risposta è 200 allora il file è stato caricato correttamente
       if response.code == 200
         scan_id = JSON.parse(response.body)['data']['id']
+        sleep(10)
         analyze_response = analyze(scan_id)
+        sleep(10)
         #se la risposta è 200 allora il file è stato analizzato correttamente
         if analyze_response.code == 200
           malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
@@ -81,7 +82,8 @@ class DriveController < ApplicationController
           if malicious_count > 0 || suspicious_count > 0
             redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca e sospetto su #{suspicious_count} motori di ricerca"
           else
-            upload()
+            upload(file_id)
+            #redirect_to dashboard_path, notice: "File caricato correttamente"
           end
         else
           error = JSON.parse(analyze_response.body)['error']['message']
@@ -114,7 +116,7 @@ class DriveController < ApplicationController
     end
 
 
-    def upload
+    def upload(file)
       # Initialize the API
       drive_service = Google::Apis::DriveV3::DriveService.new
 
@@ -122,17 +124,14 @@ class DriveController < ApplicationController
       drive_service.authorization = google_credentials
 
       # Verify file is present
-      if params[:file].present?
+      # if params[:file].present?
         # Upload file to Google Drive
-        metadata = {
-          name: params[:file].original_filename,
-          mime_type: params[:file].content_type
-        }
-        file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
-        redirect_to root_path, notice: 'File uploaded to Google Drive successfully'
-      else
-        redirect_to root_path, alert: 'No file selected'
-      end
+      metadata = {
+        name: params[:file].original_filename,
+        mime_type: params[:file].content_type
+      }
+      file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
+      redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
     end
 
     private
