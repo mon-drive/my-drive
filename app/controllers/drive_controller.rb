@@ -30,6 +30,8 @@ class DriveController < ApplicationController
           @items = get_files_and_folders_in_folder(drive_service, @current_folder)
         end
       end
+      storage_info()
+
     end
 
     def setting
@@ -172,6 +174,17 @@ class DriveController < ApplicationController
       end
     end
 
+    def storage_info
+      begin
+        drive_service = initialize_drive_service
+        storage_info = get_storage_info
+
+        @total_space = storage_info[:total_space]
+        @used_space = storage_info[:used_space]
+      rescue => e
+        render json: { error: "Si è verificato un errore: #{e.message}" }, status: :unprocessable_entity
+      end
+    end
 
     private
 
@@ -310,6 +323,15 @@ class DriveController < ApplicationController
           oauth_expires_at: Time.at(client.expires_at)
         )
       end
+    end
+
+    def get_storage_info
+      drive_service = initialize_drive_service
+      about = drive_service.get_about(fields: 'storageQuota')
+      {
+        total_space: about.storage_quota.limit.to_i,
+        used_space: about.storage_quota.usage.to_i
+      }
     end
 
     def authenticate_user!
