@@ -21,7 +21,6 @@ Given('a registered user named "Bob"') do
       refresh_token: 'mock_refresh_token'
     }
   })
-
 end
 
 Given("Bob wants to upload one or more valid files") do
