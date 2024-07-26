@@ -49,7 +49,7 @@
           <span class="input-group-text" id="search-icon">
             <i class="bi bi-search"></i>
           </span>
-          <input id="search-input" class="form-control" type="search" placeholder="Search" name="search" aria-label="Search">
+          <input id="search-input" class="form-control" type="search" placeholder="Cerca" name="search" aria-label="Search">
         </div>
       </form>
     </div>
@@ -64,7 +64,7 @@
       </ul>
     </div>
 
-    <%= link_to 'Premium', payment_path(plan: 'premium'), class: 'nav-link' %>
+    <%= link_to 'Passa a Premium', payment_path(plan: 'premium'), class: 'nav-link' %>
     
   </div>
 <% end %>
@@ -118,7 +118,24 @@
             </div>
           <% end %>
         </div>
-
+    <div class="d-flex justify-content-center mt-3">
+      <div class="dropdown">
+        <button class="btn btn-transparent rounded-circle border border-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 50px; height: 50px; padding: 0;">
+          <i class="fas fa-plus text-dark"></i>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="#">Nuova Cartella</a></li>
+          <li>
+            <form id="upload-form" action="<%= upload_path %>" method="post" enctype="multipart/form-data" style="display: none;">
+              <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+              <input type="file" name="file" id="file-input" onchange="document.getElementById('upload-form').submit();">
+            </form>
+            <a class="dropdown-item" href="#" onclick="document.getElementById('file-input').click();">Carica File</a>
+          </li>
+          <li><a class="dropdown-item" href="#">Carica Cartella</a></li>
+        </ul>
+      </div>
+    </div>
   </div>
   <div class="col-md-10">
     <h3>Contents of: <%= @current_folder_name %></h3>
@@ -200,13 +217,27 @@
   .dropdown-toggle::after {
     display: none;
   }
+
+  .btn-transparent {
+    background-color: transparent;
+  }
+
+  .btn-primary.rounded-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dropdown-menu {
+    min-width: auto;
+  }
+
+  .border-dark {
+    border-color: #000 !important;
+  }
+
+  .text-dark {
+    color: #000 !important;
+  }
+
 </style>
-
-
-
-
-
-<%= form_with url: '/upload', local: true, multipart: true do |form| %>
-  <%= form.file_field :file %>
-  <%= form.submit 'Upload to Google Drive' %>
-<% end %>

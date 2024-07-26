@@ -67,6 +67,10 @@ class DriveController < ApplicationController
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
+      if file_id.nil?
+        redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
+        return
+      end
       response = upload_scan(file_id)
       #se la risposta è 200 allora il file è stato caricato correttamente
       if response.code == 200
