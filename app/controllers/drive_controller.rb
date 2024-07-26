@@ -71,6 +71,7 @@ class DriveController < ApplicationController
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
+      @current_folder = params[:folder_id] || 'root'
       response = upload_scan(file_id)
       #se la risposta è 200 allora il file è stato caricato correttamente
       if response.code == 200
@@ -87,7 +88,7 @@ class DriveController < ApplicationController
             redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca e sospetto su #{suspicious_count} motori di ricerca"
           else
             upload(file_id)
-            redirect_to dashboard_path, notice: "File caricato con successo"
+            redirect_to dashboard_path(folder_id: @current_folder), notice: "File caricato con successo"
           end
         else
           error = JSON.parse(analyze_response.body)['error']['message']
@@ -132,20 +133,39 @@ class DriveController < ApplicationController
         # Upload file to Google Drive
       metadata = {
         name: params[:file].original_filename,
+        parents: [@current_folder],
         mime_type: params[:file].content_type
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
       #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
     end
 
+    def create_folder
+      folder_name = params[:folder_name]
+      if folder_name.blank?
+        redirect_to dashboard_path, alert: "Il nome della cartella non può essere vuoto."
+        return
+      end
+
+      # Logica per creare la cartella, ad esempio tramite un'API di Google Drive
+      # Supponiamo che ci sia una funzione create_folder_in_drive(folder_name) che crea la cartella
+
+      @current_folder = params[:folder_id] || 'root'
+
+      begin
+        create_folder_in_drive(folder_name)
+        redirect_to dashboard_path(folder_id: @current_folder), notice: "Cartella '#{folder_name}' creata con successo."
+      rescue => e
+        redirect_to dashboard_path, alert: "Si è verificato un errore durante la creazione della cartella: #{e.message}"
+      end
+    end
+
+
     private
 
     def initialize_drive_service
       drive_service = Google::Apis::DriveV3::DriveService.new
       drive_service.authorization = google_credentials
-      puts '\n\n\n\n\nRefresh Token' # Debug
-      puts current_user.refresh_token # Debug
-      puts "\n\n\n\n\n"
       drive_service
     end
 
@@ -238,6 +258,20 @@ class DriveController < ApplicationController
     def get_root_name(drive_service)
       folder = drive_service.get_file('root', fields: 'name')
       folder.name
+    end
+
+    def create_folder_in_drive(folder_name)
+      # Implementa la logica per creare una cartella in Google Drive o altro servizio
+      drive_service = initialize_drive_service
+      puts "\n\n\n\n"
+      puts @current_folder
+      puts "\n\n\n\n"
+      metadata = {
+        name: folder_name,
+        parents: [@current_folder],
+        mime_type: "application/vnd.google-apps.folder"
+      }
+      file = drive_service.create_file(metadata, content_type: "application/vnd.google-apps.folder")
     end
 
     def file_params

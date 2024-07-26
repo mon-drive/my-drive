@@ -69,6 +69,31 @@
   </div>
 <% end %>
 
+<!-- Modal per creare una nuova cartella -->
+<div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="newFolderModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newFolderModalLabel">Nuova Cartella</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="new-folder-form" action="<%= new_folder_path(folder_id: @current_folder) %>" method="post">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <div class="mb-3">
+            <label for="folder-name" class="form-label">Nome della Cartella</label>
+            <input type="text" class="form-control" id="folder-name" name="folder_name" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();">Crea Cartella</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid">
   <div class="row">
   <div class="col-md-2">
@@ -124,13 +149,13 @@
           <i class="fas fa-plus text-dark"></i>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#">Nuova Cartella</a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal">Nuova Cartella</a></li>
           <li>
-            <form id="upload-form" action="<%= upload_path %>" method="post" enctype="multipart/form-data" style="display: none;">
+            <form id="upload-form" action="<%= upload_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
               <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-              <input type="file" name="file" id="file-input" onchange="document.getElementById('upload-form').submit();">
+              <input type="file" name="file" id="file-input" onchange="handleFileSelect()">
             </form>
-            <a class="dropdown-item" href="#" onclick="document.getElementById('file-input').click();">Carica File</a>
+            <a class="dropdown-item" href="#" onclick="document.getElementById('file-input').click(); return false;">Carica File</a>
           </li>
           <li><a class="dropdown-item" href="#">Carica Cartella</a></li>
         </ul>

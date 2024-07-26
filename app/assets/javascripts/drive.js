@@ -106,3 +106,12 @@ function chiudi_alert(id){
   modal = document.getElementById(id);
   modal.style.display = 'none';
 }
+
+function handleFileSelect() {
+  var fileInput = document.getElementById('file-input');
+  if (fileInput.files.length > 0) { // Verifica se è stato selezionato un file
+    document.getElementById('upload-form').submit();
+  } else {
+    alert('Seleziona un file prima di procedere.');
+  }
+}

@@ -14,6 +14,9 @@ Rails.application.routes.draw do
   # Route for uploading file
   post 'upload', to: 'drive#scan'
 
+  # Route for creating new folder
+  post 'new_folder', to: 'drive#create_folder'
+
   # Route for pricing page
   get 'pricing', to: 'pages#pricing'
 
