@@ -36,6 +36,7 @@ document.addEventListener('turbolinks:load', function () {
   });
 });
 
+
 $(document).on('turbolinks:load', function() {
   // Rename
   $('.rename-item').on('click', function() {
@@ -102,11 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-function chiudi_alert(id){
-  modal = document.getElementById(id);
-  modal.style.display = 'none';
-}
-
 function handleFileSelect() {
   var fileInput = document.getElementById('file-input');
   if (fileInput.files.length > 0) { // Verifica se è stato selezionato un file
@@ -114,4 +110,9 @@ function handleFileSelect() {
   } else {
     alert('Seleziona un file prima di procedere.');
   }
+}
+
+function apri_modal(id){
+  modal = new bootstrap.Modal(document.getElementById(id));
+  modal.show();  
 }

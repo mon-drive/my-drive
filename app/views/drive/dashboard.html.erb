@@ -1,12 +1,15 @@
 <% if notice %>
-  <div class="modal fade" id="md_notice" data-bs-backdrop="false">
+  <div class="modal fade" id="md_notice" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center"><%= notice %></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= notice %>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="close_md" onclick="chiudi_alert('md_notice')">ok</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
       </div>
     </div>
   </div>
@@ -19,18 +22,19 @@
 <% end %>
 
 <% if alert %>
-  <div class="modal fade" id="md_alert" data-bs-backdrop="false">
+  <div class="modal fade" id="md_alert" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title text-center" style="color: red;">Attenzione</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <%= alert %>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" id="close_md" onclick="chiudi_alert('md_alert')">ok</button>
-      </div>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+      </div> 
     </div>
   </div>
 </div>
@@ -40,7 +44,25 @@
   </script>
 
 <% end %>
-
+<!--modal durante scanzione virus-->
+<div class="modal fade" id="md_scan" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Analisi antivurs in corso può richiedere un pò di tempo:</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <div class="spinner-border" role="status" style="color: red;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Scansione in corso...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--fine modal scan-->
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav w-100 d-flex justify-content-between align-items-center">
     <div class="d-flex flex-grow-1 justify-content-center">
@@ -70,8 +92,8 @@
 <% end %>
 
 <!-- Modal per creare una nuova cartella -->
-<div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="newFolderModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="newFolderModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="newFolderModalLabel">Nuova Cartella</h5>
@@ -165,9 +187,9 @@
           <li>
             <form id="upload-form" action="<%= upload_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
               <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-              <input type="file" name="file" id="file-input" onchange="handleFileSelect()">
+              <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
             </form>
-            <a class="dropdown-item" href="#" onclick="document.getElementById('file-input').click(); return false;">Carica File</a>
+            <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;">Carica File</a>
           </li>
           <li><a class="dropdown-item" href="#">Carica Cartella</a></li>
         </ul>

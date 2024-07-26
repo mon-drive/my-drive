@@ -71,7 +71,6 @@ class DriveController < ApplicationController
       file_id = params[:file]
       puts "avvio scan"
       if file_id.nil?
-        puts "nessun file selezionato"
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
@@ -81,11 +80,10 @@ class DriveController < ApplicationController
       #se la risposta è 200 allora il file è stato caricato correttamente
       if response.code == 200
         scan_id = JSON.parse(response.body)['data']['id']
-        puts "mo scanziono"
         analyze_response = analyze(scan_id)
 
         while JSON.parse(analyze_response.body)['data']['attributes']['status'] == 'queued' || JSON.parse(analyze_response.body)['data']['attributes']['status'] == 'in_progress'
-          sleep(15)
+          sleep(20)
           analyze_response = analyze(scan_id)
           puts JSON.parse(analyze_response.body)['data']['attributes']['status']
         end
@@ -96,7 +94,7 @@ class DriveController < ApplicationController
           #se il file è infetto non lo carica su google drive
           if malicious_count > 0
             puts malicious_count
-            redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
+            redirect_to dashboard_path(folder_id: @current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
           else
             puts "file pulito"
             upload(file_id)
@@ -105,12 +103,12 @@ class DriveController < ApplicationController
         else
           puts "errore analisi"
           error = JSON.parse(analyze_response.body)['error']['message']
-          redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
+          redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
         end
       else
         puts "errore caricamento"
         error = JSON.parse(response.body)['error']['message']
-        redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
+        redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
       end
 
     end
@@ -174,6 +172,9 @@ class DriveController < ApplicationController
       end
     end
 
+
+
+
     def storage_info
       begin
         drive_service = initialize_drive_service
@@ -190,7 +191,7 @@ class DriveController < ApplicationController
       drive_service = initialize_drive_service
       item_id = params[:item_id]
       folder_id = params[:folder_id] # Recupera il parametro folder_id
-      
+
       begin
         drive_service.delete_file(item_id)
         respond_to do |format|
