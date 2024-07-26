@@ -116,6 +116,31 @@
   </div>
 </div>
 
+<!-- Modal rinomina -->
+<div class="modal fade" id="renameItemModal" tabindex="-1" aria-labelledby="renameItemModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameItemModalLabel">Rinomina File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="rename-item-form">
+          <input type="hidden" id="rename-item-id">
+          <div class="mb-3">
+            <label for="item-name" class="form-label">Nuovo Nome</label>
+            <input type="text" class="form-control" id="item-name" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal">Rinomina</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid">
   <div class="row">
   <div class="col-md-2">

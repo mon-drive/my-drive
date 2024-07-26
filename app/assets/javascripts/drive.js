@@ -44,29 +44,42 @@ $(document).on('turbolinks:load', function() {
   // Rename
   $('.rename-item').on('click', function() {
     var itemId = $(this).data('id');
-    var itemName = prompt('Inserisci il nuovo nome:');
-    if (itemName) {
-      $.ajax({
-        url: '/items/' + itemId + '/rename',
-        type: 'PATCH',
-        data: JSON.stringify({
-          item: { name: itemName }
-        }),
-        contentType: 'application/json',
-        dataType: 'json',
-        headers: {
-          'X-CSRF-Token': csrfToken //CSRF token to avoid security issues
-        },
-        success: function(response) {
-          if (response.success) {
-            $('#item-name-' + itemId).text(response.name);
-            location.reload(); //Reload the page to see name change
-          } else {
-            alert('Errore: ' + response.errors.join(', '));
+    var currentName = $('#item-name-' + itemId).text(); // Assuming this is how you get the current name
+    
+    // Set the item ID and current name in the modal's inputs
+    $('#rename-item-id').val(itemId);
+    $('#item-name').val(currentName);
+    
+    // Show the modal
+    $('#renameItemModal').modal('show');
+    
+    // Handle the form submission
+    $('#save-changes').off('click').on('click', function() {
+      var itemName = $('#item-name').val();
+  
+      if (itemName) {
+        $.ajax({
+          url: '/items/' + itemId + '/rename',
+          type: 'PATCH',
+          data: JSON.stringify({
+            item: { name: itemName }
+          }),
+          contentType: 'application/json',
+          dataType: 'json',
+          headers: {
+            'X-CSRF-Token': csrfToken
+          },
+          success: function(response) {
+            if (response.success) {
+              $('#item-name-' + itemId).text(response.name);
+              $('#renameItemModal').modal('hide');
+            } else {
+              alert('Errore: ' + response.errors.join(', '));
+            }
           }
-        }
-      });
-    }
+        });
+      }
+    });
   });
 
   // Share
