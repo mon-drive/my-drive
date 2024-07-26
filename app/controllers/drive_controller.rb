@@ -67,34 +67,46 @@ class DriveController < ApplicationController
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
+      puts "avvio scan"
       if file_id.nil?
+        puts "nessun file selezionato"
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
       @current_folder = params[:folder_id] || 'root'
       response = upload_scan(file_id)
+      puts response
       #se la risposta è 200 allora il file è stato caricato correttamente
       if response.code == 200
         scan_id = JSON.parse(response.body)['data']['id']
-        sleep(5)
+        puts "mo scanziono"
         analyze_response = analyze(scan_id)
-        sleep(2)
+
+        while JSON.parse(analyze_response.body)['data']['attributes']['status'] == 'queued' || JSON.parse(analyze_response.body)['data']['attributes']['status'] == 'in_progress'
+          sleep(15)
+          analyze_response = analyze(scan_id)
+          puts JSON.parse(analyze_response.body)['data']['attributes']['status']
+        end
         #se la risposta è 200 allora il file è stato analizzato correttamente
         if analyze_response.code == 200
           malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
-          suspicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['suspicious']
+          #suspicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['suspicious']
           #se il file è infetto non lo carica su google drive
-          if malicious_count > 0 || suspicious_count > 0
-            redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca e sospetto su #{suspicious_count} motori di ricerca"
+          if malicious_count > 0
+            puts malicious_count
+            redirect_to dashboard_path, alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
           else
+            puts "file pulito"
             upload(file_id)
             redirect_to dashboard_path(folder_id: @current_folder), notice: "File caricato con successo"
           end
         else
+          puts "errore analisi"
           error = JSON.parse(analyze_response.body)['error']['message']
           redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
         end
       else
+        puts "errore caricamento"
         error = JSON.parse(response.body)['error']['message']
         redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
       end
