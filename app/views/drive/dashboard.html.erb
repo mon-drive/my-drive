@@ -133,7 +133,7 @@
                 </button>
               </div>
               <div class="folder-contents" style="display: none;">
-                <% @all_items.select { |item| item.parents.include?(folder.id) && item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
+                <% @all_items.select { |item| item.parents&.include?(folder.id) && item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
                   <div class="list-group-item list-group-item-action">
                     <i class="bi bi-folder-fill fs-3 me-2"></i>
                     <%= link_to subfolder.name, dashboard_path(folder_id: subfolder.id), class: 'text-dark w-100' %>
