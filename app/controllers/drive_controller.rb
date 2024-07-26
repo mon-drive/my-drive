@@ -1,6 +1,6 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_item, only: [:rename, :share, :export, :properties]
+    before_action :set_item, only: [:share, :export, :properties]
 
     require 'google/apis/drive_v3'
     require 'googleauth'
@@ -41,13 +41,30 @@ class DriveController < ApplicationController
     end
 
     def rename
-      if @item.update(item_params)
+      #initialize drive service
+      drive_service = initialize_drive_service
+
+      #get file id and new name and metadata
+      file_id = params[:id]
+      new_name = params[:item][:name]
+      
+      puts "\n\n\n\n"
+      puts "File ID: #{file_id}"
+      puts "New Name: #{new_name}"
+      puts "\n\n\n\n"
+
+      file_metadata = Google::Apis::DriveV3::File.new(name: new_name)
+
+      drive_service.update_file(file_id, file_metadata, fields: 'name')
+      begin
         respond_to do |format|
-          format.json { render json: { success: true, name: @item.name } }
+          format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento rinominato con successo.' }
+          format.json { render json: { message: 'Elemento rinominato con successo.' }, status: :ok }
         end
-      else
+      rescue => e
         respond_to do |format|
-          format.json { render json: { success: false, errors: @item.errors.full_messages } }
+          format.html { redirect_to dashboard_path(folder_id: folder_id), alert: "Errore nel rinominare l'elemento: #{e.message}" }
+          format.json { render json: { error: "Errore nel rinominare l'elemento: #{e.message}" }, status: :unprocessable_entity }
         end
       end
     end

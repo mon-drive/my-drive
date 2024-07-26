@@ -38,6 +38,9 @@ document.addEventListener('turbolinks:load', function () {
 
 
 $(document).on('turbolinks:load', function() {
+  // Get CSRF token from meta tag to avoid security issues
+  var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
   // Rename
   $('.rename-item').on('click', function() {
     var itemId = $(this).data('id');
@@ -46,13 +49,18 @@ $(document).on('turbolinks:load', function() {
       $.ajax({
         url: '/items/' + itemId + '/rename',
         type: 'PATCH',
-        data: {
+        data: JSON.stringify({
           item: { name: itemName }
-        },
+        }),
+        contentType: 'application/json',
         dataType: 'json',
+        headers: {
+          'X-CSRF-Token': csrfToken //CSRF token to avoid security issues
+        },
         success: function(response) {
           if (response.success) {
             $('#item-name-' + itemId).text(response.name);
+            location.reload(); //Reload the page to see name change
           } else {
             alert('Errore: ' + response.errors.join(', '));
           }
