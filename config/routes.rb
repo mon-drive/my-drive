@@ -29,11 +29,15 @@ Rails.application.routes.draw do
   # Dashboard route
   get 'dashboard', to: 'drive#dashboard', as: 'dashboard'
 
+  # Route for delete item
+  delete 'delete_item', to: 'drive#delete_item'
+
   resources :items, controller: 'drive', only: [] do
     member do
       patch 'rename'
       get 'share'
       get 'export'
+      delete :delete_item
       get 'properties'
     end
   end

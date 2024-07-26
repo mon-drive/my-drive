@@ -186,6 +186,25 @@ class DriveController < ApplicationController
       end
     end
 
+    def delete_item
+      drive_service = initialize_drive_service
+      item_id = params[:item_id]
+      folder_id = params[:folder_id] # Recupera il parametro folder_id
+      
+      begin
+        drive_service.delete_file(item_id)
+        respond_to do |format|
+          format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento eliminato con successo.' }
+          format.json { render json: { message: 'Elemento eliminato con successo.' }, status: :ok }
+        end
+      rescue => e
+        respond_to do |format|
+          format.html { redirect_to dashboard_path(folder_id: folder_id), alert: "Errore nell'eliminazione dell'elemento: #{e.message}" }
+          format.json { render json: { error: "Errore nell'eliminazione dell'elemento: #{e.message}" }, status: :unprocessable_entity }
+        end
+      end
+    end
+
     private
 
     def initialize_drive_service
