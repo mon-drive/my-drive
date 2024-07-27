@@ -111,11 +111,21 @@ $(document).on('turbolinks:load', function() {
       success: function(data){
         // Populate the modal with the file details
         $('#file-name').text("Nome: " + data.name);
-        $('#file-mime_type').text("MIME type: " + data.mime_type);
-        $('#file-size').text("Dimensione: " + data.size + " bytes");
+        $('#file-mime_type').text("Tipo di file: " + data.mime_type);
+        $('#file-size').text("Dimensione: " + get_file_size(data.size));
         $('#file-created_time').text("Data di creazione: " + new Date(data.created_time).toLocaleString());
         $('#file-modified_time').text("Data di modifica: " + new Date(data.modified_time).toLocaleString());
         
+        var ownersText = data.owners.map(owner => owner.display_name + " (" + owner.email + ")").join(", ");
+        $('#file-owners').text("Owners: " + ownersText);
+        
+        var permissionsText = data.permissions.map(permission => {
+          return permission.role + " (" + permission.type + ")";
+        }).join(", ");
+        
+        $('#file-permissions').text("Permissions: " + permissionsText);
+        $('#file-shared').text("Shared: " + (data.shared ? "Yes" : "No"));
+
         $('#filePropertiesModal').modal('show');
       }
     });
@@ -145,4 +155,24 @@ function handleFileSelect() {
 function apri_modal(id){
   modal = new bootstrap.Modal(document.getElementById(id));
   modal.show();  
+}
+
+function get_file_size(size){
+  //gets file size in bytes and returns a human readable format
+  let human_size = 0;
+  
+  if(size < 1024){
+    human_size + ' B';
+  }
+  else if(size < 1048576){
+    human_size = (size / 1024).toFixed(2) + ' KB';
+  }
+  else if(size < 1073741824){
+    human_size = (size / 1048576).toFixed(2) + ' MB';
+  }
+  else{
+    human_size = (size / 1073741824).toFixed(2) + ' GB';
+  } 
+
+  return human_size;
 }

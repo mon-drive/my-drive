@@ -75,7 +75,7 @@ class DriveController < ApplicationController
       file_id = params[:id]
   
       #save file data
-      file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time')
+      file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time, owners, permissions, shared')
   
       # Render the response as JSON
       file_properties = {
@@ -84,7 +84,10 @@ class DriveController < ApplicationController
         mime_type: file.mime_type,
         size: file.size,
         created_time: file.created_time.to_s,
-        modified_time: file.modified_time.to_s
+        modified_time: file.modified_time.to_s,
+        owners: file.owners.map { |owner| { display_name: owner.display_name, email: owner.email_address } },
+        permissions: file.permissions,
+        shared: file.shared,
       }
       render json: file_properties
       rescue Google::Apis::ClientError => e
