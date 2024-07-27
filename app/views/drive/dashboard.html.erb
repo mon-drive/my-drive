@@ -44,7 +44,7 @@
   </script>
 
 <% end %>
-<!--modal durante scanzione virus-->
+<!--modal durante scansione virus-->
 <div class="modal fade" id="md_scan" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -111,6 +111,31 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
         <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();">Crea Cartella</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal rinomina -->
+<div class="modal fade" id="renameItemModal" tabindex="-1" aria-labelledby="renameItemModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameItemModalLabel">Rinomina File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="rename-item-form">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <div class="mb-3">
+            <label for="item-name" class="form-label">Nuovo Nome</label>
+            <input type="text" class="form-control" id="item-name" name="item_name" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal">Rinomina</button>
       </div>
     </div>
   </div>
@@ -230,7 +255,8 @@
                       <%= hidden_field_tag :item_id, item.id %>
                       <%= hidden_field_tag :folder_id, @current_folder %>
                       <button type="submit" class="dropdown-item">Elimina</button>
-                      <% end %></li>
+                      <% end %>
+                  </li>
                   <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Proprietà</a></li>
                 </ul>
               </div>

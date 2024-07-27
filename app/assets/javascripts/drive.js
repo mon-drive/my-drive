@@ -38,28 +38,60 @@ document.addEventListener('turbolinks:load', function () {
 
 
 $(document).on('turbolinks:load', function() {
+  // Get CSRF token from meta tag to avoid security issues
+  var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
   // Rename
   $('.rename-item').on('click', function() {
     var itemId = $(this).data('id');
-    var itemName = prompt('Inserisci il nuovo nome:');
-    if (itemName) {
-      $.ajax({
-        url: '/items/' + itemId + '/rename',
-        type: 'PATCH',
-        data: {
-          item: { name: itemName }
-        },
-        dataType: 'json',
-        success: function(response) {
-          if (response.success) {
-            $('#item-name-' + itemId).text(response.name);
-          } else {
-            alert('Errore: ' + response.errors.join(', '));
+    var currentName = $('#item-name-' + itemId).text(); // Assuming this is how you get the current name
+    
+    // Set the item ID and current name in the modal's inputs
+    $('#item-name').val(currentName);
+    
+    // Show the modal
+    $('#renameItemModal').modal('show');
+    
+    // Handle the form submission 
+    $('#rename-item-form').on('submit', function(event) {
+      event.preventDefault();
+  
+      var itemName = $('#item-name').val();
+  
+      if (itemName) {
+        $.ajax({
+          url: '/items/' + itemId + '/rename',
+          type: 'PATCH',
+          data: JSON.stringify({
+            item: { name: itemName }
+          }),
+          contentType: 'application/json',
+          dataType: 'json',
+          headers: {
+            'X-CSRF-Token': csrfToken
+          },
+          success: function(response) {
+            if (response.success) {
+              $('#item-name-' + itemId).text(response.name);
+              $('#renameItemModal').modal('hide');
+            } else {
+              alert('Errore: ' + response.errors.join(', '));
+            }
           }
-        }
-      });
-    }
+        });
+      }
+      location.reload();
+    });
+
+    // Add event listener for the "Rinomina" button click
+    document.getElementById('save-changes').addEventListener('click', function() {
+      var renameItemForm = document.getElementById('rename-item-form');
+      renameItemForm.dispatchEvent(new Event('submit'));
+    });
+
   });
+
+
 
   // Share
   $('.share-item').on('click', function() {
