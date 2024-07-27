@@ -78,7 +78,15 @@ class DriveController < ApplicationController
       file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time')
   
       # Render the response as JSON
-      render json: file.to_json
+      file_properties = {
+        id: file.id,
+        name: file.name,
+        mime_type: file.mime_type,
+        size: file.size,
+        created_time: file.created_time.to_s,
+        modified_time: file.modified_time.to_s
+      }
+      render json: file_properties
       rescue Google::Apis::ClientError => e
         render json: { error: e.message }, status: :unprocessable_entity
   end

@@ -114,7 +114,7 @@ $(document).on('turbolinks:load', function() {
         $('#file-mime_type').text("MIME type: " + data.mime_type);
         $('#file-size').text("Dimensione: " + data.size + " bytes");
         $('#file-created_time').text("Data di creazione: " + new Date(data.created_time).toLocaleString());
-        $('#file-modified_time').text("Data di modifica: " + data.modified_time);
+        $('#file-modified_time').text("Data di modifica: " + new Date(data.modified_time).toLocaleString());
         
         $('#filePropertiesModal').modal('show');
       }
