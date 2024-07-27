@@ -1,6 +1,6 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_item, only: [:share, :export, :properties]
+    before_action :set_item, only: [:share, :export]
 
     require 'google/apis/drive_v3'
     require 'googleauth'
@@ -68,10 +68,20 @@ class DriveController < ApplicationController
     end
 
     def properties
-      respond_to do |format|
-        format.json { render json: { success: true, properties: @item.attributes } }
-      end
-    end
+      #initialize drive service
+      drive_service = initialize_drive_service
+
+      #get file id
+      file_id = params[:id]
+  
+      #save file data
+      file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time')
+  
+      # Render the response as JSON
+      render json: file.to_json
+      rescue Google::Apis::ClientError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+  end
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan

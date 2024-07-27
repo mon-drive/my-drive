@@ -38,7 +38,7 @@ Rails.application.routes.draw do
       get 'share'
       get 'export'
       delete :delete_item
-      get 'properties'
+      get 'properties', defaults: { format: 'json' }
     end
   end
 

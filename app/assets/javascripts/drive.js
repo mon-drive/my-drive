@@ -91,8 +91,6 @@ $(document).on('turbolinks:load', function() {
 
   });
 
-
-
   // Share
   $('.share-item').on('click', function() {
     // Implementa la logica di condivisione
@@ -110,15 +108,15 @@ $(document).on('turbolinks:load', function() {
       url: '/items/' + itemId + '/properties',
       type: 'GET',
       dataType: 'json',
-      success: function(response) {
-        if (response.success) {
-          var properties = response.properties;
-          var propertiesText = '';
-          for (var key in properties) {
-            propertiesText += key + ': ' + properties[key] + '\n';
-          }
-          alert(propertiesText);
-        }
+      success: function(data){
+        // Populate the modal with the file details
+        $('#file-name').text("Nome: " + data.name);
+        $('#file-mime_type').text("MIME type: " + data.mime_type);
+        $('#file-size').text("Dimensione: " + data.size + " bytes");
+        $('#file-created_time').text("Data di creazione: " + new Date(data.created_time).toLocaleString());
+        $('#file-modified_time').text("Data di modifica: " + data.modified_time);
+        
+        $('#filePropertiesModal').modal('show');
       }
     });
   });
