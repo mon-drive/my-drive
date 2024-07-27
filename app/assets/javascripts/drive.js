@@ -47,14 +47,15 @@ $(document).on('turbolinks:load', function() {
     var currentName = $('#item-name-' + itemId).text(); // Assuming this is how you get the current name
     
     // Set the item ID and current name in the modal's inputs
-    $('#rename-item-id').val(itemId);
     $('#item-name').val(currentName);
     
     // Show the modal
     $('#renameItemModal').modal('show');
     
-    // Handle the form submission
-    $('#save-changes').off('click').on('click', function() {
+    // Handle the form submission 
+    $('#rename-item-form').on('submit', function(event) {
+      event.preventDefault();
+  
       var itemName = $('#item-name').val();
   
       if (itemName) {
@@ -81,7 +82,16 @@ $(document).on('turbolinks:load', function() {
       }
       location.reload();
     });
+
+    // Add event listener for the "Rinomina" button click
+    document.getElementById('save-changes').addEventListener('click', function() {
+      var renameItemForm = document.getElementById('rename-item-form');
+      renameItemForm.dispatchEvent(new Event('submit'));
+    });
+
   });
+
+
 
   // Share
   $('.share-item').on('click', function() {

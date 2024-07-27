@@ -126,10 +126,10 @@
       </div>
       <div class="modal-body">
         <form id="rename-item-form">
-          <input type="hidden" id="rename-item-id">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <div class="mb-3">
             <label for="item-name" class="form-label">Nuovo Nome</label>
-            <input type="text" class="form-control" id="item-name" required>
+            <input type="text" class="form-control" id="item-name" name="item_name" required>
           </div>
         </form>
       </div>

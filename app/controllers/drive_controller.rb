@@ -47,7 +47,7 @@ class DriveController < ApplicationController
       #get file id and new name and metadata
       file_id = params[:id]
       new_name = params[:item][:name]
-      
+
       puts "\n\n\n\n"
       puts "File ID: #{file_id}"
       puts "New Name: #{new_name}"
@@ -56,17 +56,7 @@ class DriveController < ApplicationController
       file_metadata = Google::Apis::DriveV3::File.new(name: new_name)
 
       drive_service.update_file(file_id, file_metadata, fields: 'name')
-      begin
-        respond_to do |format|
-          format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento rinominato con successo.' }
-          format.json { render json: { message: 'Elemento rinominato con successo.' }, status: :ok }
-        end
-      rescue => e
-        respond_to do |format|
-          format.html { redirect_to dashboard_path(folder_id: folder_id), alert: "Errore nel rinominare l'elemento: #{e.message}" }
-          format.json { render json: { error: "Errore nel rinominare l'elemento: #{e.message}" }, status: :unprocessable_entity }
-        end
-      end
+
     end
 
     def share
