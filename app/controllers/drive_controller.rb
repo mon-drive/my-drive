@@ -1,6 +1,5 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_item, only: [:share, :export]
 
     require 'google/apis/drive_v3'
     require 'googleauth'
@@ -12,13 +11,13 @@ class DriveController < ApplicationController
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
       @all_items = get_files_and_folders(drive_service)
+      @root_folder_name = get_root_name(drive_service)
       if params[:folder_id] == 'bin'
         @current_folder_name = 'Cestino'
       else
-        @current_folder_name = @current_folder == 'root' ? 'Root' : get_folder_name(drive_service, @current_folder)
+        @current_folder_name = @current_folder == 'root' ? @root_folder_name : get_folder_name(drive_service, @current_folder)
         @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
       end
-      @root_folder_name = get_root_name(drive_service)
       if params[:search].present?
         @current_folder = 'null'
         @items = search_files(drive_service, params[:search])
@@ -61,6 +60,25 @@ class DriveController < ApplicationController
 
     def share
       # Logica per condividere l'elemento
+      drive_service = initialize_drive_service
+
+      file_id = params[:file_id]
+      email = params[:email]
+      role = params[:permission]
+      notify = params[:notify]
+      message = params[:message]
+
+      permission = Google::Apis::DriveV3::Permission.new(
+        type: 'user',
+        role: role,
+        email_address: email
+      )
+
+      drive_service.create_permission(file_id, permission, email_message: message, send_notification_email: notify)
+
+      respond_to do |format|
+        format.json { render json: { success: true, message: 'File condiviso con successo.' } }
+      end
     end
 
     def export
@@ -73,10 +91,10 @@ class DriveController < ApplicationController
 
       #get file id
       file_id = params[:id]
-  
+
       #save file data
       file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time, owners, permissions, shared')
-  
+
       # Render the response as JSON
       file_properties = {
         id: file.id,
@@ -384,10 +402,6 @@ class DriveController < ApplicationController
 
     def authenticate_user!
       redirect_to root_path unless current_user
-    end
-
-    def set_item
-      @item = Item.find(params[:id])
     end
 
     def item_params

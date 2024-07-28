@@ -168,6 +168,47 @@
   </div>
 </div>
 
+<!-- Modal Condividi -->
+<div class="modal fade" id="shareItemModal" tabindex="-1" aria-labelledby="shareItemModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareItemModalLabel">Condividi File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="share-item-form">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <div class="mb-3">
+            <label for="share-email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="share-email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="share-permission" class="form-label">Permessi</label>
+            <select class="form-control" id="share-permission" name="permission" required>
+              <option value="writer">Editor</option>
+              <option value="commenter">Commenter</option>
+              <option value="reader">Viewer</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="share-notify" class="form-label">Notificare la persona</label>
+            <input type="checkbox" class="form-check-input" id="share-notify" name="notify" checked>
+          </div>
+          <div class="mb-3">
+            <label for="share-message" class="form-label">Messaggio</label>
+            <textarea class="form-control" id="share-message" name="message" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" id="share-file" data-bs-dismiss="modal">Condividi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div class="container-fluid">
   <div class="row">

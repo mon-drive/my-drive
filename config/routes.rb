@@ -32,15 +32,8 @@ Rails.application.routes.draw do
   # Route for delete item
   delete 'delete_item', to: 'drive#delete_item'
 
-  resources :items, controller: 'drive', only: [] do
-    member do
-      patch 'rename'
-      get 'share'
-      get 'export'
-      delete :delete_item
-      get 'properties', defaults: { format: 'json' }
-    end
-  end
+  # Route for rename item
+  post 'share', to: 'drive#share'
 
   # Settings route
   get 'settings', to: 'drive#setting'

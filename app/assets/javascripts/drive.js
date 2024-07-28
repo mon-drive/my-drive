@@ -176,3 +176,44 @@ function get_file_size(size){
 
   return human_size;
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const shareItemButtons = document.querySelectorAll('.share-item');
+  const shareFileButton = document.getElementById('share-file');
+  const shareForm = document.getElementById('share-item-form');
+  let currentFileId = null;
+
+  shareItemButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      currentFileId = this.getAttribute('data-id');
+      const shareModal = new bootstrap.Modal(document.getElementById('shareItemModal'));
+      shareModal.show();
+    });
+  });
+
+  shareFileButton.addEventListener('click', function() {
+    const email = shareForm.querySelector('#share-email').value;
+    const permission = shareForm.querySelector('#share-permission').value;
+    const notify = shareForm.querySelector('#share-notify').checked;
+    const message = shareForm.querySelector('#share-message').value;
+    const token = shareForm.querySelector('input[name="authenticity_token"]').value;
+
+    fetch('/share', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': token
+      },
+      body: JSON.stringify({ file_id: currentFileId, email: email, permission: permission, notify: notify, message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        shareForm.reset();
+        alert('File condiviso con successo.');
+      } else {
+        alert('Errore durante la condivisione del file.');
+      }
+    });
+  });
+});
