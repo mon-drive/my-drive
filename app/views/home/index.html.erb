@@ -1,8 +1,8 @@
 
 <% content_for :navbar_custom_content do %>
   <% if session[:user_id] %>
-  <a class="nav-link" href="<%= pricing_path %>">Access Drive</a>
-  <% end %>
+    <a class="nav-link" href="<%= pricing_path %>">Accedi a Drive</a>
+  <%end%>
   <a class="nav-link" href="<%= pricing_path %>">Plans</a>
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Language
@@ -20,49 +20,85 @@
   </div>
 <% end %>
 
-<h1 class="text-center">SCEGLI L'ARCHIVIO GIUSTO PER LE TUE ESIGENZE</h1>
-
-<div>
-  <img src="<%= asset_path('myDrive.jpg') %>" class="img-fluid" alt="Logo" style="width: 10%; display: block; margin-left: auto; margin-right: auto">
+ <div class="container">
+    <div class="row">
+      <div class="col">
+        <h1 class="text-center">SCEGLI L'ARCHIVIO GIUSTO PER LE TUE ESIGENZE</h1>
+      </div>
+    </div>
+    <div class="row d-flex justify-content-center">
+      <div class="col-24 col-md-18 col-lg-12">
+        <div class="carousel">
+          <div class="carousel-images">
+            <div class="carousel-image">
+              <img src="<%= asset_path('virustotal.png') %>" alt="First slide">
+            </div>
+            <div class="carousel-image">
+              <img src="<%= asset_path('conversion.jpg') %>" alt="Second slide">
+            </div>
+            <div class="carousel-image">
+              <img src="<%= asset_path('drive.jpg') %>" alt="Third slide">
+            </div>
+          </div>
+        </div>        
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-center">
+        <% if session[:user_id] %>
+          <button class="btn btn-primary btn-lg btn-block" id="driveButton" onclick="window.location.href='<%= pricing_path %>';">Accedi a Drive</button>
+        <% end %>
+      </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+      <div class="col">
+        <div class="card">
+          <img src="<%= asset_path('drive.jpg') %>" class="card-img-top" alt="drive">
+          <div class="card-body">
+            <h5 class="card-title">Archiviazione</h5>
+            <p class="card-text">Gestisci i tuoi file con facilità su google drive.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <img src="<%= asset_path('conversion.jpg') %>" class="card-img-top" alt="cloudmersive">
+          <div class="card-body">
+            <h5 class="card-title">Conversione</h5>
+            <p class="card-text">Converti i tuoi file in uno dei molti formati supportati.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <img src="<%= asset_path('virustotal.png') %>" class="card-img-top" alt="virustotal">
+          <div class="card-body">
+            <h5 class="card-title">Sicurezza dei file</h5>
+            <p class="card-text">I file sono sempre controllati con VirusTotal.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <img src="<%= asset_path('stripe.png') %>" class="card-img-top" alt="Stripe">
+          <div class="card-body">
+            <h5 class="card-title">Pagamenti sicuri</h5>
+            <p class="card-text">Tutti i pagamenti sono gestiti tramite Stripe.</p>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl ac tincidunt tincidunt, justo nunc ultrices nunc, id aliquam nisl nunc id nunc. Sed auctor, nunc id tincidunt lacinia, nunc nunc aliquet nunc, id aliquam nunc nunc id nunc. Sed auctor, nunc id tincidunt lacinia, nunc nunc aliquet nunc, id aliquam nunc nunc id nunc.</p>
 
+<script>
+  let currentIndex = 0;
+  const images = document.querySelectorAll('.carousel-image');
+  const totalImages = images.length;
 
-<div class="row row-cols-1 row-cols-md-4 g-4">
-  <div class="col">
-    <div class="card">
-      <img src="<%= asset_path('drive.jpg') %>" class="card-img-top" alt="drive">
-      <div class="card-body">
-        <h5 class="card-title">Archiviazione</h5>
-        <p class="card-text">Gestisci i tuoi file con facilità su google drive.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <img src="<%= asset_path('conversion.jpg') %>" class="card-img-top" alt="cloudmersive">
-      <div class="card-body">
-        <h5 class="card-title">Conversione</h5>
-        <p class="card-text">Converti i tuoi file in uno dei molti formati supportati.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <img src="<%= asset_path('virustotal.png') %>" class="card-img-top" alt="virustotal">
-      <div class="card-body">
-        <h5 class="card-title">Sicurezza dei file</h5>
-        <p class="card-text">I file sono sempre controllati con VirusTotal.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <img src="<%= asset_path('stripe.png') %>" class="card-img-top" alt="Stripe">
-      <div class="card-body">
-        <h5 class="card-title">Pagamenti sicuri</h5>
-        <p class="card-text">Tutti i pagamenti sono gestiti tramite Stripe.</p>
-      </div>
-    </div>
-  </div>
-</div>
+  function showNextImage() {
+    currentIndex = (currentIndex + 1) % totalImages;
+    document.querySelector('.carousel-images').style.transform = `translateX(-${currentIndex * 100}%)`;
+  }
+
+  setInterval(showNextImage, 3000);
+</script>

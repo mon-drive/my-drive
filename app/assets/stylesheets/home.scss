@@ -1,3 +1,34 @@
 // Place all the styles related to the Home controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: https://sass-lang.com/
+
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  overflow: hidden;
+}
+
+.carousel-images {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-image {
+  width: 50%;
+  flex: 1 0 100%;
+}
+
+.carousel img {
+  width: 100%;
+  height: auto;
+  margin-left: auto; // This, along with margin-right: auto, centers the image horizontally
+  margin-right: auto;
+  display: block; // Ensure the image is a block-level element for the margins to take effect
+}
+
+#driveButton{
+  font-size: 27px;
+  margin-bottom: 2.5vh;
+}
