@@ -8,6 +8,7 @@
   max-width: 600px;
   margin: auto;
   overflow: hidden;
+  margin-top: 2vh;
 }
 
 .carousel-images {
@@ -16,7 +17,7 @@
 }
 
 .carousel-image {
-  width: 50%;
+  width: 100%;
   flex: 1 0 100%;
 }
 
@@ -30,5 +31,9 @@
 
 #driveButton{
   font-size: 27px;
-  margin-bottom: 2.5vh;
+}
+
+#sideBar{
+  margin-right: -10vh;
+  margin-top: 5vh;
 }
