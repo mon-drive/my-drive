@@ -212,18 +212,7 @@
 
 <div class="container-fluid">
   <div class="row">
-  <div class="col-md-2">
-    <!-- 
-        This code represents the dashboard view for a file management system. It displays a folder tree structure with links to navigate through the folders.
-
-        The code iterates through the @items collection and filters out folders using the 'application/vnd.google-apps.folder' mime type. For each folder, it generates a list item with a folder icon, folder name, and a toggle button to show/hide the folder contents.
-
-        The folder contents are displayed in a nested list format. It filters out subfolders that belong to the current folder and generates list items for each subfolder.
-
-        The @current_folder and @parent_folder variables are used to determine the current folder and its parent folder, respectively. If the current folder is not the root folder, links to the root folder and parent folder are also displayed.
-
-        Note: This code assumes the presence of the @items, @current_folder, and @parent_folder variables in the corresponding controller action.
-        -->
+  <div class="col-md-3">
         <div id="folderTree" class="list-group">
           <% if @current_folder != 'root' %>
             <% if @parent_folder and @parent_folder.name != @root_folder_name %>
@@ -290,7 +279,7 @@
       </div>
     </div>
   </div>
-  <div class="col-md-10">
+  <div class="col-md-9">
     <h3>Contents of: <%= @current_folder_name %></h3>
     <div class="row">
       <% @items.each do |item| %>
@@ -396,6 +385,12 @@
 
   .text-dark {
     color: #000 !important;
+  }
+
+  .folder-item .text-dark {
+    white-space: nowrap;         /* Impedisce al testo di andare a capo */
+    overflow: hidden;            /* Nasconde il testo che eccede il contenitore */
+    text-overflow: ellipsis;     /* Aggiunge un'ellisse alla fine del testo tronco */
   }
 
 </style>
