@@ -55,46 +55,59 @@
         </div>        
       </div>
     </div>
+    
     <div class="row">
-      <div class="col d-flex justify-content-center">
-        <p></p>
+      <div class="card-container">
+        <div class="card">
+            <div class="card-image">
+              <img src="<%= asset_path('drive.jpg') %>" alt="Image 1">
+            </div>
+            <div class="card-content">
+              <h5 class="card-title">Archiviazione</h5>
+              <p class="card-text">Gestisci i tuoi file con facilità su google drive.</p>
+            </div>
+        </div>
       </div>
     </div>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-      <div class="col">
-        <div class="card">
-          <img src="<%= asset_path('drive.jpg') %>" class="card-img-top" alt="drive">
-          <div class="card-body">
-            <h5 class="card-title">Archiviazione</h5>
-            <p class="card-text">Gestisci i tuoi file con facilità su google drive.</p>
-          </div>
+
+    <div class="row">
+      <div class="card-container">
+        <div class="right-card">
+            <div class="right-card-content">
+              <h5 class="card-title">Conversione</h5>
+              <p class="card-text">Converti i tuoi file in uno dei molti formati supportati.</p>
+            </div>
+            <div class="right-card-image">
+              <img src="<%= asset_path('conversion.jpg') %>" alt="Image 1">
+            </div>
         </div>
       </div>
-      <div class="col">
+    </div>
+
+    <div class="row">
+      <div class="card-container">
         <div class="card">
-          <img src="<%= asset_path('conversion.jpg') %>" class="card-img-top" alt="cloudmersive">
-          <div class="card-body">
-            <h5 class="card-title">Conversione</h5>
-            <p class="card-text">Converti i tuoi file in uno dei molti formati supportati.</p>
-          </div>
+            <div class="card-image">
+              <img src="<%= asset_path('virustotal.png') %>" alt="Image 1">
+            </div>
+            <div class="card-content">
+              <h5 class="card-title">Sicurezza dei file</h5>
+              <p class="card-text">I file sono sempre controllati con VirusTotal.</p>
+            </div>
         </div>
       </div>
-      <div class="col">
-        <div class="card">
-          <img src="<%= asset_path('virustotal.png') %>" class="card-img-top" alt="virustotal">
-          <div class="card-body">
-            <h5 class="card-title">Sicurezza dei file</h5>
-            <p class="card-text">I file sono sempre controllati con VirusTotal.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card">
-          <img src="<%= asset_path('stripe.png') %>" class="card-img-top" alt="Stripe">
-          <div class="card-body">
-            <h5 class="card-title">Pagamenti sicuri</h5>
-            <p class="card-text">Tutti i pagamenti sono gestiti tramite Stripe.</p>
-          </div>
+    </div>
+
+    <div class="row">
+      <div class="card-container">
+        <div class="right-card">
+            <div class="right-card-content">
+              <h5 class="card-title">Pagamenti sicuri</h5>
+              <p class="card-text">Tutti i pagamenti sono gestiti tramite Stripe.</p>
+            </div>
+            <div class="right-card-image">
+              <img src="<%= asset_path('stripe.png') %>" alt="Image 1">
+            </div>
         </div>
       </div>
     </div>
