@@ -1,18 +1,24 @@
 
 <% content_for :navbar_custom_content do %>
-  <% if session[:user_id] %>
-    <a class="nav-link" href="<%= pricing_path %>">Accedi a Drive</a>
-  <%end%>
-  <a class="nav-link" href="<%= pricing_path %>">Plans</a>
-  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Language
-  </a>
-  <% if session[:user_id] %>
-    <a class="nav-link" href="<%= signout_path %>">Logout</a>
-  <% else %>
-    <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
-  <% end %>
+  <div class="navbar-nav">
+    <a class="nav-link" href="<%= pricing_path %>">Plans</a>
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      Language
+    </a>
+  </div>
+  <div class="navbar-nav ms-auto">
+    <% if session[:user_id] %>
+      <a class="nav-link" href="<%= pricing_path %>">Accedi a Drive</a>
+    <%end%>
+    <% if session[:user_id] %>
+      <a class="nav-link" href="<%= signout_path %>">Logout</a>
+    <% else %>
+      <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
+    <% end %>
+  </div>
+
 <% end %>
+
 
 <% if notice %>
   <div class="alert alert-info">
