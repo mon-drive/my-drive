@@ -181,10 +181,7 @@ class DriveController < ApplicationController
 
     def upload(file)
       # Initialize the API
-      drive_service = Google::Apis::DriveV3::DriveService.new
-
-      # Use the stored token to authorize
-      drive_service.authorization = google_credentials
+      drive_service = initialize_drive_service
 
       # Verify file is present
       # if params[:file].present?
@@ -196,6 +193,38 @@ class DriveController < ApplicationController
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
       #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
+    end
+
+    def upload_folder
+
+      drive_service = initialize_drive_service
+
+      folder_name = params[:folder_name]
+
+      if folder_name.blank?
+        redirect_to dashboard_path, alert: 'Nome della cartella non fornito.'
+        return
+      end
+
+      # Crea la cartella su Google Drive
+      folder_metadata = {
+        name: folder_name,
+        mime_type: 'application/vnd.google-apps.folder',
+        parents: [params[:folder_id]]
+      }
+      folder = drive_service.create_file(folder_metadata, fields: 'id')
+
+      # Itera su tutti i file nella cartella e caricali su Google Drive
+      params[:files].each do |file|
+        file_metadata = {
+          name: file.original_filename,
+          parents: [folder.id],
+          mime_type: file.content_type
+        }
+        drive_service.create_file(file_metadata, upload_source: file.tempfile, content_type: file.content_type)
+      end
+
+      redirect_to dashboard_path, notice: 'Cartella caricata su Google Drive con successo'
     end
 
     def create_folder

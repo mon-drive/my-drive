@@ -152,6 +152,21 @@ function handleFileSelect() {
   }
 }
 
+function handleFolderSelect() {
+  var folderInput = document.getElementById('folder-input');
+  if (folderInput.files.length > 0) {
+      // Imposta il nome della cartella
+      var folderPath = folderInput.files[0].webkitRelativePath;
+      var folderName = folderPath.split('/')[0];
+      document.getElementById('folder_name').value = folderName;
+
+      // Invia il modulo
+      document.getElementById('upload-folder-form').submit();
+  } else {
+      alert('Seleziona una cartella prima di procedere.');
+  }
+}
+
 function apri_modal(id){
   modal = new bootstrap.Modal(document.getElementById(id));
   modal.show();  
