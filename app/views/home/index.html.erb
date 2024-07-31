@@ -2,16 +2,22 @@
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav">
     <a class="nav-link" href="<%= pricing_path %>">Plans</a>
-    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-      Language
-    </a>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Language
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a href="#" class="dropdown-item" data-locale="en">English</a></li>
+        <li><a href="#" class="dropdown-item" data-locale="it">Italiano</a></li>
+      </ul>
+    </li>
   </div>
   <div class="navbar-nav ms-auto">
     <% if session[:user_id] %>
       <a class="nav-link" href="<%= dashboard_path %>">Accedi a Drive</a>
     <%end%>
     <% if session[:user_id] %>
-      <a class="nav-link" href="<%= signout_path %>">Logout</a>
+      <a class="nav-link" href="<%= signout_path %>"><%= t('hello')%></a>
     <% else %>
       <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
     <% end %>
