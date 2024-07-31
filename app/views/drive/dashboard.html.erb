@@ -1,0 +1,403 @@
+<% if notice %>
+  <div class="modal fade" id="md_notice" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= notice %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <script>
+    modal = new bootstrap.Modal(document.getElementById('md_notice'));
+    modal.show();
+  </script>
+
+<% end %>
+
+<% if alert %>
+  <div class="modal fade" id="md_alert" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" style="color: red;">Attenzione</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= alert %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+      </div> 
+    </div>
+  </div>
+</div>
+  <script>
+    modal = new bootstrap.Modal(document.getElementById('md_alert'));
+    modal.show();
+  </script>
+
+<% end %>
+<!--modal durante scansione virus-->
+<div class="modal fade" id="md_scan" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Analisi antivurs in corso può richiedere un pò di tempo:</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <div class="spinner-border" role="status" style="color: red;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Scansione in corso...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--fine modal scan-->
+<% content_for :navbar_custom_content do %>
+  <div class="navbar-nav w-100 d-flex justify-content-between align-items-center">
+    <div class="d-flex flex-grow-1 justify-content-center">
+      <form id="search-form" class="d-flex" action="<%= dashboard_path %>" method="get" style="width: 50%;">
+        <div class="input-group">
+          <span class="input-group-text" id="search-icon">
+            <i class="bi bi-search"></i>
+          </span>
+          <input id="search-input" class="form-control" type="search" placeholder="Cerca" name="search" aria-label="Search">
+        </div>
+      </form>
+    </div>
+    
+    <div class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-circle"></i>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="<%= settings_path %>">Impostazioni</a></li>
+        <li><a class="dropdown-item" href="<%= signout_path %>">Esci</a></li>
+      </ul>
+    </div>
+
+    <%= link_to 'Passa a Premium', payment_path(plan: 'premium'), class: 'nav-link' %>
+    
+  </div>
+<% end %>
+
+<!-- Modal per creare una nuova cartella -->
+<div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="newFolderModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newFolderModalLabel">Nuova Cartella</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="new-folder-form" action="<%= new_folder_path(folder_id: @current_folder) %>" method="post">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <div class="mb-3">
+            <label for="folder-name" class="form-label">Nome della Cartella</label>
+            <input type="text" class="form-control" id="folder-name" name="folder_name" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();">Crea Cartella</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal rinomina -->
+<div class="modal fade" id="renameItemModal" tabindex="-1" aria-labelledby="renameItemModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameItemModalLabel">Rinomina File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="rename-item-form">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <div class="mb-3">
+            <label for="item-name" class="form-label">Nuovo Nome</label>
+            <input type="text" class="form-control" id="item-name" name="item_name" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal">Rinomina</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Proprietà -->
+<div class="modal fade" id="filePropertiesModal" tabindex="-1" aria-labelledby="filePropertiesModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="filePropertiesModalLabel">Proprietà File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <p id="file-name"></p>
+          <p id="file-mime_type"></p>
+          <p id="file-size"></p>
+          <p id="file-created_time"></p>
+          <p id="file-modified_time"></p>
+          <p id="file-owners"></p>
+          <p id="file-permissions"></p>
+          <p id="file-shared"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Condividi -->
+<div class="modal fade" id="shareItemModal" tabindex="-1" aria-labelledby="shareItemModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareItemModalLabel">Condividi File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="share-item-form">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <div class="mb-3">
+            <label for="share-email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="share-email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="share-permission" class="form-label">Permessi</label>
+            <select class="form-control" id="share-permission" name="permission" required>
+              <option value="writer">Editor</option>
+              <option value="commenter">Commenter</option>
+              <option value="reader">Viewer</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="share-notify" class="form-label">Notificare la persona</label>
+            <input type="checkbox" class="form-check-input" id="share-notify" name="notify" checked>
+          </div>
+          <div class="mb-3">
+            <label for="share-message" class="form-label">Messaggio</label>
+            <textarea class="form-control" id="share-message" name="message" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" id="share-file" data-bs-dismiss="modal">Condividi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="container-fluid">
+  <div class="row">
+  <div class="col-md-3">
+        <div id="folderTree" class="list-group">
+          <% if @current_folder != 'root' %>
+            <% if @parent_folder and @parent_folder.name != @root_folder_name %>
+              <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
+            <% end %>
+            <% if @parent_folder %>
+              <%= link_to @parent_folder.name, dashboard_path(folder_id: @parent_folder.id), class: 'list-group-item list-group-item-action' %>
+            <% else %>
+              <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
+            <% end %>
+          <% end %>
+          <% if @current_folder != 'bin' %>
+            <%= link_to "Cestino", dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
+          <% end %>
+
+          <% @items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
+            <div class="list-group-item list-group-item-action folder-item">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-folder-fill fs-3 me-2"></i>
+                <%= link_to folder.name, dashboard_path(folder_id: folder.id), class: 'text-dark w-100' %>
+                <button class="btn btn-link folder-toggle" type="button">
+                  <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+              </div>
+              <div class="folder-contents" style="display: none;">
+                <% @all_items.select { |item| item.parents&.include?(folder.id) && item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
+                  <div class="list-group-item list-group-item-action">
+                    <i class="bi bi-folder-fill fs-3 me-2"></i>
+                    <%= link_to subfolder.name, dashboard_path(folder_id: subfolder.id), class: 'text-dark w-100' %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+    <div class="progress">
+      <div 
+        class="progress-bar" 
+        role="progressbar" 
+        style="width: <%= (@used_space.to_f / @total_space.to_f) * 100 %>%" 
+        aria-valuenow="<%= (@used_space.to_f / @total_space.to_f) * 100 %>" 
+        aria-valuemin="0" 
+        aria-valuemax="100">
+        <%= number_to_percentage((@used_space.to_f / @total_space.to_f) * 100, precision: 2) %>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-3">
+      <div class="dropdown">
+        <button class="btn btn-transparent rounded-circle border border-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 50px; height: 50px; padding: 0;">
+          <i class="fas fa-plus text-dark"></i>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal">Nuova Cartella</a></li>
+          <li>
+            <form id="upload-form" action="<%= upload_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
+              <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+              <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
+            </form>
+            <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;">Carica File</a>
+          </li>
+          <li>
+            <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
+              <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+              <%= hidden_field_tag :folder_name, '' %>
+              <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect();">
+            </form>
+            <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;">Carica Cartella</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-9">
+    <h3>Contents of: <%= @current_folder_name %></h3>
+    <div class="row">
+      <% @items.each do |item| %>
+        <div class="col-md-3">
+          <div class="card mb-4 shadow-sm">
+            <div class="card-body text-center position-relative">
+              <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                <%= link_to dashboard_path(folder_id: item.id), class: 'text-decoration-none text-dark' do %>
+                  <i class="bi bi-folder-fill fs-3 mb-2"></i>
+                  <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+                <% end %>
+              <% else %>
+                <i class="bi bi-file-earmark-text fs-3 mb-2"></i>
+                <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+              <% end %>
+
+              <!-- Dropdown menu -->
+              <div class="dropdown position-absolute top-0 end-0 mt-2 me-2">
+                <button class="btn btn-link dropdown-toggle p-0" type="button" id="dropdownMenu<%= item.id %>" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu<%= item.id %>">
+                  <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                    <li><%= link_to 'Apri', dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
+                  <% end %>
+                  
+                  <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Esporta</a></li>
+                  <li><%= form_with url: delete_item_path, method: :delete, local: true, class: 'd-inline' do %>
+                      <%= hidden_field_tag :item_id, item.id %>
+                      <%= hidden_field_tag :folder_id, @current_folder %>
+                      <button type="submit" class="dropdown-item">Elimina</button>
+                      <% end %>
+                  </li>
+                  <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Proprietà</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+
+</div>
+
+  </div>
+</div>
+
+</div>
+
+<style>
+  .card-body i {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+   .card-body h5 {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  .folder-toggle {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: auto;
+  }
+
+  .folder-contents {
+    padding-left: 20px;
+    margin-top: 5px;
+  }
+
+  /* Rimuove la freccia verso il basso dai pulsanti dropdown-toggle */
+  .dropdown-toggle::after {
+    display: none;
+  }
+  /* Rimuove la freccia verso il basso dai pulsanti dropdown-toggle */
+  .dropdown-toggle::after {
+    display: none;
+  }
+
+  .btn-transparent {
+    background-color: transparent;
+  }
+
+  .btn-primary.rounded-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dropdown-menu {
+    min-width: auto;
+  }
+
+  .border-dark {
+    border-color: #000 !important;
+  }
+
+  .text-dark {
+    color: #000 !important;
+  }
+
+  .folder-item .text-dark {
+    white-space: nowrap;         /* Impedisce al testo di andare a capo */
+    overflow: hidden;            /* Nasconde il testo che eccede il contenitore */
+    text-overflow: ellipsis;     /* Aggiunge un'ellisse alla fine del testo tronco */
+  }
+
+</style>
