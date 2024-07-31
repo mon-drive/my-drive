@@ -1,2 +1,15 @@
 it:
-  hello: "Ciao Mondo"
+  home:
+    plans: "Piani"
+    language: "Lingua"
+    access-drive: "Accedi a Drive"
+    head-title: "SCEGLI L'ARCHIVIO GIUSTO PER LE TUE ESIGENZE"
+    side-text: "Archivia i tuoi file in modo sicuro e convertili in uno dei molti formati supportati. I file sono sempre controllati con VirusTotal e i pagamenti sono gestiti tramite Stripe."
+    first-card-title: "Archiviazione"
+    first-card-text: "Gestisci i tuoi file con facilità su google drive."
+    second-card-title: "Conversione"
+    second-card-text: "Converti i tuoi file in uno dei molti formati supportati."
+    third-card-title: "Sicurezza dei file"
+    third-card-text: "I file sono sempre controllati con VirusTotal."
+    fourth-card-title: "Pagamenti sicuri"
+    fourth-card-text: "Tutti i pagamenti sono gestiti tramite Stripe."
