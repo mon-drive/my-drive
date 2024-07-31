@@ -1,3 +1,110 @@
 // Place all the styles related to the Home controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: https://sass-lang.com/
+
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 38vw;
+  margin: auto;
+  overflow: hidden;
+  margin-top: 2vh;
+}
+
+.carousel-images {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-image {
+  width: 100%;
+  flex: 1 0 100%;
+}
+
+.carousel img {
+  width: 100%;
+  height: auto;
+  margin-left: auto; // This, along with margin-right: auto, centers the image horizontally
+  margin-right: auto;
+  display: block; // Ensure the image is a block-level element for the margins to take effect
+}
+
+#driveButton{
+  font-size: 27px;
+}
+
+#sideBar{
+  margin-top: 5vh;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: auto;
+  width: 95%;
+  transition: transform 0.3s;
+}
+
+.card-container:hover {
+  transform: translateY(-10px);
+}
+
+.left-card {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  width: 100%;
+  margin-bottom: 4vh;
+}
+
+.left-card-image img {
+  display: flex;
+  height: auto;
+  width: 40vh;
+}
+
+.left-card-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 35vh;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 16px;
+  color: #555;
+}
+
+.right-card {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  width: 100%;
+  transition: transform 0.3s;
+  margin-bottom: 4vh;
+}
+
+.right-card-content{
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: auto;
+  margin-left: 15vh;
+}
+
+.right-card-image img {
+  display: flex;
+  height: auto;
+  width: 40vh;
+  margin-left: auto !important;
+}
