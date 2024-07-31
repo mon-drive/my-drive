@@ -4,7 +4,7 @@
     <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans')%></a>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <%= t('home.language')%>
+        <%= t('language')%>
       </a>
       <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
         <li><a href="#" class="dropdown-item" data-locale="en">English</a></li>
@@ -17,7 +17,7 @@
       <a class="nav-link" href="<%= dashboard_path %>"><%= t('home.access-drive')%></a>
     <%end%>
     <% if session[:user_id] %>
-      <a class="nav-link" href="<%= signout_path %>"></a>
+      <a class="nav-link" href="<%= signout_path %>"><%= t('home.signout')%></a>
     <% else %>
       <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
     <% end %>
@@ -44,7 +44,7 @@
         </div>
         <div class="row">
           <% if session[:user_id] %>
-            <button class="btn btn-primary btn-lg btn-block" id="driveButton" onclick="window.location.href='<%= pricing_path %>';"><%= t('home.access-drive')%></button>
+            <button class="btn btn-primary btn-lg btn-block" id="driveButton" onclick="window.location.href='<%= dashboard_path %>';"><%= t('home.access-drive')%></button>
           <% end %>
         </div>
       </div>

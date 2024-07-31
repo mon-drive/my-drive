@@ -9,7 +9,7 @@
         <%= notice %>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div>
     </div>
   </div>
@@ -26,14 +26,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center" style="color: red;">Attenzione</h5>
+        <h5 class="modal-title text-center" style="color: red;"><%= t('dash.warning')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <%= alert %>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div> 
     </div>
   </div>
@@ -49,14 +49,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center">Analisi antivurs in corso può richiedere un pò di tempo:</h5>
+        <h5 class="modal-title text-center"><%= t('dash.virus-analysis')%></h5>
       </div>
       <div class="modal-body">
         <div class="text-center">
           <div class="spinner-border" role="status" style="color: red;">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden"><%= t('dash.loading')%></span>
           </div>
-          <p class="mt-2">Scansione in corso...</p>
+          <p class="mt-2"><%= t('dash.virus-scan')%></p>
         </div>
       </div>
     </div>
@@ -65,13 +65,22 @@
 <!--fine modal scan-->
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav w-100 d-flex justify-content-between align-items-center">
+     <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <%= t('language')%>
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a href="#" class="dropdown-item" data-locale="en">English</a></li>
+        <li><a href="#" class="dropdown-item" data-locale="it">Italiano</a></li>
+      </ul>
+    </li>
     <div class="d-flex flex-grow-1 justify-content-center">
       <form id="search-form" class="d-flex" action="<%= dashboard_path %>" method="get" style="width: 50%;">
         <div class="input-group">
           <span class="input-group-text" id="search-icon">
             <i class="bi bi-search"></i>
           </span>
-          <input id="search-input" class="form-control" type="search" placeholder="Cerca" name="search" aria-label="Search">
+          <input id="search-input" class="form-control" type="search" placeholder="search" name="search" aria-label="Search">
         </div>
       </form>
     </div>
@@ -81,12 +90,12 @@
         <i class="bi bi-person-circle"></i>
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item" href="<%= settings_path %>">Impostazioni</a></li>
-        <li><a class="dropdown-item" href="<%= signout_path %>">Esci</a></li>
+        <li><a class="dropdown-item" href="<%= settings_path %>"><%= t('dash.settings')%></a></li>
+        <li><a class="dropdown-item" href="<%= signout_path %>"><%= t('dash.signout')%></a></li>
       </ul>
     </div>
 
-    <%= link_to 'Passa a Premium', payment_path(plan: 'premium'), class: 'nav-link' %>
+    <%= link_to t('dash.premium'), payment_path(plan: 'premium'), class: 'nav-link' %>
     
   </div>
 <% end %>
@@ -96,21 +105,21 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="newFolderModalLabel">Nuova Cartella</h5>
+        <h5 class="modal-title" id="newFolderModalLabel"><%= t('dash.new-folder')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="new-folder-form" action="<%= new_folder_path(folder_id: @current_folder) %>" method="post">
           <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <div class="mb-3">
-            <label for="folder-name" class="form-label">Nome della Cartella</label>
+            <label for="folder-name" class="form-label"><%= t('dash.new-folder-name')%></label>
             <input type="text" class="form-control" id="folder-name" name="folder_name" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();">Crea Cartella</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();"><%= t('dash.create-folder')%></button>
       </div>
     </div>
   </div>
@@ -121,21 +130,21 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="renameItemModalLabel">Rinomina File</h5>
+        <h5 class="modal-title" id="renameItemModalLabel"><%= t('dash.rename-file')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="rename-item-form">
           <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <div class="mb-3">
-            <label for="item-name" class="form-label">Nuovo Nome</label>
+            <label for="item-name" class="form-label"><%= t('dash.new-file-name')%></label>
             <input type="text" class="form-control" id="item-name" name="item_name" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal">Rinomina</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal"><%= t('dash.rename')%></button>
       </div>
     </div>
   </div>
@@ -146,7 +155,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="filePropertiesModalLabel">Proprietà File</h5>
+        <h5 class="modal-title" id="filePropertiesModalLabel"><%= t('dash.file-properties')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -162,7 +171,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div>
     </div>
   </div>
@@ -225,7 +234,7 @@
             <% end %>
           <% end %>
           <% if @current_folder != 'bin' %>
-            <%= link_to "Cestino", dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
+            <%= link_to t('dash.trash'), dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
           <% end %>
 
           <% @items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
