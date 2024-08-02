@@ -110,39 +110,27 @@ $(document).on('turbolinks:load', function() {
       dataType: 'json',
       success: function(data){
         // Populate the modal with the file details
-        $('#file-name').append(data.name);
-        $('#file-mime_type').append(data.mime_type);
-        $('#file-size').append(get_file_size(data.size));
-        $('#file-created_time').append(new Date(data.created_time).toLocaleString());
-        $('#file-modified_time').append(new Date(data.modified_time).toLocaleString());
+        $('#file-name').text(data.name);
+        $('#file-mime_type').text(data.mime_type);
+        $('#file-size').text(get_file_size(data.size));
+        $('#file-created_time').text(new Date(data.created_time).toLocaleString());
+        $('#file-modified_time').text(new Date(data.modified_time).toLocaleString());
         
         var ownersText = data.owners.map(owner => owner.display_name + " (" + owner.email + ")").join(", ");
-        $('#file-owners').append(ownersText);
+        $('#file-owners').text(ownersText);
         
         var permissionsText = data.permissions.map(permission => {
           return permission.role + " (" + permission.type + ")";
         }).join(", ");
         
-        $('#file-permissions').append(permissionsText);
-        $('#file-shared').append((data.shared ? "Yes" : "No"));
-
+        $('#file-permissions').text(permissionsText);
+        $('#file-shared').text((data.shared ? "Yes" : "No"));
         
         $('#filePropertiesModal').modal('show');
       }
     });
   });
 });
-
-function clearModal() {
-  $('#file-name').text('');
-  $('#file-mime_type').text('');
-  $('#file-size').text('');
-  $('#file-created_time').text('');
-  $('#file-modified_time').text('');
-  $('#file-owners').text('');
-  $('#file-permissions').text('');
-  $('#file-shared').text('');
-}
 
 
 document.addEventListener('DOMContentLoaded', function() {
