@@ -33,7 +33,6 @@ document.addEventListener("turbolinks:load", () => {
   document.getElementById('languageDropdown').addEventListener('click', function(event) {
     event.preventDefault();
     var locale = event.target.getAttribute('data-locale');
-
     // Make an AJAX request to set the locale
     fetch('/set_locale', {
       method: 'POST',

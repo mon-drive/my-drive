@@ -147,22 +147,22 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="filePropertiesModalLabel"><%= t('dash.file-properties')%></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearModal()"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <p id="file-name"></p>
-          <p id="file-mime_type"></p>
-          <p id="file-size"></p>
-          <p id="file-created_time"></p>
-          <p id="file-modified_time"></p>
-          <p id="file-owners"></p>
-          <p id="file-permissions"></p>
-          <p id="file-shared"></p>
+          <p id="file-name"><%= t('propModal.name')%>: </p>
+          <p id="file-mime_type"><%= t('propModal.file-type')%>: </p>
+          <p id="file-size"><%= t('propModal.size')%>: </p>
+          <p id="file-created_time"><%= t('propModal.creation-date')%>: </p>
+          <p id="file-modified_time"><%= t('propModal.modified-date')%>: </p>
+          <p id="file-owners"><%= t('propModal.owners')%>: </p>
+          <p id="file-permissions"><%= t('propModal.permissions')%>: </p>
+          <p id="file-shared"><%= t('propModal.shared')%>: </p>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        <button type="button" class="btn btn-primary" onclick="clearModal()" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div>
     </div>
   </div>
