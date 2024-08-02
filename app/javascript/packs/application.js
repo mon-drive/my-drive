@@ -30,24 +30,22 @@ ActiveStorage.start()
 Turbolinks.start()
 
 document.addEventListener("turbolinks:load", () => {
-  document.querySelectorAll('.dropdown-item').forEach(function (item) {
-    item.addEventListener('click', function (event) {
-      event.preventDefault();
-      var locale = event.target.getAttribute('data-locale');
+  document.getElementById('languageDropdown').addEventListener('click', function(event) {
+    event.preventDefault();
+    var locale = event.target.getAttribute('data-locale');
 
-      // Make an AJAX request to set the locale
-      fetch('/set_locale', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ locale: locale })
-      }).then(function (response) {
-        if (response.ok) {
-          location.reload(); // Reload the page to apply the new locale
-        }
-      });
+    // Make an AJAX request to set the locale
+    fetch('/set_locale', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ locale: locale })
+    }).then(function(response) {
+      if (response.ok) {
+        location.reload(); // Reload the page to apply the new locale
+      }
     });
   });
 });

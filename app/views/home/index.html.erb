@@ -2,15 +2,6 @@
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav">
     <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans')%></a>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <%= t('language')%>
-      </a>
-      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        <li><a href="#" class="dropdown-item" data-locale="en">English</a></li>
-        <li><a href="#" class="dropdown-item" data-locale="it">Italiano</a></li>
-      </ul>
-    </li>
   </div>
   <div class="navbar-nav ms-auto">
     <% if session[:user_id] %>

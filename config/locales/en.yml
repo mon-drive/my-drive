@@ -46,6 +46,7 @@ en:
     export: "Export"
     delete: "Delete"
     properties: "Properties"
+    open: "Open"
   propModal:
     name: "Name"
     file-type: "File type"

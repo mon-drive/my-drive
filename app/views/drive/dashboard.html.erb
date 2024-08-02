@@ -65,15 +65,6 @@
 <!--fine modal scan-->
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav w-100 d-flex justify-content-between align-items-center">
-     <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <%= t('language')%>
-      </a>
-      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        <li><a href="#" class="dropdown-item" data-locale="en">English</a></li>
-        <li><a href="#" class="dropdown-item" data-locale="it">Italiano</a></li>
-      </ul>
-    </li>
     <div class="d-flex flex-grow-1 justify-content-center">
       <form id="search-form" class="d-flex" action="<%= dashboard_path %>" method="get" style="width: 50%;">
         <div class="input-group">
@@ -319,7 +310,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu<%= item.id %>">
                   <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                    <li><%= link_to 'Apri', dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
+                    <li><%= link_to t('dash.open'), dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
                   <% end %>
                   
                   <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.rename')%></a></li>
