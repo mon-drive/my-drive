@@ -6,6 +6,7 @@ class DriveController < ApplicationController
 
     require 'httparty'
     require 'json'
+    require 'zip'
 
     def dashboard
       drive_service = initialize_drive_service
@@ -110,72 +111,112 @@ class DriveController < ApplicationController
       render json: file_properties
       rescue Google::Apis::ClientError => e
         render json: { error: e.message }, status: :unprocessable_entity
-  end
+    end
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
-      puts "avvio scan"
+      puts "Avvio scan"
       if file_id.nil?
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
       @current_folder = params[:folder_id] || 'root'
-      response = upload_scan(file_id)
-      puts response
-      #se la risposta è 200 allora il file è stato caricato correttamente
-      if response.code == 200
-        scan_id = JSON.parse(response.body)['data']['id']
-        analyze_response = analyze(scan_id)
 
-        while JSON.parse(analyze_response.body)['data']['attributes']['status'] == 'queued' || JSON.parse(analyze_response.body)['data']['attributes']['status'] == 'in_progress'
-          sleep(20)
-          analyze_response = analyze(scan_id)
-          puts JSON.parse(analyze_response.body)['data']['attributes']['status']
-        end
-        #se la risposta è 200 allora il file è stato analizzato correttamente
-        if analyze_response.code == 200
-          malicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['malicious']
-          #suspicious_count = JSON.parse(analyze_response.body)['data']['attributes']['stats']['suspicious']
-          #se il file è infetto non lo carica su google drive
-          if malicious_count > 0
-            puts malicious_count
-            redirect_to dashboard_path(folder_id: @current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
+      begin
+        file_path = params[:file].path
+        puts "File path: #{file_path}"
+
+        response_upload = upload_scan(file_path)
+
+        if response_upload['data'] && response_upload['data']['id']
+          scan_id = response_upload['data']['id']
+          puts "Scan ID received: #{scan_id}"
+
+          analyze_response = nil
+
+          5.times do  # Prova per un massimo di 5 volte
+
+            analyze_response = analyze(scan_id)
+            status = analyze_response['data']['attributes']['status']
+            puts "Analysis status: #{status}"
+            break if ['completed', 'failed'].include?(status)
+            sleep(20)  # Attendi 20 secondi tra ogni tentativo
+          end
+
+          if analyze_response['data'] && analyze_response['data']['attributes']
+            if analyze_response['data']['attributes']['status'] == 'completed'
+              malicious_count = analyze_response['data']['attributes']['stats']['malicious']
+              puts "Malicious count: #{malicious_count}"
+              if malicious_count > 0
+                redirect_to dashboard_path(folder_id: @current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
+              else
+                puts "File pulito"
+                upload(file_id)
+                redirect_to dashboard_path(folder_id: @current_folder), notice: "File caricato con successo"
+              end
+            else
+              redirect_to dashboard_path(folder_id: @current_folder), alert: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi."
+            end
           else
-            puts "file pulito"
-            upload(file_id)
-            redirect_to dashboard_path(folder_id: @current_folder), notice: "File caricato con successo"
+            error = analyze_response['error'] ? analyze_response['error']['message'] : "Errore sconosciuto durante l'analisi"
+            puts "Analysis error: #{error}"
+            redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
           end
         else
-          puts "errore analisi"
-          error = JSON.parse(analyze_response.body)['error']['message']
+          error = response_upload['error'] ? response_upload['error']['message'] : "Errore sconosciuto durante il caricamento"
+          puts "Upload error: #{error}"
           redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
         end
-      else
-        puts "errore caricamento"
-        error = JSON.parse(response.body)['error']['message']
-        redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
+      rescue => e
+        puts "Error in scan: #{e.message}"
+        puts e.backtrace.join("\n")
+        redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore durante la scansione: #{e.message}"
       end
-
     end
 
     #carica il file su virustotal
-    def upload_scan(file)
-      api_key=Figaro.env.VIRUSTOTAL_API_KEY
-      url="https://www.virustotal.com/api/v3/files"
-      HTTParty.post(url,
-        headers: { 'x-apikey' => api_key },
-        body: { file: file }
-      )
+    def upload_scan(file_path)
+      api_key = Figaro.env.VIRUSTOTAL_API_KEY
+      url = "https://www.virustotal.com/api/v3/files"
+
+      puts "Attempting to upload file: #{file_path}"
+      puts "File exists: #{File.exist?(file_path)}"
+      puts "File size: #{File.size(file_path)} bytes"
+
+      begin
+        file = File.open(file_path, 'rb')
+        puts "File opened successfully"
+
+        response = HTTParty.post(url,
+          headers: {
+            'x-apikey' => api_key
+          },
+          multipart: true,
+          body: {
+            file: file
+          },
+          debug_output: $stdout # This will log the full HTTP request and response
+        )
+
+        puts "VirusTotal API Response: #{response.body}"
+        JSON.parse(response.body)
+      rescue => e
+        puts "Error in upload_scan: #{e.message}"
+        puts e.backtrace.join("\n")
+        { 'error' => { 'message' => e.message } }
+      ensure
+        file.close if file
+      end
     end
 
-    #analizza il file su virustotal partendo dall'id ottenuto dopo l'upload su virustotal
     def analyze(id)
       api_key = Figaro.env.VIRUSTOTAL_API_KEY
       url = "https://www.virustotal.com/api/v3/analyses/#{id}"
-      HTTParty.get(url,
+      response = HTTParty.get(url,
         headers: { 'x-apikey' => api_key }
       )
+      JSON.parse(response.body)
     end
 
 
@@ -193,6 +234,92 @@ class DriveController < ApplicationController
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
       #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
+    end
+
+    def folder_scan
+      folder_name = params[:folder_name]
+      if folder_name.blank?
+        redirect_to dashboard_path, alert: "Nessuna cartella selezionata per il caricamento."
+        return
+      end
+
+      begin
+        puts "Files received: #{params[:files].inspect}"
+        zip_buffer = create_zip_from_folder(params[:files])
+        puts "Zip buffer created, size: #{zip_buffer.bytesize} bytes"
+
+        temp_file = Tempfile.new(['scan', '.zip'])
+        temp_file.binmode
+        temp_file.write(zip_buffer)
+        temp_file.rewind
+        puts "Temporary file created: #{temp_file.path}"
+
+        response_upload = upload_scan(temp_file.path)
+
+        if response_upload['data'] && response_upload['data']['id']
+          scan_id = response_upload['data']['id']
+          puts "Scan ID received: #{scan_id}"
+
+          analyze_response = nil
+
+          5.times do  # Prova per un massimo di 5 volte
+
+            analyze_response = analyze(scan_id)
+            status = analyze_response['data']['attributes']['status']
+            puts "Analysis status: #{status}"
+            break if ['completed', 'failed'].include?(status)
+            sleep(20)  # Attendi 20 secondi tra ogni tentativo
+          end
+
+          if analyze_response['data'] && analyze_response['data']['attributes']
+            if analyze_response['data']['attributes']['status'] == 'completed'
+              malicious_count = analyze_response['data']['attributes']['stats']['malicious']
+              puts "Malicious count: #{malicious_count}"
+              if malicious_count > 0
+                redirect_to dashboard_path, alert: "Cartella infetta, non è possibile caricarla. Risulta malevola su #{malicious_count} motori di ricerca."
+                return
+              else
+                upload_folder
+                redirect_to dashboard_path, notice: "Cartella caricata con successo"
+                return
+              end
+            else
+              redirect_to dashboard_path, alert: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi."
+              return
+            end
+          else
+            error = analyze_response['error'] ? analyze_response['error']['message'] : "Errore sconosciuto durante l'analisi"
+            puts "Analysis error: #{error}"
+            redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
+            return
+          end
+        else
+          error = response_upload['error'] ? response_upload['error']['message'] : "Errore sconosciuto durante il caricamento"
+          puts "Upload error: #{error}"
+          redirect_to dashboard_path, alert: "Si è verificato un errore: #{error}"
+          return
+        end
+      rescue => e
+        puts "Error in folder_scan: #{e.message}"
+        puts e.backtrace.join("\n")
+        redirect_to dashboard_path, alert: "Si è verificato un errore durante la scansione: #{e.message}"
+        return
+      ensure
+        temp_file.close
+        temp_file.unlink if temp_file
+        puts "Temporary file deleted"
+      end
+    end
+
+    def create_zip_from_folder(files)
+      Zip::OutputStream.write_buffer do |zip|
+        files.each do |file|
+          puts "Adding file to zip: #{file.original_filename}"
+          next unless file.respond_to?(:original_filename) && file.respond_to?(:read)
+          zip.put_next_entry(file.original_filename)
+          zip.write file.read
+        end
+      end.string
     end
 
     def upload_folder
@@ -224,7 +351,8 @@ class DriveController < ApplicationController
         drive_service.create_file(file_metadata, upload_source: file.tempfile, content_type: file.content_type)
       end
 
-      redirect_to dashboard_path, notice: 'Cartella caricata su Google Drive con successo'
+      #redirect_to dashboard_path, notice: 'Cartella caricata su Google Drive con successo'
+      #return
     end
 
     def create_folder
@@ -242,8 +370,10 @@ class DriveController < ApplicationController
       begin
         create_folder_in_drive(folder_name)
         redirect_to dashboard_path(folder_id: @current_folder), notice: "Cartella '#{folder_name}' creata con successo."
+        return
       rescue => e
         redirect_to dashboard_path, alert: "Si è verificato un errore durante la creazione della cartella: #{e.message}"
+        return
       end
     end
 

@@ -343,6 +343,7 @@ DEPENDENCIES
   puma (~> 5.0)
   rack-mini-profiler (~> 2.0)
   rails (~> 6.1.7, >= 6.1.7.7)
+  rubyzip
   selenium-webdriver (>= 4.0.0.rc1)
   sqlite3 (~> 1.4.2)
   tzinfo-data

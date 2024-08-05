@@ -49,6 +49,6 @@ Rails.application.routes.draw do
   get 'settings', to: 'drive#setting'
 
   # Route for upload folder
-  post 'upload_folder/:folder_id', to: 'drive#upload_folder', as: 'upload_folder'
+  post 'upload_folder/:folder_id', to: 'drive#folder_scan', as: 'upload_folder'
 
 end
