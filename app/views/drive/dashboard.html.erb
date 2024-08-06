@@ -315,7 +315,7 @@
                   
                   <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
                   <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
-                  <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Esporta</a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" id="export-<%= item.id %>">Esporta</a></li>
                   <li><%= form_with url: delete_item_path, method: :delete, local: true, class: 'd-inline' do %>
                       <%= hidden_field_tag :item_id, item.id %>
                       <%= hidden_field_tag :folder_id, @current_folder %>

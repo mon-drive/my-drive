@@ -232,3 +232,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+
+//export
+document.querySelectorAll('.export-item').forEach(item => {
+  item.addEventListener('click', function(event) {
+    event.preventDefault();
+    const fileId = this.getAttribute('data-id');
+
+    fetch('/export', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({ id: fileId })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `converted_file_${fileId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Si è verificato un errore durante la conversione del file.');
+    });
+  });
+});
+

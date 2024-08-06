@@ -7,6 +7,7 @@ class DriveController < ApplicationController
     require 'httparty'
     require 'json'
     require 'zip'
+    require 'cloudmersive-convert-api-client'
 
     def dashboard
       drive_service = initialize_drive_service
@@ -83,8 +84,60 @@ class DriveController < ApplicationController
     end
 
     def export
-      # Logica per esportare l'elemento
+      file_id = params[:id]
+      drive_service = initialize_drive_service
+
+      begin
+        # Recupera il file da Google Drive
+        file_metadata = drive_service.get_file(file_id, fields: 'id, name, mimeType')
+        file_name = file_metadata.name
+        file_content = StringIO.new
+        drive_service.get_file(file_id, download_dest: file_content)
+
+        # Scrivi il file scaricato su disco locale
+        local_file_path = Rails.root.join('tmp', file_name)
+        File.open(local_file_path, 'wb') do |file|
+          file.write(file_content.string)
+        end
+
+        # Configura Cloudmersive
+        CloudmersiveConvertApiClient.configure do |config|
+          config.api_key['Apikey'] = Figaro.env.CLOUDMERSIVE_API_KEY
+        end
+
+        # Converti il documento in PDF usando HTTParty
+        api_key = Figaro.env.CLOUDMERSIVE_API_KEY
+        response = HTTParty.post(
+          'https://api.cloudmersive.com/convert/autodetect/to/pdf',
+          headers: { 'Apikey' => api_key },
+          body: { inputFile: File.new(local_file_path) }
+        )
+
+        if response.success?
+          # Genera un nome file unico per il PDF
+          pdf_file_name = "#{File.basename(file_name, '.*')}_converted.pdf"
+
+          # Invia il file PDF al browser
+          send_data(
+            response.body,
+            filename: pdf_file_name,
+            type: 'application/pdf',
+            disposition: 'attachment'
+          )
+        else
+          render json: { error: "Conversione fallita: #{response.code} #{response.message}" }, status: :unprocessable_entity
+        end
+
+      rescue Google::Apis::ClientError => e
+        render json: { error: "Errore Google Drive: #{e.message}" }, status: :bad_request
+      rescue => e
+        render json: { error: "Errore imprevisto: #{e.message}" }, status: :internal_server_error
+      ensure
+        # Pulisci i file temporanei
+        File.delete(local_file_path) if File.exist?(local_file_path)
+      end
     end
+
 
     def properties
       #initialize drive service

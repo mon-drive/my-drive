@@ -45,6 +45,9 @@ Rails.application.routes.draw do
   # Route for rename item
   post 'share', to: 'drive#share'
 
+  # Route for export item
+  post 'export', to: 'drive#export'
+
   # Settings route
   get 'settings', to: 'drive#setting'
 
