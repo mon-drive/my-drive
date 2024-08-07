@@ -9,7 +9,7 @@
         <%= notice %>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div>
     </div>
   </div>
@@ -26,14 +26,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center" style="color: red;">Attenzione</h5>
+        <h5 class="modal-title text-center" style="color: red;"><%= t('dash.warning')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <%= alert %>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div> 
     </div>
   </div>
@@ -49,14 +49,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center">Analisi antivurs in corso può richiedere un pò di tempo:</h5>
+        <h5 class="modal-title text-center"><%= t('dash.virus-analysis')%></h5>
       </div>
       <div class="modal-body">
         <div class="text-center">
           <div class="spinner-border" role="status" style="color: red;">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden"><%= t('dash.loading')%></span>
           </div>
-          <p class="mt-2">Scansione in corso...</p>
+          <p class="mt-2"><%= t('dash.virus-scan')%></p>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
           <span class="input-group-text" id="search-icon">
             <i class="bi bi-search"></i>
           </span>
-          <input id="search-input" class="form-control" type="search" placeholder="Cerca" name="search" aria-label="Search">
+          <input id="search-input" class="form-control" type="search" placeholder="search" name="search" aria-label="Search">
         </div>
       </form>
     </div>
@@ -81,12 +81,12 @@
         <i class="bi bi-person-circle"></i>
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item" href="<%= settings_path %>">Impostazioni</a></li>
-        <li><a class="dropdown-item" href="<%= signout_path %>">Esci</a></li>
+        <li><a class="dropdown-item" href="<%= settings_path %>"><%= t('dash.settings')%></a></li>
+        <li><a class="dropdown-item" href="<%= signout_path %>"><%= t('dash.signout')%></a></li>
       </ul>
     </div>
 
-    <%= link_to 'Passa a Premium', payment_path(plan: 'premium'), class: 'nav-link' %>
+    <%= link_to t('dash.premium'), payment_path(plan: 'premium'), class: 'nav-link' %>
     
   </div>
 <% end %>
@@ -96,21 +96,21 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="newFolderModalLabel">Nuova Cartella</h5>
+        <h5 class="modal-title" id="newFolderModalLabel"><%= t('dash.new-folder')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="new-folder-form" action="<%= new_folder_path(folder_id: @current_folder) %>" method="post">
           <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <div class="mb-3">
-            <label for="folder-name" class="form-label">Nome della Cartella</label>
+            <label for="folder-name" class="form-label"><%= t('dash.new-folder-name')%></label>
             <input type="text" class="form-control" id="folder-name" name="folder_name" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();">Crea Cartella</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('new-folder-form').submit();"><%= t('dash.create-folder')%></button>
       </div>
     </div>
   </div>
@@ -121,21 +121,21 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="renameItemModalLabel">Rinomina File</h5>
+        <h5 class="modal-title" id="renameItemModalLabel"><%= t('dash.rename-file')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="rename-item-form">
           <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <div class="mb-3">
-            <label for="item-name" class="form-label">Nuovo Nome</label>
+            <label for="item-name" class="form-label"><%= t('dash.new-file-name')%></label>
             <input type="text" class="form-control" id="item-name" name="item_name" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal">Rinomina</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        <button type="button" class="btn btn-primary" id="save-changes" data-bs-dismiss="modal"><%= t('dash.rename')%></button>
       </div>
     </div>
   </div>
@@ -146,23 +146,23 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="filePropertiesModalLabel">Proprietà File</h5>
+        <h5 class="modal-title" id="filePropertiesModalLabel"><%= t('dash.file-properties')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <p id="file-name"></p>
-          <p id="file-mime_type"></p>
-          <p id="file-size"></p>
-          <p id="file-created_time"></p>
-          <p id="file-modified_time"></p>
-          <p id="file-owners"></p>
-          <p id="file-permissions"></p>
-          <p id="file-shared"></p>
+          <p id="file-name-text"><%= t('propModal.name')%>: <span id="file-name"></span></p>
+          <p id="file-mime_type-text"><%= t('propModal.file-type')%>: <span id="file-mime_type"></span></p>
+          <p id="file-size-text"><%= t('propModal.size')%>: <span id="file-size"></span></p>
+          <p id="file-created_time-text"><%= t('propModal.creation-date')%>: <span id="file-created_time"></span></p>
+          <p id="file-modified_time-text"><%= t('propModal.modified-date')%>: <span id="file-modified_time"></span></p>
+          <p id="file-owners-text"><%= t('propModal.owners')%>: <span id="file-owners"></span></p>
+          <p id="file-permissions-text"><%= t('propModal.permissions')%>: <span id="file-permissions"></span></p>
+          <p id="file-shared-text"><%= t('propModal.shared')%>: <span id="file-shared"></span></p>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
       </div>
     </div>
   </div>
@@ -173,7 +173,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="shareItemModalLabel">Condividi File</h5>
+        <h5 class="modal-title" id="shareItemModalLabel"><%= t('dash.share-file')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -184,26 +184,26 @@
             <input type="email" class="form-control" id="share-email" name="email" required>
           </div>
           <div class="mb-3">
-            <label for="share-permission" class="form-label">Permessi</label>
+            <label for="share-permission" class="form-label"><%= t('dash.permissions')%></label>
             <select class="form-control" id="share-permission" name="permission" required>
-              <option value="writer">Editor</option>
-              <option value="commenter">Commenter</option>
-              <option value="reader">Viewer</option>
+              <option value="writer"><%= t('dash.editor')%></option>
+              <option value="commenter"><%= t('dash.commenter')%></option>
+              <option value="reader"><%= t('dash.viewer')%></option>
             </select>
           </div>
           <div class="mb-3">
-            <label for="share-notify" class="form-label">Notificare la persona</label>
+            <label for="share-notify" class="form-label"><%= t('dash.notify')%></label>
             <input type="checkbox" class="form-check-input" id="share-notify" name="notify" checked>
           </div>
           <div class="mb-3">
-            <label for="share-message" class="form-label">Messaggio</label>
+            <label for="share-message" class="form-label"><%= t('dash.message')%></label>
             <textarea class="form-control" id="share-message" name="message" rows="3"></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-        <button type="button" class="btn btn-primary" id="share-file" data-bs-dismiss="modal">Condividi</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        <button type="button" class="btn btn-primary" id="share-file" data-bs-dismiss="modal"><%= t('dash.share')%></button>
       </div>
     </div>
   </div>
@@ -225,7 +225,7 @@
             <% end %>
           <% end %>
           <% if @current_folder != 'bin' %>
-            <%= link_to "Cestino", dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
+            <%= link_to t('dash.trash'), dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
           <% end %>
 
           <% @items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
@@ -266,13 +266,13 @@
           <i class="fas fa-plus text-dark"></i>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal">Nuova Cartella</a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal"><%= t('dash.new-folder')%></a></li>
           <li>
             <form id="upload-form" action="<%= upload_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
               <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
               <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
             </form>
-            <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;">Carica File</a>
+            <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;"><%= t('dash.upload-file')%></a>
           </li>
           <li>
             <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
@@ -280,7 +280,7 @@
               <%= hidden_field_tag :folder_name, '' %>
               <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect(); apri_modal('md_scan');">
             </form>
-            <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;">Carica Cartella</a>
+            <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;"><%= t('dash.upload-folder')%></a>
           </li>
         </ul>
       </div>
@@ -310,19 +310,19 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu<%= item.id %>">
                   <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                    <li><%= link_to 'Apri', dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
+                    <li><%= link_to t('dash.open'), dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
                   <% end %>
                   
-                  <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
-                  <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
-                  <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Esporta</a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.rename')%></a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.share')%></a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.export')%></a></li>
                   <li><%= form_with url: delete_item_path, method: :delete, local: true, class: 'd-inline' do %>
                       <%= hidden_field_tag :item_id, item.id %>
                       <%= hidden_field_tag :folder_id, @current_folder %>
-                      <button type="submit" class="dropdown-item">Elimina</button>
+                      <button type="submit" class="dropdown-item"><%= t('dash.delete')%></button>
                       <% end %>
                   </li>
-                  <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Proprietà</a></li>
+                  <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.properties')%></a></li>
                 </ul>
               </div>
             </div>

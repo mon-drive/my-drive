@@ -21,6 +21,13 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <%= t('language')%>
+          </a>
+          <ul class="dropdown-menu" id="languageDropdown" aria-labelledby="navbarDropdown">
+            <li><a href="#" class="dropdown-item" data-locale="en">English</a></li>
+            <li><a href="#" class="dropdown-item" data-locale="it">Italiano</a></li>
+          </ul>
         <div class="collapse navbar-collapse" id="navbarNav">
           <%= yield :navbar_custom_content %>
         </div>

@@ -51,4 +51,7 @@ Rails.application.routes.draw do
   # Route for upload folder
   post 'upload_folder/:folder_id', to: 'drive#folder_scan', as: 'upload_folder'
 
+  # Route for changing locale
+  post 'set_locale', to: 'application#change_locale'
+
 end

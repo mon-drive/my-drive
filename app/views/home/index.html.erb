@@ -1,17 +1,14 @@
 
 <% content_for :navbar_custom_content do %>
   <div class="navbar-nav">
-    <a class="nav-link" href="<%= pricing_path %>">Plans</a>
-    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-      Language
-    </a>
+    <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans')%></a>
   </div>
   <div class="navbar-nav ms-auto">
     <% if session[:user_id] %>
-      <a class="nav-link" href="<%= dashboard_path %>">Accedi a Drive</a>
+      <a class="nav-link" href="<%= dashboard_path %>"><%= t('home.access-drive')%></a>
     <%end%>
     <% if session[:user_id] %>
-      <a class="nav-link" href="<%= signout_path %>">Logout</a>
+      <a class="nav-link" href="<%= signout_path %>"><%= t('home.signout')%></a>
     <% else %>
       <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
     <% end %>
@@ -28,19 +25,17 @@
  <div class="container-fluid">
     <div class="row">
       <div class="col">
-        <h1 class="text-center">SCEGLI L'ARCHIVIO GIUSTO PER LE TUE ESIGENZE</h1>
+        <h1 class="text-center"><%= t('home.head-title')%></h1>
       </div>
     </div>
     <div class="row d-flex justify-content-center">
       <div class="col-4" id="sideBar">
         <div class="row">
-          <p class="text-center">
-            Archivia i tuoi file in modo sicuro e convertili in uno dei molti formati supportati. I file sono sempre controllati con VirusTotal e i pagamenti sono gestiti tramite Stripe.
-          </p>
+          <p class="text-center"><%= t('home.side-text')%></p>
         </div>
         <div class="row">
           <% if session[:user_id] %>
-            <button class="btn btn-primary btn-lg btn-block" id="driveButton" onclick="window.location.href='<%= dashboard_path %>';">Accedi a Drive</button>
+            <button class="btn btn-primary btn-lg btn-block" id="driveButton" onclick="window.location.href='<%= dashboard_path %>';"><%= t('home.access-drive')%></button>
           <% end %>
         </div>
       </div>
@@ -68,8 +63,8 @@
               <img src="<%= asset_path('drive.jpg') %>" alt="Image 1">
             </div>
             <div class="left-card-content">
-              <h5 class="card-title">Archiviazione</h5>
-              <p class="card-text">Gestisci i tuoi file con facilità su google drive.</p>
+              <h5 class="card-title"><%= t('home.first-card-title')%></h5>
+              <p class="card-text"><%= t('home.first-card-text')%></p>
             </div>
         </div>
       </div>
@@ -79,8 +74,8 @@
       <div class="card-container">
         <div class="right-card">
             <div class="right-card-content">
-              <h5 class="card-title">Conversione</h5>
-              <p class="card-text">Converti i tuoi file in uno dei molti formati supportati.</p>
+              <h5 class="card-title"><%= t('home.second-card-title')%></h5>
+              <p class="card-text"><%= t('home.second-card-text')%></p>
             </div>
             <div class="right-card-image">
               <img src="<%= asset_path('conversion.jpg') %>" alt="Image 1">
@@ -96,8 +91,8 @@
               <img src="<%= asset_path('virustotal.png') %>" alt="Image 1">
             </div>
             <div class="left-card-content">
-              <h5 class="card-title">Sicurezza dei file</h5>
-              <p class="card-text">I file sono sempre controllati con VirusTotal.</p>
+              <h5 class="card-title"><%= t('home.third-card-title')%></h5>
+              <p class="card-text"><%= t('home.third-card-text')%></p>
             </div>
         </div>
       </div>
@@ -107,8 +102,8 @@
       <div class="card-container">
         <div class="right-card">
             <div class="right-card-content">
-              <h5 class="card-title">Pagamenti sicuri</h5>
-              <p class="card-text">Tutti i pagamenti sono gestiti tramite Stripe.</p>
+              <h5 class="card-title"><%= t('home.fourth-card-title')%></h5>
+              <p class="card-text"><%= t('home.fourth-card-text')%></p>
             </div>
             <div class="right-card-image">
               <img src="<%= asset_path('stripe.png') %>" alt="Image 1">

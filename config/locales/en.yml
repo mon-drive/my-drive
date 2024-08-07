@@ -1,33 +1,58 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t 'hello'
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t('hello') %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# The following keys must be escaped otherwise they will not be retrieved by
-# the default I18n backend:
-#
-# true, false, on, off, yes, no
-#
-# Instead, surround them with single quotes.
-#
-# en:
-#   'true': 'foo'
-#
-# To learn more, please read the Rails Internationalization guide
-# available at https://guides.rubyonrails.org/i18n.html.
-
 en:
-  hello: "Hello world"
+  language: "Language"
+  home:
+    plans: "Plans"
+    access-drive: "Access Drive"
+    signout: "Log Out"
+    head-title: "CHOOSE THE RIGHT ARCHIVE FOR YOUR NEEDS"
+    side-text: "Store your files in a safe way and convert them in one of the mamny supported formats. Files are checked with VirusTotal and payments are managed by Stripe"
+    first-card-title: "Store"
+    first-card-text: "Manage your files with ease thanks to Google Drive."
+    second-card-title: "Convert"
+    second-card-text: "Convert your files to one of the many supported types."
+    third-card-title: "File security"
+    third-card-text: "Files are always checked with VirusTotal."
+    fourth-card-title: "Secure payments"
+    fourth-card-text: "All payments are handled through Stripe."
+  dash:
+    close: "Close"
+    search: "Search"
+    trash: "Trash"
+    warning: "Warning"
+    virus-analysis: "Antivirus analysis started, it may take some time"
+    virus-scan: "Scan started..."
+    loading: "Loading..."
+    settings: "Settings"
+    signout: "Sign Out"
+    premium: "Get Premium"
+    new-folder: "New Folder"
+    new-folder-name: "Folder name"
+    create-folder: "Create Folder"
+    rename-file: "Rename File"
+    new-file-name: "New Name"
+    rename: "Rename"
+    file-properties: "File Properties"
+    share-file: "Share File"
+    permissions: "Permissions"
+    commenter: "Commenter"
+    viewer: "Viewer"
+    editor: "Editor"
+    notify: "Notify the other user"
+    message: "Message"
+    share: "Share"
+    upload-file: "Upload File"
+    upload-folder: "Upload Folder"
+    rename: "Rename"
+    export: "Export"
+    delete: "Delete"
+    properties: "Properties"
+    open: "Open"
+  propModal:
+    name: "Name"
+    file-type: "File type"
+    size: "Size"
+    creation-date: "Creation date"
+    modified-date: "Last modified date"
+    owners: "Owners"
+    permissions: "Permissions"
+    shared: "Shared"

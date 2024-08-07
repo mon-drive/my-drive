@@ -110,22 +110,22 @@ $(document).on('turbolinks:load', function() {
       dataType: 'json',
       success: function(data){
         // Populate the modal with the file details
-        $('#file-name').text("Nome: " + data.name);
-        $('#file-mime_type').text("Tipo di file: " + data.mime_type);
-        $('#file-size').text("Dimensione: " + get_file_size(data.size));
-        $('#file-created_time').text("Data di creazione: " + new Date(data.created_time).toLocaleString());
-        $('#file-modified_time').text("Data di modifica: " + new Date(data.modified_time).toLocaleString());
+        $('#file-name').text(data.name);
+        $('#file-mime_type').text(data.mime_type);
+        $('#file-size').text(get_file_size(data.size));
+        $('#file-created_time').text(new Date(data.created_time).toLocaleString());
+        $('#file-modified_time').text(new Date(data.modified_time).toLocaleString());
         
         var ownersText = data.owners.map(owner => owner.display_name + " (" + owner.email + ")").join(", ");
-        $('#file-owners').text("Owners: " + ownersText);
+        $('#file-owners').text(ownersText);
         
         var permissionsText = data.permissions.map(permission => {
           return permission.role + " (" + permission.type + ")";
         }).join(", ");
         
-        $('#file-permissions').text("Permissions: " + permissionsText);
-        $('#file-shared').text("Shared: " + (data.shared ? "Yes" : "No"));
-
+        $('#file-permissions').text(permissionsText);
+        $('#file-shared').text((data.shared ? "Yes" : "No"));
+        
         $('#filePropertiesModal').modal('show');
       }
     });
