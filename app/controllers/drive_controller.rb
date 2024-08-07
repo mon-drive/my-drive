@@ -134,7 +134,7 @@ class DriveController < ApplicationController
           puts "Scan ID received: #{scan_id}"
 
           analyze_response = nil
-
+          sleep(5)
           5.times do  # Prova per un massimo di 5 volte
 
             analyze_response = analyze(scan_id)
@@ -261,7 +261,7 @@ class DriveController < ApplicationController
           puts "Scan ID received: #{scan_id}"
 
           analyze_response = nil
-
+          sleep(5)
           5.times do  # Prova per un massimo di 5 volte
 
             analyze_response = analyze(scan_id)
