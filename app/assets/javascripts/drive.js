@@ -252,14 +252,20 @@ document.querySelectorAll('.export-item').forEach(item => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      return response.blob();
+      const fileName = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '').split(';')[0];
+      console.log('File name:', fileName);
+      console.log('----------------------------------');
+      console.log('Response:', response);
+      console.log('----------------------------------');
+      console.log(response.filename);
+      return response.blob().then(blob => ({ blob, fileName }));
     })
-    .then(blob => {
+    .then(({ blob, fileName }) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `converted_file_${fileId}.pdf`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
