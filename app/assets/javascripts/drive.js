@@ -91,15 +91,15 @@ $(document).on('turbolinks:load', function() {
 
   });
 
-  // Share
-  $('.share-item').on('click', function() {
-    // Implementa la logica di condivisione
-  });
+  // // Share
+  // $('.share-item').on('click', function() {
+  //   // Implementa la logica di condivisione
+  // });
 
-  // Export
-  $('.export-item').on('click', function() {
-    // Implementa la logica di esportazione
-  });
+  // // Export
+  // $('.export-item').on('click', function() {
+  //   // Implementa la logica di esportazione
+  // });
 
   // Properties
   $('.properties-item').on('click', function() {
@@ -234,10 +234,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-//export
-document.querySelectorAll('.export-item').forEach(item => {
+//export file
+document.querySelectorAll('.export-as-pdf').forEach(item => {
   item.addEventListener('click', function(event) {
     event.preventDefault();
+    apri_modal('md_export');
     const fileId = this.getAttribute('data-id');
 
     fetch('/export', {
@@ -252,12 +253,10 @@ document.querySelectorAll('.export-item').forEach(item => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
+      const modal = document.getElementById('md_export');
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
       const fileName = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '').split(';')[0];
-      console.log('File name:', fileName);
-      console.log('----------------------------------');
-      console.log('Response:', response);
-      console.log('----------------------------------');
-      console.log(response.filename);
       return response.blob().then(blob => ({ blob, fileName }));
     })
     .then(({ blob, fileName }) => {
@@ -269,6 +268,7 @@ document.querySelectorAll('.export-item').forEach(item => {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+
     })
     .catch(error => {
       console.error('Error:', error);
@@ -277,3 +277,51 @@ document.querySelectorAll('.export-item').forEach(item => {
   });
 });
 
+//export folder
+document.querySelectorAll('.export-folder').forEach(item => {
+  item.addEventListener('click', function(event) {
+    event.preventDefault();
+    alert("DA IMPLEMENTARE");
+  });
+});
+
+$(document).ready(function() {
+  $('.dropdown-submenu > a').on('click', function(e) {
+    var $submenu = $(this).next('.submenu');
+    $('.dropdown-submenu .submenu').not($submenu).hide();
+    
+    // Rimuovi le classi esistenti prima di riposizionare
+    $submenu.removeClass('submenu-left submenu-right');
+    
+    // Calcola la posizione
+    var submenuWidth = $submenu.outerWidth();
+    var distanceToRight = $(window).width() - ($(this).offset().left + $(this).outerWidth());
+    
+    if (distanceToRight < submenuWidth) {
+      // Non c'è abbastanza spazio a destra, posiziona a sinistra
+      $submenu.addClass('submenu-left');
+    } else {
+      // C'è abbastanza spazio a destra
+      $submenu.addClass('submenu-right');
+    }
+    
+    $submenu.toggle();
+    
+    // Correggi la posizione verticale del sottomenu
+    var topPosition = $(this).position().top;
+    $submenu.css('top', topPosition);
+    
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  $('.dropdown').on('hidden.bs.dropdown', function () {
+    $('.dropdown-submenu .submenu').hide();
+  });
+
+  $(document).on('click', function (e) {
+    if (!$(e.target).closest('.dropdown-submenu').length) {
+      $('.dropdown-submenu .submenu').hide();
+    }
+  });
+});
