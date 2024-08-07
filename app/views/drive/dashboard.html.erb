@@ -278,7 +278,7 @@
             <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
               <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
               <%= hidden_field_tag :folder_name, '' %>
-              <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect();">
+              <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect(); apri_modal('md_scan');">
             </form>
             <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;"><%= t('dash.upload-folder')%></a>
           </li>
