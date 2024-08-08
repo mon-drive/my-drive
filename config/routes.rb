@@ -51,6 +51,9 @@ Rails.application.routes.draw do
   # Settings route
   get 'settings', to: 'drive#setting'
 
+  # Route for extection
+  get 'extension', to: 'drive#extension'
+
   # Route for upload folder
   post 'upload_folder/:folder_id', to: 'drive#folder_scan', as: 'upload_folder'
 

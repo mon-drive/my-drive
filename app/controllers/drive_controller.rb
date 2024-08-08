@@ -85,7 +85,19 @@ class DriveController < ApplicationController
 
     def export
       file_id = params[:id]
+      type = params[:type]
+      puts "\n\n\n\n"
+      puts "File ID: #{file_id}"
+      puts "Type: #{type}"
+      puts "\n\n\n\n"
       drive_service = initialize_drive_service
+
+      if type =='SELF'
+        puts"/n/n/n/n"
+        puts "SELF"
+        puts"/n/n/n/n"
+        return;
+      end
 
       begin
         # Recupera il file da Google Drive
@@ -166,6 +178,27 @@ class DriveController < ApplicationController
         render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def extension
+      #initialize drive service
+      drive_service = initialize_drive_service
+
+      #get file id
+      file_id = params[:id]
+
+      #save file data
+      file = drive_service.get_file(file_id, fields: 'mime_type')
+      puts "/n/n/n/n"
+      puts file.mime_type
+      puts "/n/n/n/n"
+      # Render the response as JSON
+      file_properties = {
+        type: file.mime_type,
+      }
+      render json: file_properties
+      rescue Google::Apis::ClientError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
@@ -188,13 +221,13 @@ class DriveController < ApplicationController
 
           analyze_response = nil
 
-          5.times do  # Prova per un massimo di 5 volte
+          4.times do  # Prova per un massimo di 5 volte
 
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             puts "Analysis status: #{status}"
             break if ['completed', 'failed'].include?(status)
-            sleep(20)  # Attendi 20 secondi tra ogni tentativo
+            sleep(40)  # Attendi 20 secondi tra ogni tentativo
           end
 
           if analyze_response['data'] && analyze_response['data']['attributes']
