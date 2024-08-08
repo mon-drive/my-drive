@@ -268,6 +268,15 @@ class DriveController < ApplicationController
       folder_id = params[:folder_id] # Recupera il parametro folder_id
 
       begin
+        if params[:folder_id] == 'bin'
+          drive_service.delete_file(item_id)
+          respond_to do |format|
+            format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento eliminato con successo.' }
+            format.json { render json: { message: 'Elemento eliminato con successo.' }, status: :ok }
+          end
+          return
+        end
+
         file_metadata = {
           trashed: true
         }
@@ -282,6 +291,17 @@ class DriveController < ApplicationController
           format.json { render json: { error: "Errore nell'eliminazione dell'elemento: #{e.message}" }, status: :unprocessable_entity }
         end
       end
+    end
+
+    def empty_bin
+      drive_service = initialize_drive_service
+      items = get_files_and_folders_in_bin(drive_service)
+
+      items.each do |item|
+        drive_service.delete_file(item.id)
+      end
+
+      redirect_to dashboard_path(folder_id: 'bin'), notice: 'Cestino svuotato con successo.'
     end
 
     private

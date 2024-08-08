@@ -213,6 +213,13 @@
 <div class="container-fluid">
   <div class="row">
   <div class="col-md-3">
+    <% if @current_folder == 'bin' %>
+      <%= form_with url: empty_bin_path, method: :post, local: true do %>
+        <div class="d-flex justify-content-center mt-3">
+          <%= button_to 'Svuota Cestino', empty_bin_path, method: :post, class: 'btn btn-danger', data: { confirm: 'Sei sicuro di voler svuotare il cestino?' } %>
+        </div>
+      <% end %>
+    <% end %>
         <div id="folderTree" class="list-group">
           <% if @current_folder != 'root' %>
             <% if @parent_folder and @parent_folder.name != @root_folder_name %>
