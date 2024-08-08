@@ -268,7 +268,10 @@ class DriveController < ApplicationController
       folder_id = params[:folder_id] # Recupera il parametro folder_id
 
       begin
-        drive_service.delete_file(item_id)
+        file_metadata = {
+          trashed: true
+        }
+        drive_service.update_file(item_id, file_metadata, fields: 'trashed')
         respond_to do |format|
           format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento eliminato con successo.' }
           format.json { render json: { message: 'Elemento eliminato con successo.' }, status: :ok }
