@@ -68,7 +68,3 @@ gem 'popper_js', '~> 2.11', '>= 2.11.8'
 # VirusTotal
 gem 'httparty'
 gem 'rubyzip'
-
-
-#conversioni
-gem 'cloudmersive-convert-api-client'

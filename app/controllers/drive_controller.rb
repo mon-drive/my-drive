@@ -243,6 +243,71 @@ class DriveController < ApplicationController
         render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def export_folder
+      folder_id = params[:id]
+      puts "Folder ID: #{folder_id}"
+
+      # Autenticazione con Google Drive API
+      drive_service = initialize_drive_service
+      puts "Drive service initialized"
+
+      # Crea una nuova cartella temporanea per l'esportazione
+      temp_dir = Dir.mktmpdir
+      puts "Temporary directory created: #{temp_dir}"
+
+      # Funzione ricorsiva per scaricare i file e le sottocartelle
+      def download_files_from_folder(service, folder_id, parent_path)
+        # Recupera i file e le cartelle nella cartella specificata
+        drive_files = get_files_and_folders_in_folder(service, folder_id)
+
+        drive_files.each do |file|
+          if file.mime_type == 'application/vnd.google-apps.folder'
+            # Crea una nuova cartella nel percorso temporaneo per la sottocartella
+            new_folder_path = File.join(parent_path, file.name)
+            FileUtils.mkdir_p(new_folder_path)
+            puts "Created directory: #{new_folder_path}"
+
+            # Scarica i file all'interno della sottocartella
+            download_files_from_folder(service, file.id, new_folder_path)
+          else
+            # Scarica i file all'interno della cartella corrente
+            file_path = File.join(parent_path, file.name)
+            puts "Downloading file: #{file.name}"
+            begin
+              service.get_file(file.id, download_dest: file_path)
+            rescue Google::Apis::ClientError => e
+              puts "Error downloading file: #{file.name} - #{e.message}"
+              next
+            end
+          end
+        end
+      end
+
+      # Avvia il download dei file dalla cartella principale
+      download_files_from_folder(drive_service, folder_id, temp_dir)
+
+      # Crea il file ZIP nella cartella temporanea
+      zip_filename = "#{drive_service.get_file(folder_id).name}.zip"
+      zip_filepath = File.join(temp_dir, zip_filename)
+      puts "Creating ZIP file: #{zip_filepath}"
+
+      # Aggiunta dei file allo ZIP mantenendo la struttura delle cartelle
+      Zip::File.open(zip_filepath, Zip::File::CREATE) do |zipfile|
+        Dir.glob("#{temp_dir}/**/*").each do |file|
+          unless File.directory?(file)
+            zipfile.add(file.sub("#{temp_dir}/", ''), file)
+          end
+        end
+      end
+
+      # Invia il file ZIP come risposta
+      send_data(File.read(zip_filepath), type: 'application/zip', filename: zip_filename)
+    ensure
+      # Rimuovi la cartella temporanea
+      FileUtils.remove_entry(temp_dir) if temp_dir
+    end
+
+
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
