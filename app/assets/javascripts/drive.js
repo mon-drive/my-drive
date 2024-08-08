@@ -243,8 +243,7 @@ function handleExportAsPDF() {
       const fileId = this.getAttribute('data-id');
       const type = this.getAttribute('type');
 
-      console.log('File ID:', fileId);
-      console.log('Type:', type);
+
 
       fetch('/export', {
         method: 'POST',
@@ -309,6 +308,7 @@ $(document).ready(function() {
             '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">DOCX</a></li>' +
             '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
           );
+          break;
         case 'vnd.oasis.opendocument.text':
           $submenu.html(
             '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">ODT</a></li>' +
@@ -346,7 +346,7 @@ $(document).ready(function() {
         case 'png':
           $submenu.html(
             '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">PNG</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="jpeg">JPEG</a></li>'+
+            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="JPEG">JPEG</a></li>'+
             '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
           );
           break;
@@ -386,7 +386,6 @@ $(document).ready(function() {
       .then(response => response.json())
       .then(data => {
         const ext = data.type.split('/')[1];
-        console.log(ext);
         updateSubmenu(ext);
       })
       .catch(error => {

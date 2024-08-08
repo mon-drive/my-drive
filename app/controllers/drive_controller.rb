@@ -86,16 +86,12 @@ class DriveController < ApplicationController
     def export
       file_id = params[:id]
       type = params[:type]
-      puts "\n\n\n\n"
-      puts "File ID: #{file_id}"
-      puts "Type: #{type}"
-      puts "\n\n\n\n"
       drive_service = initialize_drive_service
 
+
       if type =='SELF'
-        puts"/n/n/n/n"
-        puts "SELF"
-        puts"/n/n/n/n"
+        #fai funzione per scaricare un file
+        download_file(drive_service, file_id)
         return;
       end
 
@@ -117,23 +113,54 @@ class DriveController < ApplicationController
           config.api_key['Apikey'] = Figaro.env.CLOUDMERSIVE_API_KEY
         end
 
-        # Converti il documento in PDF usando HTTParty
+
         api_key = Figaro.env.CLOUDMERSIVE_API_KEY
+
+        url = case type
+        when 'PDF'
+          "https://api.cloudmersive.com/convert/autodetect/to/pdf"
+        when 'DOCX'
+          'https://api.cloudmersive.com/convert/odt/to/docx'
+        when 'XLSX'
+          'https://api.cloudmersive.com/convert/ods/to/xlsx'
+        when 'PPTX'
+          'https://api.cloudmersive.com/convert/odp/to/pptx'
+        when 'JPEG'
+          'https://api.cloudmersive.com/convert/autodetect/to/jpg'
+        when 'PNG'
+          'https://api.cloudmersive.com/convert/autodetect/to/png'
+        end
+
+
+        # Esegui la richiesta HTTP al servizio di conversione
         response = HTTParty.post(
-          'https://api.cloudmersive.com/convert/autodetect/to/pdf',
+          url,
           headers: { 'Apikey' => api_key },
           body: { inputFile: File.new(local_file_path) }
         )
 
         if response.success?
-          # Genera un nome file unico per il PDF
-          pdf_file_name = "#{File.basename(file_name, '.*')}_converted.pdf"
+          # Genera un nome file unico basato sul tipo di file richiesto
+          converted_file_name = case type
+          when 'PDF'
+            "#{File.basename(file_name, '.*')}_converted.pdf"
+          when 'DOCX'
+            "#{File.basename(file_name, '.*')}_converted.docx"
+          when 'XLSX'
+            "#{File.basename(file_name, '.*')}_converted.xlsx"
+          when 'PPTX'
+            "#{File.basename(file_name, '.*')}_converted.pptx"
+          when 'JPEG'
+            "#{File.basename(file_name, '.*')}_converted.jpeg"
+          when 'PNG'
+            "#{File.basename(file_name, '.*')}_converted.png"
+          end
 
-          # Invia il file PDF al browser
+          # Invia il file convertito al browser
           send_data(
             response.body,
-            filename: pdf_file_name,
-            type: 'application/pdf',
+            filename: converted_file_name,
+            type: response.headers['content-type'],
             disposition: 'attachment'
           )
         else
@@ -148,6 +175,23 @@ class DriveController < ApplicationController
         # Pulisci i file temporanei
         File.delete(local_file_path) if File.exist?(local_file_path)
       end
+    end
+
+    def download_file(drive_service, file_id)
+      # Recupera il file da Google Drive
+      file_metadata = drive_service.get_file(file_id, fields: 'id, name, mimeType')
+      file_name = file_metadata.name
+      file_content = StringIO.new
+      drive_service.get_file(file_id, download_dest: file_content)
+
+      # Scrivi il file scaricato su disco locale
+      local_file_path = Rails.root.join('tmp', file_name)
+      File.open(local_file_path, 'wb') do |file|
+        file.write(file_content.string)
+      end
+
+      # Invia il file al browser
+      send_file local_file_path, filename: file_name
     end
 
 
