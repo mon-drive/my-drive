@@ -88,11 +88,9 @@ class DriveController < ApplicationController
       type = params[:type]
       drive_service = initialize_drive_service
 
-
-      if type =='SELF'
-        #fai funzione per scaricare un file
+      if type == 'SELF'
         download_file(drive_service, file_id)
-        return;
+        return
       end
 
       begin
@@ -112,63 +110,85 @@ class DriveController < ApplicationController
         CloudmersiveConvertApiClient.configure do |config|
           config.api_key['Apikey'] = Figaro.env.CLOUDMERSIVE_API_KEY
         end
-
-
         api_key = Figaro.env.CLOUDMERSIVE_API_KEY
 
         url = case type
-        when 'PDF'
-          "https://api.cloudmersive.com/convert/autodetect/to/pdf"
-        when 'DOCX'
-          'https://api.cloudmersive.com/convert/odt/to/docx'
-        when 'XLSX'
-          'https://api.cloudmersive.com/convert/ods/to/xlsx'
-        when 'PPTX'
-          'https://api.cloudmersive.com/convert/odp/to/pptx'
-        when 'JPEG'
-          'https://api.cloudmersive.com/convert/autodetect/to/jpg'
-        when 'PNG'
-          'https://api.cloudmersive.com/convert/autodetect/to/png'
-        end
-
+              when 'PDF'
+                'https://api.cloudmersive.com/convert/autodetect/to/pdf'
+              when 'DOCX'
+                'https://api.cloudmersive.com/convert/odt/to/docx'
+              when 'XLSX'
+                'https://api.cloudmersive.com/convert/ods/to/xlsx'
+              when 'PPTX'
+                'https://api.cloudmersive.com/convert/odp/to/pptx'
+              when 'JPEG'
+                'https://api.cloudmersive.com/convert/autodetect/to/jpg'
+              when 'PNG'
+                'https://api.cloudmersive.com/convert/autodetect/to/png'
+              end
 
         # Esegui la richiesta HTTP al servizio di conversione
         response = HTTParty.post(
           url,
           headers: { 'Apikey' => api_key },
+          multipart: true,
           body: { inputFile: File.new(local_file_path) }
         )
 
         if response.success?
-          # Genera un nome file unico basato sul tipo di file richiesto
-          converted_file_name = case type
-          when 'PDF'
-            "#{File.basename(file_name, '.*')}_converted.pdf"
-          when 'DOCX'
-            "#{File.basename(file_name, '.*')}_converted.docx"
-          when 'XLSX'
-            "#{File.basename(file_name, '.*')}_converted.xlsx"
-          when 'PPTX'
-            "#{File.basename(file_name, '.*')}_converted.pptx"
-          when 'JPEG'
-            "#{File.basename(file_name, '.*')}_converted.jpeg"
-          when 'PNG'
-            "#{File.basename(file_name, '.*')}_converted.png"
-          end
+          case type
+          when 'PDF', 'DOCX', 'XLSX', 'PPTX'
+            # Genera un nome file unico per il file convertito
+            converted_file_name = "#{File.basename(file_name, '.*')}_converted.#{type.downcase}"
 
-          # Invia il file convertito al browser
-          send_data(
-            response.body,
-            filename: converted_file_name,
-            type: response.headers['content-type'],
-            disposition: 'attachment'
-          )
+            # Invia il file convertito al browser
+            send_data(
+              response.body,
+              filename: converted_file_name,
+              type: response.headers['content-type'],
+              disposition: 'attachment'
+            )
+          when 'JPEG'
+            # Ottieni la risposta come array di immagini JPEG
+            jpeg_response = response.parsed_response
+            jpeg_pages = jpeg_response['JpgResultPages']
+
+            # Salva e invia ogni immagine JPEG convertita
+            jpeg_pages.each_with_index do |page, index|
+              jpeg_data = Base64.decode64(page['Content'])
+              converted_file_name = "#{File.basename(file_name, '.*')}_converted_#{index + 1}.jpeg"
+              send_data(
+                jpeg_data,
+                filename: converted_file_name,
+                type: 'image/jpeg',
+                disposition: 'attachment'
+              )
+            end
+          when 'PNG'
+            # Ottieni la risposta come hash con l'URL dell'immagine PNG convertita
+            png_response = response.parsed_response
+            if png_response.key?('PngResultPages')
+              png_url = png_response['PngResultPages'].first['URL']
+
+              # Scarica l'immagine PNG e invia al browser
+              png_data = HTTParty.get(png_url).body
+              send_data(
+                png_data,
+                filename: "#{File.basename(file_name, '.*')}_converted.png",
+                type: 'image/png',
+                disposition: 'attachment'
+              )
+            else
+              render json: { error: 'Conversione a PNG fallita' }, status: :unprocessable_entity
+            end
+          end
         else
           render json: { error: "Conversione fallita: #{response.code} #{response.message}" }, status: :unprocessable_entity
         end
-
       rescue Google::Apis::ClientError => e
         render json: { error: "Errore Google Drive: #{e.message}" }, status: :bad_request
+      rescue CloudmersiveConvertApiClient::ApiError => e
+        render json: { error: "Errore Cloudmersive: #{e.message}" }, status: :unprocessable_entity
       rescue => e
         render json: { error: "Errore imprevisto: #{e.message}" }, status: :internal_server_error
       ensure
@@ -336,7 +356,7 @@ class DriveController < ApplicationController
             status = analyze_response['data']['attributes']['status']
             puts "Analysis status: #{status}"
             break if ['completed', 'failed'].include?(status)
-            sleep(40)  # Attendi 20 secondi tra ogni tentativo
+            sleep(50)  # Attendi 20 secondi tra ogni tentativo
           end
 
           if analyze_response['data'] && analyze_response['data']['attributes']

@@ -257,6 +257,10 @@ function handleExportAsPDF() {
       })
       .then(response => {
         if (!response.ok) {
+          console.error('Error:', error);
+          const modal = document.getElementById('md_export');
+          const bootstrapModal = bootstrap.Modal.getInstance(modal);
+          bootstrapModal.hide();
           throw new Error('Network response was not ok');
         }
         const modal = document.getElementById('md_export');
@@ -277,7 +281,7 @@ function handleExportAsPDF() {
 
       })
       .catch(error => {
-        console.error('Error:', error);
+
         alert('Si è verificato un errore durante la conversione del file.');
       });
     });
@@ -287,53 +291,57 @@ function handleExportAsPDF() {
 
 //export folder
 
-  document.querySelectorAll('.export-folder').forEach(item => {
-    item.addEventListener('click', function(event) {
-      event.preventDefault();
-      
-      apri_modal('md_export');
-      const folderId = this.getAttribute('data-id');
-
+document.querySelectorAll('.export-folder').forEach(item => {
+  item.addEventListener('click', function(event) {
+    event.preventDefault();
     
+    apri_modal('md_export');
+    const folderId = this.getAttribute('data-id');
 
-      fetch('/export_folder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ id: folderId })
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
+  
+
+    fetch('/export_folder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({ id: folderId })
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error('Error:', error);
         const modal = document.getElementById('md_export');
         const bootstrapModal = bootstrap.Modal.getInstance(modal);
         bootstrapModal.hide();
-        const fileName = response.headers.get('Content-Disposition')
-                        .split('filename=')[1]
-                        .replace(/"/g, '')
-                        .split(';')[0];
-        return response.blob().then(blob => ({ blob, fileName }));
-      })
-      .then(({ blob, fileName }) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Si è verificato un errore durante l\'esportazione della cartella.');
-      });
-      
+        throw new Error('Network response was not ok');
+      }
+      const modal = document.getElementById('md_export');
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
+      const fileName = response.headers.get('Content-Disposition')
+                      .split('filename=')[1]
+                      .replace(/"/g, '')
+                      .split(';')[0];
+      return response.blob().then(blob => ({ blob, fileName }));
+    })
+    .then(({ blob, fileName }) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+
+      alert('Si è verificato un errore durante l\'esportazione della cartella.');
     });
+
   });
+});
 
 
 
