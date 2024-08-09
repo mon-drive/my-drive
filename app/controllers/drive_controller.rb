@@ -1,5 +1,6 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
+    before_action :fetch_google_profile_image
 
     require 'google/apis/drive_v3'
     require 'googleauth'
@@ -247,9 +248,6 @@ class DriveController < ApplicationController
       end
     end
 
-
-
-
     def storage_info
       begin
         drive_service = initialize_drive_service
@@ -458,6 +456,11 @@ class DriveController < ApplicationController
 
     def item_params
       params.require(:item).permit(:name)
+    end
+
+    def fetch_google_profile_image
+      auth = request.env['omniauth.auth']
+      @google_profile_image = session[:image]
     end
 
   end
