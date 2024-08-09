@@ -134,14 +134,13 @@ class DriveController < ApplicationController
           puts "Scan ID received: #{scan_id}"
 
           analyze_response = nil
-          sleep(5)
-          5.times do  # Prova per un massimo di 5 volte
+          20.times do  # Prova per un massimo di 5 volte
 
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             puts "Analysis status: #{status}"
             break if ['completed', 'failed'].include?(status)
-            sleep(20)  # Attendi 20 secondi tra ogni tentativo
+            sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
 
           if analyze_response['data'] && analyze_response['data']['attributes']
@@ -262,13 +261,13 @@ class DriveController < ApplicationController
 
           analyze_response = nil
           sleep(5)
-          5.times do  # Prova per un massimo di 5 volte
+          20.times do  # Prova per un massimo di 5 volte
 
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             puts "Analysis status: #{status}"
             break if ['completed', 'failed'].include?(status)
-            sleep(20)  # Attendi 20 secondi tra ogni tentativo
+            sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
 
           if analyze_response['data'] && analyze_response['data']['attributes']
