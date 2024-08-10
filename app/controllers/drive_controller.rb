@@ -7,7 +7,6 @@ class DriveController < ApplicationController
     require 'httparty'
     require 'json'
     require 'zip'
-    require 'cloudmersive-convert-api-client'
 
     def dashboard
       drive_service = initialize_drive_service
@@ -87,6 +86,10 @@ class DriveController < ApplicationController
       file_id = params[:id]
       type = params[:type]
       drive_service = initialize_drive_service
+      puts "\n\n\n\n"
+      puts "File ID: #{file_id}"
+      puts "Type: #{type}"
+      puts "\n\n\n\n"
 
       if type == 'SELF'
         download_file(drive_service, file_id)
@@ -106,10 +109,10 @@ class DriveController < ApplicationController
           file.write(file_content.string)
         end
 
-        # Configura Cloudmersive
-        CloudmersiveConvertApiClient.configure do |config|
-          config.api_key['Apikey'] = Figaro.env.CLOUDMERSIVE_API_KEY
-        end
+        puts "\n\n\n\n"
+        puts "Local file path: #{local_file_path}"
+        puts "\n\n\n\n"
+
         api_key = Figaro.env.CLOUDMERSIVE_API_KEY
 
         url = case type
@@ -134,6 +137,10 @@ class DriveController < ApplicationController
           multipart: true,
           body: { inputFile: File.new(local_file_path) }
         )
+
+        puts "\n\n\n\n"
+        puts "Response: #{response.code} - #{response.message}"
+        puts "\n\n\n\n"
 
         if response.success?
           case type
