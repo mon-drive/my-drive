@@ -78,7 +78,11 @@
     
     <div class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-person-circle"></i>
+        <% if @google_profile_image.present? %>
+          <img src="<%= @google_profile_image %>" alt="Google Profile Image" class="rounded-circle" width="30" height="30">
+        <% else %>
+          <i class="bi bi-person-circle"></i>
+        <% end %>
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
         <li><a class="dropdown-item" href="<%= settings_path %>"><%= t('dash.settings')%></a></li>
@@ -213,6 +217,13 @@
 <div class="container-fluid">
   <div class="row">
   <div class="col-md-3">
+    <% if @current_folder == 'bin' %>
+      <%= form_with url: empty_bin_path, method: :post, local: true do %>
+        <div class="d-flex justify-content-center mt-3">
+          <%= button_to 'Svuota Cestino', empty_bin_path, method: :post, class: 'btn btn-danger', data: { confirm: 'Sei sicuro di voler svuotare il cestino?' } %>
+        </div>
+      <% end %>
+    <% end %>
         <div id="folderTree" class="list-group">
           <% if @current_folder != 'root' %>
             <% if @parent_folder and @parent_folder.name != @root_folder_name %>

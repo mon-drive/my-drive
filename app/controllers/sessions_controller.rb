@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
       auth = request.env['omniauth.auth']
       user = User.from_omniauth(auth)
       session[:user_id] = user.id
+      session[:image] = auth.info.image
       redirect_to dashboard_path
     end
 

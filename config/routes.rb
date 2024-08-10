@@ -32,6 +32,9 @@ Rails.application.routes.draw do
   # Route for delete item
   delete 'delete_item', to: 'drive#delete_item'
 
+  # Route for empty bin
+  post 'drive/empty_bin', to: 'drive#empty_bin', as: 'empty_bin'
+
   resources :items, controller: 'drive', only: [] do
     member do
       patch 'rename'
