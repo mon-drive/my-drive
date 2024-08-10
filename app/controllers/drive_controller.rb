@@ -257,13 +257,13 @@ class DriveController < ApplicationController
       file_id = params[:id]
 
       #save file data
-      file = drive_service.get_file(file_id, fields: 'mime_type')
+      file = drive_service.get_file(file_id, fields: 'fileExtension')
       puts "/n/n/n/n"
-      puts file.mime_type
+      puts file.file_extension
       puts "/n/n/n/n"
       # Render the response as JSON
       file_properties = {
-        type: file.mime_type,
+        type: file.file_extension,
       }
       render json: file_properties
       rescue Google::Apis::ClientError => e
@@ -648,7 +648,7 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: "'#{folder_id}' in parents and trashed = false",
-          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          fields: 'nextPageToken, files(id, name, mimeType, parents,fileExtension)',
           spaces: 'drive',
           page_token: next_page_token
         )

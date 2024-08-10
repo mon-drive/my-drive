@@ -236,57 +236,59 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+
+
 //export file
-function handleExportAsPDF() {
-  document.querySelectorAll('.export-item').forEach(item => {
-    item.addEventListener('click', function(event) {
-      event.preventDefault();
-      apri_modal('md_export');
-      const fileId = this.getAttribute('data-id');
-      const type = this.getAttribute('type');
+
+document.querySelectorAll('.export-item').forEach(item => {
+  item.addEventListener('click', function(event) {
+    event.preventDefault();
+    apri_modal('md_export');
+    const fileId = this.getAttribute('data-id');
+    const type = this.getAttribute('type');
 
 
 
-      fetch('/export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ id: fileId, type: type })
-      })
-      .then(response => {
-        if (!response.ok) {
-          console.error('Error:', error);
-          const modal = document.getElementById('md_export');
-          const bootstrapModal = bootstrap.Modal.getInstance(modal);
-          bootstrapModal.hide();
-          throw new Error('Network response was not ok');
-        }
+    fetch('/export', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({ id: fileId, type: type })
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error('Error:', error);
         const modal = document.getElementById('md_export');
         const bootstrapModal = bootstrap.Modal.getInstance(modal);
         bootstrapModal.hide();
-        const fileName = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '').split(';')[0];
-        return response.blob().then(blob => ({ blob, fileName }));
-      })
-      .then(({ blob, fileName }) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
+        throw new Error('Network response was not ok');
+      }
+      const modal = document.getElementById('md_export');
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
+      const fileName = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '').split(';')[0];
+      return response.blob().then(blob => ({ blob, fileName }));
+    })
+    .then(({ blob, fileName }) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
 
-      })
-      .catch(error => {
+    })
+    .catch(error => {
 
-        alert('Si è verificato un errore durante la conversione del file.');
-      });
+      alert('Si è verificato un errore durante la conversione del file.');
     });
   });
-}
+});
+
 
 
 //export folder
@@ -346,120 +348,61 @@ document.querySelectorAll('.export-folder').forEach(item => {
 
 
 
-//get extension
+//gestione sottomenu
 $(document).ready(function() {
+  // Funzione per mostrare il sottomenu
+  function showSubmenu(submenu, triggerElement) {
+    $('.dropdown-submenu .submenu').not(submenu).hide();
+    submenu.removeClass('submenu-left submenu-right');
+
+    var submenuWidth = submenu.outerWidth();
+    var distanceToRight = $(window).width() - (triggerElement.offset().left + triggerElement.outerWidth());
+
+    if (distanceToRight < submenuWidth) {
+      submenu.addClass('submenu-left');
+    } else {
+      submenu.addClass('submenu-right');
+    }
+
+    var topPosition = triggerElement.position().top;
+    submenu.css('top', topPosition);
+    submenu.show();
+  }
+
+  // Apre il sottomenu al click
   $('.dropdown-submenu > a').on('click', function(e) {
     e.stopPropagation();
     e.preventDefault();
 
-    const fileId = this.getAttribute('data-id');
     const $submenu = $(this).next('.submenu');
-
-    // Funzione per aggiornare il sottomenu
-    const updateSubmenu = (ext) => {
-      //si aggiungono i tasti per le conversioni dei vari file
-      switch(ext){
-        case 'vnd.openxmlformats-officedocument.wordprocessingml.document': 
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">DOCX</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        case 'vnd.oasis.opendocument.text':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">ODT</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="DOCX">DOCX</a></li>'+
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        case 'vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">XLSX</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-
-        case 'vnd.oasis.opendocument.spreadsheet':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">ODS</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="XLSX">XLSX</a></li>'+
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        case 'vnd.openxmlformats-officedocument.presentationml.presentation':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">PPTX</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        case 'vnd.oasis.opendocument.presentation':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">ODP</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PPTX">PPTX</a></li>'+
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        case 'png':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">PNG</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="JPEG">JPEG</a></li>'+
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        case 'jpeg':
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">JPEG</a></li>' +
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PNG">PNG</a></li>'+
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>'
-          );
-          break;
-        default:
-          $submenu.html(
-            '<li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="'+ fileId +'" data-folder-id="<%= @current_folder %>" type="SELF">'+ext+'</a></li>'
-          );
-          break;
-      }
-      handleExportAsPDF();
-      // Mostra e posiziona il sottomenu solo dopo che è stato aggiornato
-      $('.dropdown-submenu .submenu').not($submenu).hide();
-      $submenu.removeClass('submenu-left submenu-right');
-      
-      var submenuWidth = $submenu.outerWidth();
-      var distanceToRight = $(window).width() - ($(this).offset().left + $(this).outerWidth());
-      
-      if (distanceToRight < submenuWidth) {
-        $submenu.addClass('submenu-left');
-      } else {
-        $submenu.addClass('submenu-right');
-      }
-
-      var topPosition = $(this).position().top;
-      $submenu.css('top', topPosition);
-      $submenu.show();
-    };
-
-    fetch('/extension?id=' + fileId)
-      .then(response => response.json())
-      .then(data => {
-        const ext = data.type.split('/')[1];
-        updateSubmenu(ext);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        updateSubmenu(null);
-      });
+    showSubmenu($submenu, $(this));
   });
 
+  // Apre il sottomenu al passaggio del mouse
+  $('.dropdown-submenu').on('mouseenter', function() {
+    const $submenu = $(this).children('.submenu');
+    const $triggerElement = $(this).children('a');
+    showSubmenu($submenu, $triggerElement);
+  });
+
+  // Chiude il sottomenu quando si esce con il mouse
+  $('.dropdown-submenu').on('mouseleave', function() {
+    const $submenu = $(this).children('.submenu');
+    $submenu.hide();
+  });
+
+  // Nasconde il sottomenu quando il dropdown viene chiuso
   $('.dropdown').on('hidden.bs.dropdown', function () {
     $('.dropdown-submenu .submenu').hide();
   });
 
+  // Nasconde il sottomenu quando si clicca fuori
   $(document).on('click', function (e) {
     if (!$(e.target).closest('.dropdown-submenu').length) {
       $('.dropdown-submenu .submenu').hide();
     }
   });
-});
 
+});
 
 
