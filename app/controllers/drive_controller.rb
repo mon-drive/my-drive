@@ -84,8 +84,144 @@ class DriveController < ApplicationController
     end
 
     def export
-      # Logica per esportare l'elemento
+      file_id = params[:id]
+      type = params[:type]
+      drive_service = initialize_drive_service
+      puts "\n\n\n\n"
+      puts "File ID: #{file_id}"
+      puts "Type: #{type}"
+      puts "\n\n\n\n"
+
+      if type == 'SELF'
+        download_file(drive_service, file_id)
+        return
+      end
+
+      begin
+        # Recupera il file da Google Drive
+        file_metadata = drive_service.get_file(file_id, fields: 'id, name, mimeType')
+        file_name = file_metadata.name
+        file_content = StringIO.new
+        drive_service.get_file(file_id, download_dest: file_content)
+
+        # Scrivi il file scaricato su disco locale
+        local_file_path = Rails.root.join('tmp', file_name)
+        File.open(local_file_path, 'wb') do |file|
+          file.write(file_content.string)
+        end
+
+        puts "\n\n\n\n"
+        puts "Local file path: #{local_file_path}"
+        puts "\n\n\n\n"
+
+        api_key = Figaro.env.CLOUDMERSIVE_API_KEY
+
+        url = case type
+              when 'PDF'
+                'https://api.cloudmersive.com/convert/autodetect/to/pdf'
+              when 'DOCX'
+                'https://api.cloudmersive.com/convert/odt/to/docx'
+              when 'XLSX'
+                'https://api.cloudmersive.com/convert/ods/to/xlsx'
+              when 'PPTX'
+                'https://api.cloudmersive.com/convert/odp/to/pptx'
+              when 'JPEG'
+                'https://api.cloudmersive.com/convert/autodetect/to/jpg'
+              when 'PNG'
+                'https://api.cloudmersive.com/convert/autodetect/to/png'
+              end
+
+        # Esegui la richiesta HTTP al servizio di conversione
+        response = HTTParty.post(
+          url,
+          headers: { 'Apikey' => api_key },
+          multipart: true,
+          body: { inputFile: File.new(local_file_path) }
+        )
+
+        puts "\n\n\n\n"
+        puts "Response: #{response.code} - #{response.message}"
+        puts "\n\n\n\n"
+
+        if response.success?
+          case type
+          when 'PDF', 'DOCX', 'XLSX', 'PPTX'
+            # Genera un nome file unico per il file convertito
+            converted_file_name = "#{File.basename(file_name, '.*')}_converted.#{type.downcase}"
+
+            # Invia il file convertito al browser
+            send_data(
+              response.body,
+              filename: converted_file_name,
+              type: response.headers['content-type'],
+              disposition: 'attachment'
+            )
+          when 'JPEG'
+            # Ottieni la risposta come array di immagini JPEG
+            jpeg_response = response.parsed_response
+            jpeg_pages = jpeg_response['JpgResultPages']
+
+            # Salva e invia ogni immagine JPEG convertita
+            jpeg_pages.each_with_index do |page, index|
+              jpeg_data = Base64.decode64(page['Content'])
+              converted_file_name = "#{File.basename(file_name, '.*')}_converted_#{index + 1}.jpeg"
+              send_data(
+                jpeg_data,
+                filename: converted_file_name,
+                type: 'image/jpeg',
+                disposition: 'attachment'
+              )
+            end
+          when 'PNG'
+            # Ottieni la risposta come hash con l'URL dell'immagine PNG convertita
+            png_response = response.parsed_response
+            if png_response.key?('PngResultPages')
+              png_url = png_response['PngResultPages'].first['URL']
+
+              # Scarica l'immagine PNG e invia al browser
+              png_data = HTTParty.get(png_url).body
+              send_data(
+                png_data,
+                filename: "#{File.basename(file_name, '.*')}_converted.png",
+                type: 'image/png',
+                disposition: 'attachment'
+              )
+            else
+              render json: { error: 'Conversione a PNG fallita' }, status: :unprocessable_entity
+            end
+          end
+        else
+          render json: { error: "Conversione fallita: #{response.code} #{response.message}" }, status: :unprocessable_entity
+        end
+      rescue Google::Apis::ClientError => e
+        render json: { error: "Errore Google Drive: #{e.message}" }, status: :bad_request
+      rescue CloudmersiveConvertApiClient::ApiError => e
+        render json: { error: "Errore Cloudmersive: #{e.message}" }, status: :unprocessable_entity
+      rescue => e
+        render json: { error: "Errore imprevisto: #{e.message}" }, status: :internal_server_error
+      ensure
+        # Pulisci i file temporanei
+        File.delete(local_file_path) if File.exist?(local_file_path)
+      end
     end
+
+    def download_file(drive_service, file_id)
+      # Recupera il file da Google Drive
+      file_metadata = drive_service.get_file(file_id, fields: 'id, name, mimeType')
+      file_name = file_metadata.name
+      file_content = StringIO.new
+      drive_service.get_file(file_id, download_dest: file_content)
+
+      # Scrivi il file scaricato su disco locale
+      local_file_path = Rails.root.join('tmp', file_name)
+      File.open(local_file_path, 'wb') do |file|
+        file.write(file_content.string)
+      end
+
+      # Invia il file al browser
+      send_file local_file_path, filename: file_name
+    end
+
 
     def properties
       #initialize drive service
@@ -113,6 +249,92 @@ class DriveController < ApplicationController
       rescue Google::Apis::ClientError => e
         render json: { error: e.message }, status: :unprocessable_entity
     end
+
+    def extension
+      #initialize drive service
+      drive_service = initialize_drive_service
+
+      #get file id
+      file_id = params[:id]
+
+      #save file data
+      file = drive_service.get_file(file_id, fields: 'fileExtension')
+      puts "/n/n/n/n"
+      puts file.file_extension
+      puts "/n/n/n/n"
+      # Render the response as JSON
+      file_properties = {
+        type: file.file_extension,
+      }
+      render json: file_properties
+      rescue Google::Apis::ClientError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+    end
+
+    def export_folder
+      folder_id = params[:id]
+      puts "Folder ID: #{folder_id}"
+
+      # Autenticazione con Google Drive API
+      drive_service = initialize_drive_service
+      puts "Drive service initialized"
+
+      # Crea una nuova cartella temporanea per l'esportazione
+      temp_dir = Dir.mktmpdir
+      puts "Temporary directory created: #{temp_dir}"
+
+      # Funzione ricorsiva per scaricare i file e le sottocartelle
+      def download_files_from_folder(service, folder_id, parent_path)
+        # Recupera i file e le cartelle nella cartella specificata
+        drive_files = get_files_and_folders_in_folder(service, folder_id)
+
+        drive_files.each do |file|
+          if file.mime_type == 'application/vnd.google-apps.folder'
+            # Crea una nuova cartella nel percorso temporaneo per la sottocartella
+            new_folder_path = File.join(parent_path, file.name)
+            FileUtils.mkdir_p(new_folder_path)
+            puts "Created directory: #{new_folder_path}"
+
+            # Scarica i file all'interno della sottocartella
+            download_files_from_folder(service, file.id, new_folder_path)
+          else
+            # Scarica i file all'interno della cartella corrente
+            file_path = File.join(parent_path, file.name)
+            puts "Downloading file: #{file.name}"
+            begin
+              service.get_file(file.id, download_dest: file_path)
+            rescue Google::Apis::ClientError => e
+              puts "Error downloading file: #{file.name} - #{e.message}"
+              next
+            end
+          end
+        end
+      end
+
+      # Avvia il download dei file dalla cartella principale
+      download_files_from_folder(drive_service, folder_id, temp_dir)
+
+      # Crea il file ZIP nella cartella temporanea
+      zip_filename = "#{drive_service.get_file(folder_id).name}.zip"
+      zip_filepath = File.join(temp_dir, zip_filename)
+      puts "Creating ZIP file: #{zip_filepath}"
+
+      # Aggiunta dei file allo ZIP mantenendo la struttura delle cartelle
+      Zip::File.open(zip_filepath, Zip::File::CREATE) do |zipfile|
+        Dir.glob("#{temp_dir}/**/*").each do |file|
+          unless File.directory?(file)
+            zipfile.add(file.sub("#{temp_dir}/", ''), file)
+          end
+        end
+      end
+
+      # Invia il file ZIP come risposta
+      send_data(File.read(zip_filepath), type: 'application/zip', filename: zip_filename)
+    ensure
+      # Rimuovi la cartella temporanea
+      FileUtils.remove_entry(temp_dir) if temp_dir
+    end
+
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
@@ -446,7 +668,7 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: "'#{folder_id}' in parents and trashed = false",
-          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          fields: 'nextPageToken, files(id, name, mimeType, parents,fileExtension)',
           spaces: 'drive',
           page_token: next_page_token
         )

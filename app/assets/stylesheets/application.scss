@@ -23,3 +23,24 @@
     object-fit: cover;
 }
 
+.dropdown-submenu {
+    position: relative;
+  }
+  
+  .dropdown-submenu .submenu {
+    top: 0;
+    display: none;
+    position: absolute;
+    min-width: 160px;
+  }
+  
+  .dropdown-submenu .submenu-left {
+    right: 100%;
+    left: auto;
+  }
+  
+  .dropdown-submenu .submenu-right {
+    left: 100%;
+    right: auto;
+  }
+
