@@ -83,8 +83,29 @@
 <script>
 function deleteAccount() {
     if (confirm('Sei sicuro di voler eliminare il tuo account?')) {
-    // Esegui la logica di eliminazione dell'account
-    alert('Account eliminato');
+      // Esegui la logica di eliminazione dell'account
+      fetch('/delete_account', {
+        method: 'DELETE',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Gestisci la risposta del server dopo l'eliminazione dell'account
+          alert('Account eliminato');
+          window.location.href = '/';
+        } else {
+          // Gestisci l'errore in caso di fallimento della richiesta
+          alert('Errore durante l\'eliminazione dell\'account');
+        }
+      })
+      .catch(error => {
+        // Gestisci l'errore in caso di fallimento della richiesta
+        alert('Errore durante l\'eliminazione dell\'account');
+      });
     }
 }
 </script>

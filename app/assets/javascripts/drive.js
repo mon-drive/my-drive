@@ -404,5 +404,3 @@ $(document).ready(function() {
   });
 
 });
-
-

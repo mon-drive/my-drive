@@ -14,6 +14,14 @@ class SessionsController < ApplicationController
       redirect_to root_path
     end
 
+    def delete_account
+      current_user.destroy
+      session[:user_id] = nil
+      respond_to do |format|
+        format.json { render json: { success: true, message: 'Account eliminato con successo.' } }
+      end
+    end
+
     def auth_failure
       redirect_to root_path
     end

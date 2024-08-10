@@ -60,7 +60,11 @@ Rails.application.routes.draw do
   # Route for export folder
   post 'export_folder', to: 'drive#export_folder'
 
+  # Route for move item
   get 'move_item', to: 'drive#move_item'
+
+  # Route for move folder
+  delete 'delete_account', to: 'sessions#delete_account'
 
   # Route for upload folder
   post 'upload_folder/:folder_id', to: 'drive#folder_scan', as: 'upload_folder'
