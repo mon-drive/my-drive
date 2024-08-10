@@ -45,8 +45,18 @@ Rails.application.routes.draw do
   # Route for rename item
   post 'share', to: 'drive#share'
 
+  # Route for export item
+  post 'export', to: 'drive#export'
+
   # Settings route
   get 'settings', to: 'drive#setting'
+
+  # Route for extection
+  get 'extension', to: 'drive#extension'
+
+  # Route for export folder
+  post 'export_folder', to: 'drive#export_folder'
+
 
   # Route for upload folder
   post 'upload_folder/:folder_id', to: 'drive#folder_scan', as: 'upload_folder'
