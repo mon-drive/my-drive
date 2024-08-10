@@ -235,197 +235,213 @@
 
 <div class="container-fluid">
   <div class="row">
-  <div class="col-md-3">
-    <% if @current_folder == 'bin' %>
-      <%= form_with url: empty_bin_path, method: :post, local: true do %>
-        <div class="d-flex justify-content-center mt-3">
-          <%= button_to 'Svuota Cestino', empty_bin_path, method: :post, class: 'btn btn-danger', data: { confirm: 'Sei sicuro di voler svuotare il cestino?' } %>
-        </div>
+    <div class="col-md-3">
+      <% if @current_folder == 'bin' %>
+        <%= form_with url: empty_bin_path, method: :post, local: true do %>
+          <div class="d-flex justify-content-center mt-3">
+            <%= button_to 'Svuota Cestino', empty_bin_path, method: :post, class: 'btn btn-danger', data: { confirm: 'Sei sicuro di voler svuotare il cestino?' } %>
+          </div>
+        <% end %>
       <% end %>
-    <% end %>
-        <div id="folderTree" class="list-group">
-          <% if @current_folder != 'root' %>
-            <% if @parent_folder and @parent_folder.name != @root_folder_name %>
-              <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
+          <div id="folderTree" class="list-group">
+            <% if @current_folder != 'root' %>
+              <% if @parent_folder and @parent_folder.name != @root_folder_name %>
+                <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
+              <% end %>
+              <% if @parent_folder %>
+                <%= link_to @parent_folder.name, dashboard_path(folder_id: @parent_folder.id), class: 'list-group-item list-group-item-action' %>
+              <% else %>
+                <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
+              <% end %>
             <% end %>
-            <% if @parent_folder %>
-              <%= link_to @parent_folder.name, dashboard_path(folder_id: @parent_folder.id), class: 'list-group-item list-group-item-action' %>
-            <% else %>
-              <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
+            <% if @current_folder != 'bin' %>
+              <%= link_to t('dash.trash'), dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
             <% end %>
-          <% end %>
-          <% if @current_folder != 'bin' %>
-            <%= link_to t('dash.trash'), dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
-          <% end %>
 
-          <% @items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
-            <div class="list-group-item list-group-item-action folder-item">
-              <div class="d-flex align-items-center">
-                <i class="bi bi-folder-fill fs-3 me-2"></i>
-                <%= link_to folder.name, dashboard_path(folder_id: folder.id), class: 'text-dark w-100' %>
-                <button class="btn btn-link folder-toggle" type="button">
-                  <i class="bi bi-chevron-down ms-2"></i>
-                </button>
+            <% @items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
+              <div class="list-group-item list-group-item-action folder-item">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-folder-fill fs-3 me-2"></i>
+                  <%= link_to folder.name, dashboard_path(folder_id: folder.id), class: 'text-dark w-100' %>
+                  <button class="btn btn-link folder-toggle" type="button">
+                    <i class="bi bi-chevron-down ms-2"></i>
+                  </button>
+                </div>
+                <div class="folder-contents" style="display: none;">
+                  <% @all_items.select { |item| item.parents&.include?(folder.id) && item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
+                    <div class="list-group-item list-group-item-action">
+                      <i class="bi bi-folder-fill fs-3 me-2"></i>
+                      <%= link_to subfolder.name, dashboard_path(folder_id: subfolder.id), class: 'text-dark w-100' %>
+                    </div>
+                  <% end %>
+                </div>
               </div>
-              <div class="folder-contents" style="display: none;">
-                <% @all_items.select { |item| item.parents&.include?(folder.id) && item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
-                  <div class="list-group-item list-group-item-action">
-                    <i class="bi bi-folder-fill fs-3 me-2"></i>
-                    <%= link_to subfolder.name, dashboard_path(folder_id: subfolder.id), class: 'text-dark w-100' %>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
+      <div class="progress">
+        <div 
+          class="progress-bar" 
+          role="progressbar" 
+          style="width: <%= (@used_space.to_f / @total_space.to_f) * 100 %>%" 
+          aria-valuenow="<%= (@used_space.to_f / @total_space.to_f) * 100 %>" 
+          aria-valuemin="0" 
+          aria-valuemax="100">
+          <%= number_to_percentage((@used_space.to_f / @total_space.to_f) * 100, precision: 2) %>
         </div>
-    <div class="progress">
-      <div 
-        class="progress-bar" 
-        role="progressbar" 
-        style="width: <%= (@used_space.to_f / @total_space.to_f) * 100 %>%" 
-        aria-valuenow="<%= (@used_space.to_f / @total_space.to_f) * 100 %>" 
-        aria-valuemin="0" 
-        aria-valuemax="100">
-        <%= number_to_percentage((@used_space.to_f / @total_space.to_f) * 100, precision: 2) %>
       </div>
-    </div>
 
-    <div class="d-flex justify-content-center mt-3">
-      <div class="dropdown">
-        <button class="btn btn-transparent rounded-circle border border-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 50px; height: 50px; padding: 0;">
-          <i class="fas fa-plus text-dark"></i>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal"><%= t('dash.new-folder')%></a></li>
-          <li>
-            <form id="upload-form" action="<%= upload_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
-              <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-              <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
-            </form>
-            <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;"><%= t('dash.upload-file')%></a>
-          </li>
-          <li>
-            <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
-              <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-              <%= hidden_field_tag :folder_name, '' %>
-              <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect(); apri_modal('md_scan');">
-            </form>
-            <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;"><%= t('dash.upload-folder')%></a>
-          </li>
-        </ul>
+      <div class="d-flex justify-content-center mt-3">
+        <div class="dropdown">
+          <button class="btn btn-transparent rounded-circle border border-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 50px; height: 50px; padding: 0;">
+            <i class="fas fa-plus text-dark"></i>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal"><%= t('dash.new-folder')%></a></li>
+            <li>
+              <form id="upload-form" action="<%= upload_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
+                <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
+              </form>
+              <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;"><%= t('dash.upload-file')%></a>
+            </li>
+            <li>
+              <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: @current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
+                <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                <%= hidden_field_tag :folder_name, '' %>
+                <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect(); apri_modal('md_scan');">
+              </form>
+              <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;"><%= t('dash.upload-folder')%></a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col-md-9">
-    <h3>Contents of: <%= @current_folder_name %></h3>
-    <div class="row">
-      <% @items.each do |item| %>
-        <div class="col-md-3">
-          <div class="card mb-4 shadow-sm">
-            <div class="card-body text-center position-relative">
-              <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                <%= link_to dashboard_path(folder_id: item.id), class: 'text-decoration-none text-dark' do %>
-                  <i class="bi bi-folder-fill fs-3 mb-2"></i>
+    <div class="col-md-9">
+      <h3>Contents of: <%= @current_folder_name %></h3>
+      <div class="row">
+        <% @items.each do |item| %>
+          <div class="col-md-3">
+            <div class="card mb-4 shadow-sm">
+              <div class="card-body text-center position-relative">
+                <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                  <%= link_to dashboard_path(folder_id: item.id), class: 'text-decoration-none text-dark' do %>
+                    <i class="bi bi-folder-fill fs-3 mb-2"></i>
+                    <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+                  <% end %>
+                <% else %>
+                  <i class="bi bi-file-earmark-text fs-3 mb-2"></i>
                   <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
                 <% end %>
-              <% else %>
-                <i class="bi bi-file-earmark-text fs-3 mb-2"></i>
-                <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
-              <% end %>
 
-              <!-- Dropdown menu -->
-              <div class="dropdown position-absolute top-0 end-0 mt-2 me-2">
-                <button class="btn btn-link dropdown-toggle p-0" type="button" id="dropdownMenu<%= item.id %>" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-three-dots-vertical"></i>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenu<%= item.id %>">
-                  <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                    <li><%= link_to t('dash.open'), dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
-                  <% end %>
-                  
-                  <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
-                  <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
-                  <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                    <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" id="folder-export-<%= item.id %>">Scarica</a></li>
-                  <% else %>
-                    <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" type="SELF">Scarica</a></li>
-                    <!-- If per i file supportati alla conversione-->
-                    <% if item.file_extension=="docx" %>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                <!-- Dropdown menu -->
+                <div class="dropdown position-absolute top-0 end-0 mt-2 me-2">
+                  <button class="btn btn-link dropdown-toggle p-0" type="button" id="dropdownMenu<%= item.id %>" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu<%= item.id %>">
+                    <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                      <li><%= link_to t('dash.open'), dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
+                    <% end %>
+                    
+                    <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
+                    <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
+                    <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                      <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" id="folder-export-<%= item.id %>">Scarica</a></li>
+                    <% else %>
+                      <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" type="SELF">Scarica</a></li>
+                      <!-- If per i file supportati alla conversione-->
+                      <% if item.file_extension=="docx" %>
+                        <li class="dropdown-submenu">
+                          <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                          <ul id="submenu" class="dropdown-menu submenu">
+                            <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                          </ul>
+                        </li>
+                      <% elsif item.file_extension=="odt"%>
+
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="DOCX">DOCX</a></li>
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+
+                      <% elsif item.file_extension=="xlsx"%>
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+                      <% elsif item.file_extension=="ods"%>
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="XLSX">XLSX</a></li>
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+                      <% elsif item.file_extension=="pptx"%>
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+                      <% elsif item.file_extension=="odp"%>
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PPTX">PPTX</a></li>
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+                      <%elsif item.file_extension=="png"%>
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="JPG">JPG</a></li>
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+                      <%elsif item.file_extension=="jpg"%>
+                        <li class="dropdown-submenu">
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
+                        <ul id="submenu" class="dropdown-menu submenu">
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PNG">PNG</a></li>
+                          <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        </ul>
+                      <%end%>
+                    <% end %>
+                    <li class="dropdown-submenu">
+                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Sposta</a>
                       <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
+                        <% if @current_folder_name != @root_folder_name %>
+                          <li>
+                              <a href="javascript:void(0);" class="dropdown-item move-item">
+                                <%= link_to @root_folder_name, move_item_path(folder_id: @root_folder_id, item_id: item.id), class: 'dropdown-item' %>
+                              </a>
+                            </li>
+                          <li>
+                        <% end %>
+                        <% @all_items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
+                            <a href="javascript:void(0);" class="dropdown-item move-item" data-id="<%= item.id %>" data-folder-id="<%= folder.id %>">
+                              <%= link_to folder.name, move_item_path(folder_id: folder.id, item_id: item.id), class: 'dropdown-item' %>
+                            </a>
+                          </li>
+                        <% end %>
                       </ul>
                     </li>
-                    <% elsif item.file_extension=="odt"%>
-
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="DOCX">DOCX</a></li>
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-
-                    <% elsif item.file_extension=="xlsx"%>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-                    <% elsif item.file_extension=="ods"%>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="XLSX">XLSX</a></li>
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-                    <% elsif item.file_extension=="pptx"%>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-                    <% elsif item.file_extension=="odp"%>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PPTX">PPTX</a></li>
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-                    <%elsif item.file_extension=="png"%>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="JPG">JPG</a></li>
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-                    <%elsif item.file_extension=="jpg"%>
-                      <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Scarica come</a>
-                      <ul id="submenu" class="dropdown-menu submenu">
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PNG">PNG</a></li>
-                        <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id%>" data-folder-id="<%= @current_folder %>" type="PDF">PDF</a></li>
-                      </ul>
-                    <%end%>
-                  <% end %>
-                  <li><%= form_with url: delete_item_path, method: :delete, local: true, class: 'd-inline' do %>
-                      <%= hidden_field_tag :item_id, item.id %>
-                      <%= hidden_field_tag :folder_id, @current_folder %>
-                      <button type="submit" class="dropdown-item"><%= t('dash.delete')%></button>
-                      <% end %>
-                  </li>
-                  <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.properties')%></a></li>
-                </ul>
+                    <li><%= form_with url: delete_item_path, method: :delete, local: true, class: 'd-inline' do %>
+                        <%= hidden_field_tag :item_id, item.id %>
+                        <%= hidden_field_tag :folder_id, @current_folder %>
+                        <button type="submit" class="dropdown-item"><%= t('dash.delete')%></button>
+                        <% end %>
+                    </li>
+                    <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.properties')%></a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
     </div>
-
-
-</div>
-
   </div>
 </div>
 

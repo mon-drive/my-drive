@@ -14,6 +14,7 @@ class DriveController < ApplicationController
       @current_folder = params[:folder_id] || 'root'
       @all_items = get_files_and_folders(drive_service)
       @root_folder_name = get_root_name(drive_service)
+      @root_folder_id = get_root_id(drive_service)
       if params[:folder_id] == 'bin'
         @current_folder_name = 'Cestino'
       else
@@ -653,6 +654,45 @@ class DriveController < ApplicationController
       redirect_to dashboard_path(folder_id: 'bin'), notice: 'Cestino svuotato con successo.'
     end
 
+    def move_item
+      drive_service = initialize_drive_service
+      item_id = params[:item_id]
+      folder_id = params[:folder_id]
+
+      # Ottieni le informazioni dell'elemento
+      item = drive_service.get_file(item_id, fields: 'mimeType, name')
+
+      if item.mime_type == 'application/vnd.google-apps.folder'
+        # L'elemento è una cartella
+
+        folder_metadata = {
+          name: item.name,
+          mime_type: 'application/vnd.google-apps.folder',
+          parents: [folder_id]
+        }
+
+        # Crea una nuova cartella in folder_id
+        new_folder = drive_service.create_file(folder_metadata, fields: 'id')
+
+        # Recupera tutti i file e cartelle all'interno della cartella originale
+        child_files = drive_service.list_files(q: "'#{item_id}' in parents", fields: 'files(id, name)')
+
+        # Sposta ogni file nella nuova cartella
+        child_files.files.each do |child_file|
+          drive_service.update_file(child_file.id, add_parents: new_folder.id, remove_parents: item_id)
+        end
+
+        drive_service.delete_file(item_id)
+
+      else
+        # L'elemento è un file
+
+        # Sposta il file semplicemente nella cartella specificata
+        drive_service.update_file(item_id, add_parents: folder_id, remove_parents: get_current_parents(drive_service, item_id))
+      end
+      redirect_to dashboard_path, notice: 'Elemento spostato con successo.'
+    end
+
     private
 
     def initialize_drive_service
@@ -742,6 +782,11 @@ class DriveController < ApplicationController
       parents.empty? ? nil : drive_service.get_file(parents.first, fields: 'id, name')
     end
 
+    def get_current_parents(drive_service, item_id)
+      file = drive_service.get_file(item_id, fields: 'parents')
+      file.parents.join(',')
+    end
+
     def get_folder_name(drive_service, folder_id)
       folder = drive_service.get_file(folder_id, fields: 'name')
       folder.name
@@ -750,6 +795,11 @@ class DriveController < ApplicationController
     def get_root_name(drive_service)
       folder = drive_service.get_file('root', fields: 'name')
       folder.name
+    end
+
+    def get_root_id(drive_service)
+      folder = drive_service.get_file('root', fields: 'id')
+      folder.id
     end
 
     def create_folder_in_drive(folder_name)
