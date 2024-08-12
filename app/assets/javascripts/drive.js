@@ -404,3 +404,30 @@ $(document).ready(function() {
   });
 
 });
+
+//gestione ordinamento
+
+document.addEventListener("DOMContentLoaded", function() {
+  const orderSelector = document.getElementById('order-selector');
+  const itemsContainer = document.getElementById('items-container');
+
+  orderSelector.addEventListener('change', function() {
+    const orderBy = this.value;
+    const items = Array.from(itemsContainer.children);
+
+    items.sort((a, b) => {
+      const nameA = a.dataset.name;
+      const nameB = b.dataset.name;
+
+      if (orderBy === 'asc') {
+        return nameA.localeCompare(nameB);
+      } else if (orderBy === 'desc') {
+        return nameB.localeCompare(nameA);
+      }
+    });
+
+    // Rimuovi e riaggiungi gli elementi nell'ordine corretto
+    itemsContainer.innerHTML = '';
+    items.forEach(item => itemsContainer.appendChild(item));
+  });
+});

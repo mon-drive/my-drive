@@ -33,7 +33,6 @@ class DriveController < ApplicationController
         end
       end
       storage_info()
-
     end
 
     def setting

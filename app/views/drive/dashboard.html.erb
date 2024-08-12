@@ -318,9 +318,17 @@
     </div>
     <div class="col-md-9">
       <h3>Contents of: <%= @current_folder_name %></h3>
-      <div class="row">
-        <% @items.each do |item| %>
-          <div class="col-md-3">
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <select id="order-selector" class="form-select">
+            <option value="asc">Ordina per Nome (A-Z)</option>
+            <option value="desc">Ordina per Nome (Z-A)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="items-container">
+        <% @items.sort { |a, b| a.name.downcase <=> b.name.downcase }.each do |item| %>
+          <div class="col-md-3" data-name="<%= item.name.downcase %>">
             <div class="card mb-4 shadow-sm">
               <div class="card-body text-center position-relative">
                 <% if item.mime_type == 'application/vnd.google-apps.folder' %>
