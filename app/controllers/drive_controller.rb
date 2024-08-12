@@ -13,6 +13,7 @@ class DriveController < ApplicationController
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
       @all_items = get_files_and_folders(drive_service)
+
       @root_folder_name = get_root_name(drive_service)
       @root_folder_id = get_root_id(drive_service)
       if params[:folder_id] == 'bin'
@@ -49,11 +50,6 @@ class DriveController < ApplicationController
       file_id = params[:id]
       new_name = params[:item][:name]
 
-      puts "\n\n\n\n"
-      puts "File ID: #{file_id}"
-      puts "New Name: #{new_name}"
-      puts "\n\n\n\n"
-
       file_metadata = Google::Apis::DriveV3::File.new(name: new_name)
 
       drive_service.update_file(file_id, file_metadata, fields: 'name')
@@ -87,10 +83,6 @@ class DriveController < ApplicationController
       file_id = params[:id]
       type = params[:type]
       drive_service = initialize_drive_service
-      puts "\n\n\n\n"
-      puts "File ID: #{file_id}"
-      puts "Type: #{type}"
-      puts "\n\n\n\n"
 
       if type == 'SELF'
         download_file(drive_service, file_id)
@@ -109,10 +101,6 @@ class DriveController < ApplicationController
         File.open(local_file_path, 'wb') do |file|
           file.write(file_content.string)
         end
-
-        puts "\n\n\n\n"
-        puts "Local file path: #{local_file_path}"
-        puts "\n\n\n\n"
 
         api_key = Figaro.env.CLOUDMERSIVE_API_KEY
 
@@ -138,10 +126,6 @@ class DriveController < ApplicationController
           multipart: true,
           body: { inputFile: File.new(local_file_path) }
         )
-
-        puts "\n\n\n\n"
-        puts "Response: #{response.code} - #{response.message}"
-        puts "\n\n\n\n"
 
         if response.success?
           case type
@@ -233,6 +217,21 @@ class DriveController < ApplicationController
       #save file data
       file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time, owners, permissions, shared')
 
+      folder_number = 0
+      file_number = 0
+
+      @all_items = get_files_and_folders_in_folder(drive_service, file_id)
+
+      if file.mime_type == 'application/vnd.google-apps.folder'
+        @all_items.each do |item|
+          if item.mime_type == 'application/vnd.google-apps.folder'
+            folder_number += 1
+          else
+            file_number += 1
+          end
+        end
+      end
+
       # Render the response as JSON
       file_properties = {
         id: file.id,
@@ -243,6 +242,8 @@ class DriveController < ApplicationController
         modified_time: file.modified_time.to_s,
         owners: file.owners.map { |owner| { display_name: owner.display_name, email: owner.email_address } },
         permissions: file.permissions,
+        folders: folder_number,
+        files: file_number,
         shared: file.shared,
       }
       render json: file_properties
@@ -259,9 +260,7 @@ class DriveController < ApplicationController
 
       #save file data
       file = drive_service.get_file(file_id, fields: 'fileExtension')
-      puts "/n/n/n/n"
-      puts file.file_extension
-      puts "/n/n/n/n"
+
       # Render the response as JSON
       file_properties = {
         type: file.file_extension,
@@ -273,15 +272,12 @@ class DriveController < ApplicationController
 
     def export_folder
       folder_id = params[:id]
-      puts "Folder ID: #{folder_id}"
 
       # Autenticazione con Google Drive API
       drive_service = initialize_drive_service
-      puts "Drive service initialized"
 
       # Crea una nuova cartella temporanea per l'esportazione
       temp_dir = Dir.mktmpdir
-      puts "Temporary directory created: #{temp_dir}"
 
       # Funzione ricorsiva per scaricare i file e le sottocartelle
       def download_files_from_folder(service, folder_id, parent_path)
@@ -293,14 +289,12 @@ class DriveController < ApplicationController
             # Crea una nuova cartella nel percorso temporaneo per la sottocartella
             new_folder_path = File.join(parent_path, file.name)
             FileUtils.mkdir_p(new_folder_path)
-            puts "Created directory: #{new_folder_path}"
 
             # Scarica i file all'interno della sottocartella
             download_files_from_folder(service, file.id, new_folder_path)
           else
             # Scarica i file all'interno della cartella corrente
             file_path = File.join(parent_path, file.name)
-            puts "Downloading file: #{file.name}"
             begin
               service.get_file(file.id, download_dest: file_path)
             rescue Google::Apis::ClientError => e
@@ -317,7 +311,6 @@ class DriveController < ApplicationController
       # Crea il file ZIP nella cartella temporanea
       zip_filename = "#{drive_service.get_file(folder_id).name}.zip"
       zip_filepath = File.join(temp_dir, zip_filename)
-      puts "Creating ZIP file: #{zip_filepath}"
 
       # Aggiunta dei file allo ZIP mantenendo la struttura delle cartelle
       Zip::File.open(zip_filepath, Zip::File::CREATE) do |zipfile|
@@ -339,7 +332,6 @@ class DriveController < ApplicationController
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
       file_id = params[:file]
-      puts "Avvio scan"
       if file_id.nil?
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
@@ -348,20 +340,17 @@ class DriveController < ApplicationController
 
       begin
         file_path = params[:file].path
-        puts "File path: #{file_path}"
 
         response_upload = upload_scan(file_path)
 
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
-          puts "Scan ID received: #{scan_id}"
 
           analyze_response = nil
           20.times do  # Prova per un massimo di 5 volte
 
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
-            puts "Analysis status: #{status}"
             break if ['completed', 'failed'].include?(status)
             sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
@@ -369,11 +358,9 @@ class DriveController < ApplicationController
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
-              puts "Malicious count: #{malicious_count}"
               if malicious_count > 0
                 redirect_to dashboard_path(folder_id: @current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
               else
-                puts "File pulito"
                 upload(file_id)
                 redirect_to dashboard_path(folder_id: @current_folder), notice: "File caricato con successo"
               end
@@ -382,12 +369,10 @@ class DriveController < ApplicationController
             end
           else
             error = analyze_response['error'] ? analyze_response['error']['message'] : "Errore sconosciuto durante l'analisi"
-            puts "Analysis error: #{error}"
             redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
           end
         else
           error = response_upload['error'] ? response_upload['error']['message'] : "Errore sconosciuto durante il caricamento"
-          puts "Upload error: #{error}"
           redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
         end
       rescue => e
@@ -402,13 +387,8 @@ class DriveController < ApplicationController
       api_key = Figaro.env.VIRUSTOTAL_API_KEY
       url = "https://www.virustotal.com/api/v3/files"
 
-      puts "Attempting to upload file: #{file_path}"
-      puts "File exists: #{File.exist?(file_path)}"
-      puts "File size: #{File.size(file_path)} bytes"
-
       begin
         file = File.open(file_path, 'rb')
-        puts "File opened successfully"
 
         response = HTTParty.post(url,
           headers: {
@@ -420,8 +400,6 @@ class DriveController < ApplicationController
           },
           debug_output: $stdout # This will log the full HTTP request and response
         )
-
-        puts "VirusTotal API Response: #{response.body}"
         JSON.parse(response.body)
       rescue => e
         puts "Error in upload_scan: #{e.message}"
@@ -466,21 +444,17 @@ class DriveController < ApplicationController
       end
 
       begin
-        puts "Files received: #{params[:files].inspect}"
         zip_buffer = create_zip_from_folder(params[:files])
-        puts "Zip buffer created, size: #{zip_buffer.bytesize} bytes"
 
         temp_file = Tempfile.new(['scan', '.zip'])
         temp_file.binmode
         temp_file.write(zip_buffer)
         temp_file.rewind
-        puts "Temporary file created: #{temp_file.path}"
 
         response_upload = upload_scan(temp_file.path)
 
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
-          puts "Scan ID received: #{scan_id}"
 
           analyze_response = nil
           sleep(5)
@@ -488,7 +462,6 @@ class DriveController < ApplicationController
 
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
-            puts "Analysis status: #{status}"
             break if ['completed', 'failed'].include?(status)
             sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
@@ -529,7 +502,6 @@ class DriveController < ApplicationController
       ensure
         temp_file.close
         temp_file.unlink if temp_file
-        puts "Temporary file deleted"
       end
     end
 
@@ -804,9 +776,6 @@ class DriveController < ApplicationController
     def create_folder_in_drive(folder_name)
       # Implementa la logica per creare una cartella in Google Drive o altro servizio
       drive_service = initialize_drive_service
-      puts "\n\n\n\n"
-      puts @current_folder
-      puts "\n\n\n\n"
       metadata = {
         name: folder_name,
         parents: [@current_folder],

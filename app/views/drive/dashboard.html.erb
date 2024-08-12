@@ -182,6 +182,7 @@
           <p id="file-owners-text"><%= t('propModal.owners')%>: <span id="file-owners"></span></p>
           <p id="file-role-text"><%= t('propModal.role')%>: <span id="file-role"></span></p>
           <p id="file-shared-text"><%= t('propModal.shared')%>: <span id="file-shared"></span></p>
+          <p id="root_folder_name"><%= t('propModal.contains')%>: <span id="file-contains"></span></p>
         </div>
       </div>
       <div class="modal-footer">
@@ -441,7 +442,7 @@
                         <button type="submit" class="dropdown-item"><%= t('dash.delete')%></button>
                         <% end %>
                     </li>
-                    <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>"><%= t('dash.properties')%></a></li>
+                    <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" data-is-folder="<%= item.mime_type %>"><%= t('dash.properties')%></a></li>
                   </ul>
                 </div>
               </div>

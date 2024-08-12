@@ -106,6 +106,12 @@ $(document).on('turbolinks:load', function() {
   // Properties
   $('.properties-item').on('click', function() {
     var itemId = $(this).data('id');
+    var isFolder = $(this).data('is-folder');
+    if(isFolder == "application/vnd.google-apps.folder"){
+      isFolder = true;
+    }else{
+      isFolder = false;
+    }
     $.ajax({
       url: '/items/' + itemId + '/properties',
       type: 'GET',
@@ -127,6 +133,12 @@ $(document).on('turbolinks:load', function() {
         
         $('#file-role').text(permissionsText);
         $('#file-shared').text((data.shared ? "Yes" : "No"));
+
+        if(isFolder){
+          $('#file-contains').text(data.folders + " cartelle, " + data.files + " file");
+        }else{
+          $('#file-contains').text("-");
+        }
         
         $('#filePropertiesModal').modal('show');
       }

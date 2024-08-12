@@ -55,3 +55,4 @@ it:
     owners: "Proprietari"
     role: "Ruolo"
     shared: "Condiviso"
+    contains: "Contiene"
