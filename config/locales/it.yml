@@ -53,5 +53,5 @@ it:
     creation-date: "Data di creazione"
     modified-date: "Data di modifica"
     owners: "Proprietari"
-    permissions: "Permessi"
+    role: "Ruolo"
     shared: "Condiviso"

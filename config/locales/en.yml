@@ -54,5 +54,5 @@ en:
     creation-date: "Creation date"
     modified-date: "Last modified date"
     owners: "Owners"
-    permissions: "Permissions"
+    role: "Role"
     shared: "Shared"

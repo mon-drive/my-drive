@@ -125,7 +125,7 @@ $(document).on('turbolinks:load', function() {
           return permission.role + " (" + permission.type + ")";
         }).join(", ");
         
-        $('#file-permissions').text(permissionsText);
+        $('#file-role').text(permissionsText);
         $('#file-shared').text((data.shared ? "Yes" : "No"));
         
         $('#filePropertiesModal').modal('show');
