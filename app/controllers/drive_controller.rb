@@ -679,7 +679,7 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: "'#{folder_id}' in parents and trashed = false",
-          fields: 'nextPageToken, files(id, name, mimeType, parents,fileExtension)',
+          fields: 'nextPageToken, files(id, name, mimeType, parents,fileExtension,iconLink,webViewLink)',
           spaces: 'drive',
           page_token: next_page_token
         )
