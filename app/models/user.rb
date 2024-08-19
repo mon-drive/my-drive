@@ -23,14 +23,3 @@ class User < ApplicationRecord
     user
   end
 end
-
-class BaseUser < User
-end
-
-class PremiumUser < User
-  has_many :converts
-  has_many :files, through: :converts
-end
-
-class AdminUser < User
-end
