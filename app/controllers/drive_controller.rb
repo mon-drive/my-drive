@@ -646,7 +646,7 @@ class DriveController < ApplicationController
         new_folder = drive_service.create_file(folder_metadata, fields: 'id')
 
         # Recupera tutti i file e cartelle all'interno della cartella originale
-        child_files = drive_service.list_files(q: "'#{item_id}' in parents", fields: 'files(id, name)')
+        child_files = drive_service.list_files(q: "'#{item_id}' in parents or sharedWithMe = true", fields: 'files(id, name)')
 
         # Sposta ogni file nella nuova cartella
         child_files.files.each do |child_file|
@@ -678,7 +678,7 @@ class DriveController < ApplicationController
 
       begin
         response = drive_service.list_files(
-          q: "'#{folder_id}' in parents and trashed = false",
+          q: "'#{folder_id}' in parents and trashed = false or sharedWithMe = true",
           fields: 'nextPageToken, files(id, name, mimeType, parents,fileExtension,iconLink,webViewLink)',
           spaces: 'drive',
           page_token: next_page_token
@@ -714,7 +714,7 @@ class DriveController < ApplicationController
 
       begin
         response = drive_service.list_files(
-          q: "name contains '#{query}' and trashed = false",
+          q: "name contains '#{query}' and trashed = false or sharedWithMe = true",
           fields: 'nextPageToken, files(id, name, mimeType, parents)',
           spaces: 'drive',
           page_token: next_page_token
@@ -732,7 +732,7 @@ class DriveController < ApplicationController
 
       begin
         response = drive_service.list_files(
-          q: 'trashed = false',
+          q: 'trashed = false or sharedWithMe = true',
           fields: 'nextPageToken, files(id, name, mimeType, parents)',
           spaces: 'drive',
           page_token: next_page_token
