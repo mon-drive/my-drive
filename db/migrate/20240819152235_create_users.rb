@@ -1,8 +1,8 @@
 class CreateUsers < ActiveRecord::Migration[6.1]
   def change
     create_table :users do |t|
-      t.string :type # STI column
       t.string :username
+      t.string :type # STI column
       t.string :email
       t.string :profile_picture
       t.date :expire_date # Solo per PremiumUser

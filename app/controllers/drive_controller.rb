@@ -664,6 +664,16 @@ class DriveController < ApplicationController
       redirect_to dashboard_path, notice: 'Elemento spostato con successo.'
     end
 
+    def update_name
+      @user = User.find(current_user.id)
+
+      if @user.update(username: params[:username])
+        render json: { success: true }
+      else
+        render json: { success: false }, status: :unprocessable_entity
+      end
+    end
+
     private
 
     def initialize_drive_service

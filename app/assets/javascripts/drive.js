@@ -443,3 +443,30 @@ document.addEventListener("DOMContentLoaded", function() {
     items.forEach(item => itemsContainer.appendChild(item));
   });
 });
+
+document.getElementById('editNameForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+  var newName = document.getElementById('newName').value;
+
+  fetch('/update_name', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ username: newName })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('nome').textContent = newName;
+      var modal = bootstrap.Modal.getInstance(document.getElementById('editNameModal'));
+      modal.hide();
+    } else {
+      alert('Errore nell\'aggiornamento del nome');
+    }
+  })
+  .catch(error => {
+    console.error('Errore:', error);
+  });
+});

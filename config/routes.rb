@@ -72,4 +72,7 @@ Rails.application.routes.draw do
   # Route for changing locale
   post 'set_locale', to: 'application#change_locale'
 
+  post '/update_name', to: 'drive#update_name'
+
+
 end

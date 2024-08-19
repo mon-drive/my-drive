@@ -1,3 +1,24 @@
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="editNameModal" tabindex="-1" aria-labelledby="editNameModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editNameModalLabel">Modifica Nome Utente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editNameForm">
+          <div class="mb-3">
+            <label for="newName" class="form-label">Nuovo Nome</label>
+            <input type="text" class="form-control" id="newName" name="newName" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Salva</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container mt-5">
     <div class="settings-container">
         <div class="settings-sidebar">
@@ -11,8 +32,8 @@
           <div class="settings-item">
             <h5>Nome</h5>
             <div>
-              <span id="nome"><%= @user.name %></span>
-              <a id="edit-name" onclick="editName()">Modifica</a>
+              <span id="nome"><%= @user.username %></span>
+              <a id="edit-name" href="#" data-bs-toggle="modal" data-bs-target="#editNameModal">Modifica</a>
             </div>
           </div>
           <hr>
