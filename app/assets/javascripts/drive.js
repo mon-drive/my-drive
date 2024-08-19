@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = shareForm.querySelector('input[name="authenticity_token"]').value;
 
     fetch('/share', {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': token
