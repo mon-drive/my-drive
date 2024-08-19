@@ -105,6 +105,7 @@ $(document).on('turbolinks:load', function() {
 
   // Properties
   $('.properties-item').on('click', function() {
+    $('#md_loading').modal('show');
     var itemId = $(this).data('id');
     var isFolder = $(this).data('is-folder');
     if(isFolder == "application/vnd.google-apps.folder"){
@@ -127,11 +128,16 @@ $(document).on('turbolinks:load', function() {
         var ownersText = data.owners.map(owner => owner.display_name + " (" + owner.email + ")").join(", ");
         $('#file-owners').text(ownersText);
         
-        var permissionsText = data.permissions.map(permission => {
-          return permission.role + " (" + permission.type + ")";
-        }).join(", ");
+        console.log(data.permissions);
+        if(data.permissions!=null){
+          var permissionsText = data.permissions.map(permission => {
+            return permission.role + " (" + permission.type + ")";
+          }).join(", ");
+          $('#file-role').text(permissionsText);
+        }else{
+          $('#file-role').text("-");
+        }
         
-        $('#file-role').text(permissionsText);
         $('#file-shared').text((data.shared ? "Yes" : "No"));
 
         if(isFolder){
@@ -139,7 +145,7 @@ $(document).on('turbolinks:load', function() {
         }else{
           $('#file-contains').text("-");
         }
-        
+        $('#md_loading').modal('hide');
         $('#filePropertiesModal').modal('show');
       }
     });

@@ -63,8 +63,23 @@
   </div>
 </div>
 <!--fine modal scan-->
+<!--modal animazione caricamento-->
+<div class="modal fade" id="md_loading" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content p-0 border-0 bg-transparent shadow-none">
+      <div class="modal-body p-0">
+        <div class="text-center">
+          <div class="spinner-border" role="status" style="color: red; width: 4rem; height: 4rem;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <!--modal esportazione file-->
-<!--modal durante esportazione file-->
 <div class="modal fade" id="md_export" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -338,8 +353,10 @@
                     <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
                   <% end %>
                 <% else %>
-                  <img src="<%= item.icon_link %>" alt="Icona" class="bi img-fluid mb-2" style="width: 22px; height: 22px;" />
-                  <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+                  <%= link_to item.web_view_link, target: "_blank" ,class: 'text-decoration-none text-dark' do %>
+                    <img src="<%= item.icon_link %>" alt="Icona" class="bi img-fluid mb-2" style="width: 22px; height: 22px;" />
+                    <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+                  <% end %>
                 <% end %>
 
                 <!-- Dropdown menu -->
@@ -513,4 +530,3 @@
   }
 
 </style>
-

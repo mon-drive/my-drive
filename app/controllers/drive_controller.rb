@@ -208,28 +208,25 @@ class DriveController < ApplicationController
 
 
     def properties
-      #initialize drive service
+      # Initialize drive service
       drive_service = initialize_drive_service
 
-      #get file id
+      # Get file id
       file_id = params[:id]
 
-      #save file data
+      # Save file data
       file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time, owners, permissions, shared')
 
-      folder_number = 0
-      file_number = 0
-
-      @all_items = get_files_and_folders_in_folder(drive_service, file_id)
-
       if file.mime_type == 'application/vnd.google-apps.folder'
-        @all_items.each do |item|
-          if item.mime_type == 'application/vnd.google-apps.folder'
-            folder_number += 1
-          else
-            file_number += 1
-          end
-        end
+        # Calcola la dimensione, il numero di file e cartelle ricorsivamente
+        result = calculate_folder_stats(drive_service, file_id)
+        total_size = result[:size]
+        folder_number = result[:folder_count]
+        file_number = result[:file_count]
+      else
+        total_size = file.size.to_i
+        folder_number = 0
+        file_number = 1
       end
 
       # Render the response as JSON
@@ -237,7 +234,7 @@ class DriveController < ApplicationController
         id: file.id,
         name: file.name,
         mime_type: file.mime_type,
-        size: file.size,
+        size: total_size,
         created_time: file.created_time.to_s,
         modified_time: file.modified_time.to_s,
         owners: file.owners.map { |owner| { display_name: owner.display_name, email: owner.email_address } },
@@ -246,10 +243,43 @@ class DriveController < ApplicationController
         files: file_number,
         shared: file.shared,
       }
+
       render json: file_properties
-      rescue Google::Apis::ClientError => e
-        render json: { error: e.message }, status: :unprocessable_entity
+
+    rescue Google::Apis::ClientError => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
+
+    private
+
+    # Funzione ricorsiva per calcolare la dimensione totale della cartella, il numero di file e cartelle
+    def calculate_folder_stats(drive_service, folder_id)
+      total_size = 0
+      folder_count = 0
+      file_count = 0
+
+      # Ottieni tutti gli elementi nella cartella
+      all_items = get_files_and_folders_in_folder(drive_service, folder_id)
+
+      all_items.each do |item|
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          # Se è una cartella, incremento il conteggio delle cartelle e faccio una chiamata ricorsiva
+          folder_count += 1
+          result = calculate_folder_stats(drive_service, item.id)
+          total_size += result[:size]
+          folder_count += result[:folder_count]
+          file_count += result[:file_count]
+        else
+          # Se è un file, incremento il conteggio dei file e aggiungo la sua dimensione al totale
+          file_count += 1
+          total_size += item.size.to_i if item.size
+        end
+      end
+
+      { size: total_size, folder_count: folder_count, file_count: file_count }
+    end
+
+
 
     def extension
       #initialize drive service
@@ -689,7 +719,7 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: "'#{folder_id}' in parents and trashed = false or sharedWithMe = true",
-          fields: 'nextPageToken, files(id, name, mimeType, parents,fileExtension,iconLink,webViewLink)',
+          fields: 'nextPageToken, files(id, name, mimeType,size, parents,fileExtension,iconLink,webViewLink)',
           spaces: 'drive',
           page_token: next_page_token
         )
