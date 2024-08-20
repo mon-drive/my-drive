@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_19_152235) do
+ActiveRecord::Schema.define(version: 2024_08_20_134406) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "folder_id"
@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(version: 2024_08_19_152235) do
   end
 
   create_table "files", force: :cascade do |t|
+    t.string "file_id"
     t.string "name"
     t.string "mime_type"
     t.integer "size"
@@ -42,17 +43,8 @@ ActiveRecord::Schema.define(version: 2024_08_19_152235) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "folders", force: :cascade do |t|
-    t.string "name"
-    t.string "mime_type"
-    t.integer "size"
-    t.datetime "created_time"
-    t.datetime "modified_time"
-    t.string "permissions"
-    t.boolean "shared"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
+# Could not dump table "folders" because of following StandardError
+#   Unknown type 'array' for column 'owners'
 
   create_table "makes", force: :cascade do |t|
     t.integer "user_id"

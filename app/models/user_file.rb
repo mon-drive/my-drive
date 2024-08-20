@@ -1,4 +1,6 @@
-class File < ApplicationRecord
+class UserFile < ApplicationRecord
+  self.table_name = 'files'
+
   has_many :converts
   has_many :premium_users, through: :converts
   has_many :contains

@@ -2,11 +2,15 @@ class SessionsController < ApplicationController
     skip_before_action :verify_authenticity_token, only: [:create]
 
     def create
-      auth = request.env['omniauth.auth']
-      user = User.from_omniauth(auth)
-      session[:user_id] = user.id
-      session[:image] = auth.info.image
-      redirect_to dashboard_path
+      begin
+        auth = request.env['omniauth.auth']
+        user = User.from_omniauth(auth)
+        session[:user_id] = user.id
+        session[:image] = auth.info.image
+        redirect_to dashboard_path
+      rescue OmniAuth::Strategies::OAuth2::CallbackError => e
+        redirect_to root_path, alert: "Access denied: #{e.error_reason}. Please try again."
+      end
     end
 
     def destroy

@@ -74,6 +74,16 @@ class DriveController < ApplicationController
 
       drive_service.create_permission(file_id, permission, email_message: message, send_notification_email: notify)
 
+      temp = UserFile.find_by(file_id: file_id)
+      if temp.nil?
+        temp = Folder.find_by(folder_id: file_id)
+        if not temp.nil?
+          ShareFolder.create(folder_id: file_id, user_id: current_user.id)
+        end
+      else
+        #ShareFile.create(file_id: file_id, user_id: current_user.id)
+      end
+
       respond_to do |format|
         format.json { render json: { success: true, message: 'File condiviso con successo.' } }
       end
@@ -174,6 +184,7 @@ class DriveController < ApplicationController
               render json: { error: 'Conversione a PNG fallita' }, status: :unprocessable_entity
             end
           end
+          #Convert.create(file_id: file_id, premium_user_id: current_user.id)
         else
           render json: { error: "Conversione fallita: #{response.code} #{response.message}" }, status: :unprocessable_entity
         end
@@ -215,7 +226,11 @@ class DriveController < ApplicationController
       file_id = params[:id]
 
       # Save file data
-      file = drive_service.get_file(file_id, fields: 'id, name, mime_type, size, created_time, modified_time, owners, permissions, shared')
+      file = drive_service.get_file(file_id, fields: 'owners, permissions')
+      myFile = UserFile.find_by(file_id: file_id)
+      if myFile.nil?
+        myFile = Folder.find_by(folder_id: file_id)
+      end
 
       if file.mime_type == 'application/vnd.google-apps.folder'
         # Calcola la dimensione, il numero di file e cartelle ricorsivamente
@@ -231,17 +246,17 @@ class DriveController < ApplicationController
 
       # Render the response as JSON
       file_properties = {
-        id: file.id,
-        name: file.name,
-        mime_type: file.mime_type,
+        id: myFile.id,
+        name: myFile.name,
+        mime_type: myFile.mime_type,
         size: total_size,
-        created_time: file.created_time.to_s,
-        modified_time: file.modified_time.to_s,
+        created_time: myFile.created_time.to_s,
+        modified_time: myFile.modified_time.to_s,
         owners: file.owners.map { |owner| { display_name: owner.display_name, email: owner.email_address } },
         permissions: file.permissions,
         folders: folder_number,
         files: file_number,
-        shared: file.shared,
+        shared: myFile.shared,
       }
 
       render json: file_properties
@@ -773,13 +788,49 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: 'trashed = false or sharedWithMe = true',
-          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          fields: 'nextPageToken, files(id, name, mime_type, parents, trashed, size, created_time, modified_time, owners, permissions, shared)',
           spaces: 'drive',
           page_token: next_page_token
         )
         all_items.concat(response.files)
         next_page_token = response.next_page_token
       end while next_page_token.present?
+
+      all_items.each do |item|
+        idString = item.id.to_s
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          unless Folder.exists?(folder_id: idString)
+            Folder.create(
+              folder_id: idString,
+              name: item.name,
+              mime_type: item.mime_type,
+              size: item.size,
+              owners: item.owners,
+              created_time: item.created_time,
+              modified_time: item.modified_time,
+              permissions: item.permissions,
+              shared: item.shared
+            )
+            Possess.create(user_id: current_user.id, folder_id: idString)
+          end
+        else
+          unless UserFile.exists?(file_id: idString)
+            UserFile.create(
+              file_id: idString,
+              name: item.name,
+              mime_type: item.mime_type,
+              size: item.size,
+              created_time: item.created_time,
+              modified_time: item.modified_time,
+              permissions: item.permissions,
+              shared: item.shared
+            )
+            Contains.create(file_id = idString, folder_id = item.parents[0])
+          end
+        end
+      end
+
+
 
       all_items
     end

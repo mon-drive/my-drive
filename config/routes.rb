@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   # Route for OmniAuth
   match 'auth/:provider/callback', to: 'sessions#create', via: [:get, :post]
-  get 'auth/failure', to: redirect('/')
+  get 'auth/failure', to: 'sessions#auth_failure'
 
   # Route for logout
   get 'signout', to: 'sessions#destroy', as: 'signout'
