@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_20_134406) do
+ActiveRecord::Schema.define(version: 2024_08_21_140125) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "folder_id"
@@ -37,14 +37,40 @@ ActiveRecord::Schema.define(version: 2024_08_20_134406) do
     t.integer "size"
     t.datetime "created_time"
     t.datetime "modified_time"
-    t.string "permissions"
     t.boolean "shared"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
 # Could not dump table "folders" because of following StandardError
-#   Unknown type 'array' for column 'owners'
+#   Unknown type '' for column 'owners'
+
+  create_table "has_owners", force: :cascade do |t|
+    t.integer "owner_id"
+    t.string "item"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["owner_id"], name: "index_has_owners_on_owner_id"
+  end
+
+  create_table "has_parents", force: :cascade do |t|
+    t.integer "parent_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "item_id", null: false
+    t.string "item_type", null: false
+    t.index ["parent_id"], name: "index_has_parents_on_parent_id"
+  end
+
+  create_table "has_permissions", force: :cascade do |t|
+    t.integer "permission_id"
+    t.string "item"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "item_id", null: false
+    t.string "item_type", null: false
+    t.index ["permission_id"], name: "index_has_permissions_on_permission_id"
+  end
 
   create_table "makes", force: :cascade do |t|
     t.integer "user_id"
@@ -53,6 +79,30 @@ ActiveRecord::Schema.define(version: 2024_08_20_134406) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["transaction_id"], name: "index_makes_on_transaction_id"
     t.index ["user_id"], name: "index_makes_on_user_id"
+  end
+
+  create_table "owners", force: :cascade do |t|
+    t.string "displayName"
+    t.string "emailAddress"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "parents", force: :cascade do |t|
+    t.string "itemid"
+    t.integer "num"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "permissions", force: :cascade do |t|
+    t.string "permission_type"
+    t.string "role"
+    t.string "emailAddress"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "permission_id"
+    t.index ["permission_id"], name: "index_permissions_on_permission_id"
   end
 
   create_table "possesses", force: :cascade do |t|
@@ -108,6 +158,9 @@ ActiveRecord::Schema.define(version: 2024_08_20_134406) do
   add_foreign_key "contains", "folders"
   add_foreign_key "converts", "files"
   add_foreign_key "converts", "users", column: "premium_user_id"
+  add_foreign_key "has_owners", "owners"
+  add_foreign_key "has_parents", "parents"
+  add_foreign_key "has_permissions", "permissions"
   add_foreign_key "makes", "transactions"
   add_foreign_key "makes", "users"
   add_foreign_key "possesses", "folders"

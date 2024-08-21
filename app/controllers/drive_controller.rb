@@ -81,7 +81,7 @@ class DriveController < ApplicationController
           ShareFolder.create(folder_id: file_id, user_id: current_user.id)
         end
       else
-        #ShareFile.create(file_id: file_id, user_id: current_user.id)
+        ShareFile.create(file_id: file_id, user_id: current_user.id)
       end
 
       respond_to do |format|
@@ -805,13 +805,10 @@ class DriveController < ApplicationController
               name: item.name,
               mime_type: item.mime_type,
               size: item.size,
-              owners: item.owners,
               created_time: item.created_time,
               modified_time: item.modified_time,
-              permissions: item.permissions,
               shared: item.shared
             )
-            Possess.create(user_id: current_user.id, folder_id: idString)
           end
         else
           unless UserFile.exists?(file_id: idString)
@@ -822,15 +819,58 @@ class DriveController < ApplicationController
               size: item.size,
               created_time: item.created_time,
               modified_time: item.modified_time,
-              permissions: item.permissions,
               shared: item.shared
             )
-            Contains.create(file_id = idString, folder_id = item.parents[0])
+          end
+        end
+        temp = 0
+        itemid = Folder.find_by(folder_id: idString)
+        if itemid.nil?
+          itemid = UserFile.find_by(file_id: idString)
+        end
+        if item.parents
+          item.parents.each do |parent|
+
+            parent = Parent.create(itemid: idString, num: temp)
+            HasParent.create(item: itemid, parent_id: parent)
+
+            temp = temp + 1
+          end
+        end
+        if item.permissions
+          item.permissions.each do |permission|
+            puts permission.id
+            if not Permission.exists?(permission_id: permission.id.to_s)
+              permiss = Permission.create(permission_id: permission.id.to_s, permission_type: permission.type, role: permission.role, emailAddress: permission.email_address)
+            end
+            if not HasPermission.exists?(item: itemid, permission_id: permiss)
+              HasPermission.create(item: itemid, permission_id: permiss)
+            end
+          end
+        end
+        
+        if item.owners
+          item.owners.each do |owner|
+            owner = Owner.create(displayName: owner.display_name, emailAddress: owner.email_address)
+            HasOwner.create(item: itemid, owner_id: owner)
           end
         end
       end
 
-
+      all_items.each do |item|
+        idString = item.id.to_s
+        user = User.find(current_user.id)
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          unless Folder.exists?(folder_id: idString)
+            Possess.create(user_id: user, folder_id: item)
+          end
+        else
+          unless UserFile.exists?(file_id: idString)
+            parent = Folder.find_by(folder_id: item.parents[0])
+            Contains.create(file_id: item, folder_id: parent)
+          end
+        end
+      end
 
       all_items
     end
