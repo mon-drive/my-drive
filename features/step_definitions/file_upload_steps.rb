@@ -1,32 +1,13 @@
 require 'google/apis/drive_v3'
 require 'googleauth'
+require 'httparty'
 
 #Google::Apis::DriveV3 namespace for Google Drive interactions
 Drive = Google::Apis::DriveV3
 
 Given('a registered user named "Bob"') do
   # Mocking OmniAuth for Google OAuth login
-  visit "/auth/google_oauth2"
-  within_window(windows.last) do
-    sleep 1
-    #fill in email
-    email_field = find(:xpath, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[2]/div/div/div[1]/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input")
-    sleep 2
-    Figaro.env.OAUTH_TEST_EMAIL.chars.each do |char|
-      email_field.send_keys(char)
-      sleep(rand(0.05..0.2))
-    end
-    click_button 'Next'
-    #fill in password
-    password_field = find(:xpath, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[2]/div/div/div[1]/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input")
-    email_field.set(Figaro.env.OAUTH_TEST_PASSWORD)
-
-    click_button 'Next'
-    sleep 2
-
-    click_button 'Continue'
-    sleep 2
-  end
+  
 end
 
 Given("Bob wants to upload one or more valid files") do
