@@ -10,40 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_21_140125) do
+ActiveRecord::Schema.define(version: 2024_08_25_161155) do
 
   create_table "contains", force: :cascade do |t|
-    t.integer "folder_id"
-    t.integer "file_id"
+    t.integer "user_folder_id"
+    t.integer "user_file_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["file_id"], name: "index_contains_on_file_id"
-    t.index ["folder_id"], name: "index_contains_on_folder_id"
+    t.index ["user_file_id"], name: "index_contains_on_user_file_id"
+    t.index ["user_folder_id"], name: "index_contains_on_user_folder_id"
   end
 
   create_table "converts", force: :cascade do |t|
-    t.integer "file_id"
+    t.integer "user_file_id"
     t.integer "premium_user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["file_id"], name: "index_converts_on_file_id"
     t.index ["premium_user_id"], name: "index_converts_on_premium_user_id"
+    t.index ["user_file_id"], name: "index_converts_on_user_file_id"
   end
-
-  create_table "files", force: :cascade do |t|
-    t.string "file_id"
-    t.string "name"
-    t.string "mime_type"
-    t.integer "size"
-    t.datetime "created_time"
-    t.datetime "modified_time"
-    t.boolean "shared"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
-# Could not dump table "folders" because of following StandardError
-#   Unknown type '' for column 'owners'
 
   create_table "has_owners", force: :cascade do |t|
     t.integer "owner_id"
@@ -55,21 +40,21 @@ ActiveRecord::Schema.define(version: 2024_08_21_140125) do
 
   create_table "has_parents", force: :cascade do |t|
     t.integer "parent_id"
+    t.string "item_type", null: false
+    t.integer "item_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "item_id", null: false
-    t.string "item_type", null: false
+    t.index ["item_type", "item_id"], name: "index_has_parents_on_item"
     t.index ["parent_id"], name: "index_has_parents_on_parent_id"
   end
 
   create_table "has_permissions", force: :cascade do |t|
-    t.integer "permission_id"
-    t.string "item"
+    t.string "item_type"
+    t.string "item_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "item_id", null: false
-    t.string "item_type", null: false
-    t.index ["permission_id"], name: "index_has_permissions_on_permission_id"
+    t.integer "permission_id"
+    t.index ["item_type", "item_id"], name: "index_has_permissions_on_item"
   end
 
   create_table "makes", force: :cascade do |t|
@@ -107,34 +92,58 @@ ActiveRecord::Schema.define(version: 2024_08_21_140125) do
 
   create_table "possesses", force: :cascade do |t|
     t.integer "user_id"
-    t.integer "folder_id"
+    t.integer "user_folder_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["folder_id"], name: "index_possesses_on_folder_id"
+    t.index ["user_folder_id"], name: "index_possesses_on_user_folder_id"
     t.index ["user_id"], name: "index_possesses_on_user_id"
   end
 
   create_table "share_files", force: :cascade do |t|
     t.integer "user_id"
-    t.integer "file_id"
+    t.integer "user_file_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["file_id"], name: "index_share_files_on_file_id"
+    t.index ["user_file_id"], name: "index_share_files_on_user_file_id"
     t.index ["user_id"], name: "index_share_files_on_user_id"
   end
 
   create_table "share_folders", force: :cascade do |t|
     t.integer "user_id"
-    t.integer "folder_id"
+    t.integer "user_folder_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["folder_id"], name: "index_share_folders_on_folder_id"
+    t.index ["user_folder_id"], name: "index_share_folders_on_user_folder_id"
     t.index ["user_id"], name: "index_share_folders_on_user_id"
   end
 
   create_table "transactions", force: :cascade do |t|
     t.datetime "data"
     t.string "transaction_type"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "user_files", force: :cascade do |t|
+    t.string "user_file_id"
+    t.string "name"
+    t.string "mime_type"
+    t.integer "size"
+    t.datetime "created_time"
+    t.datetime "modified_time"
+    t.boolean "shared"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "user_folders", force: :cascade do |t|
+    t.string "user_folder_id"
+    t.string "name"
+    t.string "mime_type"
+    t.integer "size"
+    t.datetime "created_time"
+    t.datetime "modified_time"
+    t.boolean "shared"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -154,19 +163,20 @@ ActiveRecord::Schema.define(version: 2024_08_21_140125) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  add_foreign_key "contains", "files"
-  add_foreign_key "contains", "folders"
-  add_foreign_key "converts", "files"
+  add_foreign_key "contains", "user_files"
+  add_foreign_key "contains", "user_folders"
+  add_foreign_key "converts", "user_files"
+  add_foreign_key "converts", "user_files"
   add_foreign_key "converts", "users", column: "premium_user_id"
   add_foreign_key "has_owners", "owners"
   add_foreign_key "has_parents", "parents"
   add_foreign_key "has_permissions", "permissions"
   add_foreign_key "makes", "transactions"
   add_foreign_key "makes", "users"
-  add_foreign_key "possesses", "folders"
+  add_foreign_key "possesses", "user_folders"
   add_foreign_key "possesses", "users"
-  add_foreign_key "share_files", "files"
+  add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "users"
-  add_foreign_key "share_folders", "folders"
+  add_foreign_key "share_folders", "user_folders"
   add_foreign_key "share_folders", "users"
 end

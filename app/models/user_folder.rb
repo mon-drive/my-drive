@@ -1,6 +1,6 @@
-class Folder < ApplicationRecord
+class UserFolder < ApplicationRecord
   has_many :contains
-  has_many :files, through: :contains
+  has_many :user_files, through: :contains
 
   has_many :possesses
   has_many :users, through: :possesses

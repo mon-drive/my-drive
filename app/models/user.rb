@@ -4,11 +4,11 @@ class User < ApplicationRecord
   has_many :makes
   has_many :transactions, through: :makes
   has_many :possesses
-  has_many :folders, through: :possesses
+  has_many :user_folders, through: :possesses
   has_many :share_folders
-  has_many :shared_folders, through: :share_folders, source: :folder
+  has_many :shared_folders, through: :share_folders, source: :iser_folder
   has_many :share_files
-  has_many :shared_files, through: :share_files, source: :file
+  has_many :shared_files, through: :share_files, source: :user_file
 
   def self.from_omniauth(auth)
     user = where(provider: auth.provider, uid: auth.uid).first_or_create do |user|

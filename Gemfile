@@ -70,3 +70,5 @@ gem 'httparty'
 gem 'rubyzip'
 
 gem "net-http"
+
+gem 'rufus-scheduler'

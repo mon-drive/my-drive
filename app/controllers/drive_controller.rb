@@ -9,6 +9,8 @@ class DriveController < ApplicationController
     require 'json'
     require 'zip'
 
+    require 'rufus-scheduler'
+
     def dashboard
       drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
@@ -34,6 +36,7 @@ class DriveController < ApplicationController
         end
       end
       storage_info()
+      update_database
     end
 
     def setting
@@ -74,14 +77,14 @@ class DriveController < ApplicationController
 
       drive_service.create_permission(file_id, permission, email_message: message, send_notification_email: notify)
 
-      temp = UserFile.find_by(file_id: file_id)
+      temp = UserFile.find_by(user_file_id: file_id)
       if temp.nil?
-        temp = Folder.find_by(folder_id: file_id)
+        temp = UserFolder.find_by(user_folder_id: file_id)
         if not temp.nil?
-          ShareFolder.create(folder_id: file_id, user_id: current_user.id)
+          ShareFolder.create(user_folder_id: file_id, user_id: current_user.id)
         end
       else
-        ShareFile.create(file_id: file_id, user_id: current_user.id)
+        ShareFile.create(user_file_id: file_id, user_id: current_user.id)
       end
 
       respond_to do |format|
@@ -227,9 +230,9 @@ class DriveController < ApplicationController
 
       # Save file data
       file = drive_service.get_file(file_id, fields: 'owners, permissions')
-      myFile = UserFile.find_by(file_id: file_id)
+      myFile = UserFile.find_by(user_file_id: file_id)
       if myFile.nil?
-        myFile = Folder.find_by(folder_id: file_id)
+        myFile = UserFolder.find_by(user_folder_id: file_id)
       end
 
       if file.mime_type == 'application/vnd.google-apps.folder'
@@ -796,82 +799,6 @@ class DriveController < ApplicationController
         next_page_token = response.next_page_token
       end while next_page_token.present?
 
-      all_items.each do |item|
-        idString = item.id.to_s
-        if item.mime_type == 'application/vnd.google-apps.folder'
-          unless Folder.exists?(folder_id: idString)
-            Folder.create(
-              folder_id: idString,
-              name: item.name,
-              mime_type: item.mime_type,
-              size: item.size,
-              created_time: item.created_time,
-              modified_time: item.modified_time,
-              shared: item.shared
-            )
-          end
-        else
-          unless UserFile.exists?(file_id: idString)
-            UserFile.create(
-              file_id: idString,
-              name: item.name,
-              mime_type: item.mime_type,
-              size: item.size,
-              created_time: item.created_time,
-              modified_time: item.modified_time,
-              shared: item.shared
-            )
-          end
-        end
-        temp = 0
-        itemid = Folder.find_by(folder_id: idString)
-        if itemid.nil?
-          itemid = UserFile.find_by(file_id: idString)
-        end
-        if item.parents
-          item.parents.each do |parent|
-
-            parent = Parent.create(itemid: idString, num: temp)
-            HasParent.create(item: itemid, parent_id: parent)
-
-            temp = temp + 1
-          end
-        end
-        if item.permissions
-          item.permissions.each do |permission|
-            puts permission.id
-            if not Permission.exists?(permission_id: permission.id.to_s)
-              permiss = Permission.create(permission_id: permission.id.to_s, permission_type: permission.type, role: permission.role, emailAddress: permission.email_address)
-            end
-            if not HasPermission.exists?(item: itemid, permission_id: permiss)
-              HasPermission.create(item: itemid, permission_id: permiss)
-            end
-          end
-        end
-        
-        if item.owners
-          item.owners.each do |owner|
-            owner = Owner.create(displayName: owner.display_name, emailAddress: owner.email_address)
-            HasOwner.create(item: itemid, owner_id: owner)
-          end
-        end
-      end
-
-      all_items.each do |item|
-        idString = item.id.to_s
-        user = User.find(current_user.id)
-        if item.mime_type == 'application/vnd.google-apps.folder'
-          unless Folder.exists?(folder_id: idString)
-            Possess.create(user_id: user, folder_id: item)
-          end
-        else
-          unless UserFile.exists?(file_id: idString)
-            parent = Folder.find_by(folder_id: item.parents[0])
-            Contains.create(file_id: item, folder_id: parent)
-          end
-        end
-      end
-
       all_items
     end
 
@@ -962,5 +889,157 @@ class DriveController < ApplicationController
       auth = request.env['omniauth.auth']
       @google_profile_image = session[:image]
     end
+
+    def update_database
+      drive_service = initialize_drive_service
+      all_items = []
+      next_page_token = nil
+
+      begin
+        response = drive_service.list_files(
+          q: 'trashed = false or sharedWithMe = true',
+          fields: 'nextPageToken, files(id, name, mime_type, parents, trashed, size, created_time, modified_time, owners, permissions, shared)',
+          spaces: 'drive',
+          page_token: next_page_token
+        )
+        all_items.concat(response.files)
+        next_page_token = response.next_page_token
+      end while next_page_token.present?
+
+      all_items.each do |item|
+        idString = item.id.to_s
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          unless UserFolder.exists?(user_folder_id: idString)
+            UserFolder.create(
+              user_folder_id: idString,
+              name: item.name,
+              mime_type: item.mime_type,
+              size: item.size,
+              created_time: item.created_time,
+              modified_time: item.modified_time,
+              shared: item.shared
+            )
+          end
+        else
+          unless UserFile.exists?(user_file_id: idString)
+            UserFile.create(
+              user_file_id: idString,
+              name: item.name,
+              mime_type: item.mime_type,
+              size: item.size,
+              created_time: item.created_time,
+              modified_time: item.modified_time,
+              shared: item.shared
+            )
+          end
+        end
+
+        temp = 0
+        itemid = UserFolder.find_by(user_folder_id: idString) || UserFile.find_by(user_file_id: idString)
+
+        if itemid.mime_type == 'application/vnd.google-apps.folder'
+          id = itemid.id
+        else
+          id = itemid.id
+        end
+
+        if item.parents
+          item.parents.each do |parent|
+            if not Parent.exists?(itemid: idString)
+              parent = Parent.create(itemid: idString, num: temp)
+              temp += 1
+            end
+            parent = Parent.find_by(itemid: idString)
+            unless HasParent.exists?(item_id: id, parent_id: parent.id)
+              if item.mime_type == 'application/vnd.google-apps.folder'
+                hp = HasParent.create(item_id: id, parent_id: parent.id, item_type: 'UserFolder')
+              else
+                hp = HasParent.create(item_id: id, parent_id: parent.id, item_type: 'UserFile')
+              end
+            end
+          end
+        end
+
+        if item.permissions
+          item.permissions.each do |permission|
+            unless Permission.exists?(permission_id: permission.id.to_s)
+              permiss = Permission.create(
+                permission_id: permission.id.to_s,
+                permission_type: permission.type,
+                role: permission.role,
+                emailAddress: permission.email_address
+              )
+            end
+            permiss = Permission.find_by(permission_id: permission.id.to_s)
+            unless HasPermission.exists?(item_id: id, permission_id: permiss.id)
+              if item.mime_type == 'application/vnd.google-apps.folder'
+                hp = HasPermission.create(item_id: id, permission_id: permiss.id, item_type: 'UserFolder')
+              else
+                hp = HasPermission.create(item_id: id, permission_id: permiss.id, item_type: 'UserFile')
+              end
+            end
+          end
+        end
+
+        if item.owners
+          item.owners.each do |owner|
+            unless Owner.exists?(emailAddress: owner.email_address)
+              own = Owner.create(displayName: owner.display_name, emailAddress: owner.email_address)
+              HasOwner.create(item: id, owner_id: own.id)
+            end
+
+            ow = Owner.find_by(displayName: owner.display_name, emailAddress: owner.email_address)
+            unless HasOwner.exists?(item: id, owner_id: ow.id)
+              HasOwner.create(item: id, owner_id: ow.id)
+            end
+          end
+        end
+      end
+
+      all_items.each do |item|
+        idString = item.id.to_s
+        user = User.find(current_user.id)
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          unless UserFolder.exists?(user_folder_id: idString)
+            folder = UserFolder.find_by(user_folder_id: idString)
+          end
+          folder = UserFolder.find_by(user_folder_id: idString)
+          unless Possess.exists?(user_id: user.id, user_folder_id: folder.id)
+            Possess.create(user_id: user.id, user_folder_id: folder.id)
+          end
+        end
+
+        if item.parents
+          parent = UserFolder.find_by(user_folder_id: item.parents[0])
+          file = UserFile.find_by(user_file_id: idString)
+          if parent && file
+            unless Contains.exists?(user_folder_id: parent, user_file_id: file)
+              con = Contains.create(user_folder_id: parent.id, user_file_id: file.id)
+              if con.save
+                puts "Contains salvato correttamente."
+              else
+                puts "Errore: #{con.errors.full_messages}"
+                file = UserFile.find_by(id: file.id)
+                puts "File ID: #{file.id}"
+                puts "Folder ID: #{parent.id}"
+              end
+            end
+          end
+        end
+
+      end
+    end
+
+    # Esegue l'aggiornamento del database ogni 30 secondi
+    def schedule_update
+      scheduler = Rufus::Scheduler.new
+
+      scheduler.every '30s' do
+        update_database
+      end
+    end
+
+    # Avvia la pianificazione quando il controller è caricato
+    after_action :schedule_update, only: [:dashboard]
 
   end
