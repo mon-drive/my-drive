@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_25_161155) do
+ActiveRecord::Schema.define(version: 2024_08_26_090911) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -134,6 +134,11 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.boolean "shared"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "web_view_link"
+    t.string "icon_link"
+    t.string "file_extension"
+    t.boolean "trashed", default: false
+    t.index ["user_file_id"], name: "index_user_files_on_user_file_id", unique: true
   end
 
   create_table "user_folders", force: :cascade do |t|
@@ -146,6 +151,8 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.boolean "shared"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "trashed", default: false
+    t.index ["user_folder_id"], name: "index_user_folders_on_user_folder_id", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -164,6 +171,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
   end
 
   add_foreign_key "contains", "user_files"
+  add_foreign_key "contains", "user_files"
   add_foreign_key "contains", "user_folders"
   add_foreign_key "converts", "user_files"
   add_foreign_key "converts", "user_files"
@@ -175,6 +183,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
   add_foreign_key "makes", "users"
   add_foreign_key "possesses", "user_folders"
   add_foreign_key "possesses", "users"
+  add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "users"
   add_foreign_key "share_folders", "user_folders"

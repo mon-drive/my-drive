@@ -12,31 +12,29 @@ class DriveController < ApplicationController
     require 'rufus-scheduler'
 
     def dashboard
-      drive_service = initialize_drive_service
       @current_folder = params[:folder_id] || 'root'
-      @all_items = get_files_and_folders(drive_service)
+      @all_items = get_files_and_folders
 
-      @root_folder_name = get_root_name(drive_service)
-      @root_folder_id = get_root_id(drive_service)
+      @root_folder_name = get_root_name
+      @root_folder_id = get_root_id
       if params[:folder_id] == 'bin'
         @current_folder_name = 'Cestino'
       else
-        @current_folder_name = @current_folder == 'root' ? @root_folder_name : get_folder_name(drive_service, @current_folder)
-        @parent_folder = get_parent_folder(drive_service, @current_folder) unless @current_folder == 'root'
+        @current_folder_name = @current_folder == 'root' ? @root_folder_name : get_folder_name(@current_folder)
+        @parent_folder = get_parent_folder(@current_folder) unless @current_folder == 'root'
       end
       if params[:search].present?
         @current_folder = 'null'
-        @items = search_files(drive_service, params[:search])
+        @items = search_files(params[:search])
       else
         if params[:folder_id] == 'bin'
           @current_folder = 'bin'
-          @items = get_files_and_folders_in_bin(drive_service)
+          @items = get_files_and_folders_in_bin
         else
-          @items = get_files_and_folders_in_folder(drive_service, @current_folder)
+          @items = get_files_and_folders_in_folder(@current_folder)
         end
       end
       storage_info()
-      update_database
     end
 
     def setting
@@ -277,7 +275,7 @@ class DriveController < ApplicationController
       file_count = 0
 
       # Ottieni tutti gli elementi nella cartella
-      all_items = get_files_and_folders_in_folder(drive_service, folder_id)
+      all_items = get_files_and_folders_in_folder(folder_id)
 
       all_items.each do |item|
         if item.mime_type == 'application/vnd.google-apps.folder'
@@ -330,7 +328,7 @@ class DriveController < ApplicationController
       # Funzione ricorsiva per scaricare i file e le sottocartelle
       def download_files_from_folder(service, folder_id, parent_path)
         # Recupera i file e le cartelle nella cartella specificata
-        drive_files = get_files_and_folders_in_folder(service, folder_id)
+        drive_files = get_files_and_folders_in_folder(folder_id)
 
         drive_files.each do |file|
           if file.mime_type == 'application/vnd.google-apps.folder'
@@ -664,7 +662,7 @@ class DriveController < ApplicationController
 
     def empty_bin
       drive_service = initialize_drive_service
-      items = get_files_and_folders_in_bin(drive_service)
+      items = get_files_and_folders_in_bin
 
       items.each do |item|
         drive_service.delete_file(item.id)
@@ -730,43 +728,45 @@ class DriveController < ApplicationController
       drive_service
     end
 
-    def get_files_and_folders_in_folder(drive_service, folder_id)
+    def get_files_and_folders_in_folder(folder_id)
       all_items = []
       next_page_token = nil
 
-      begin
-        response = drive_service.list_files(
-          q: "'#{folder_id}' in parents and trashed = false or sharedWithMe = true",
-          fields: 'nextPageToken, files(id, name, mimeType,size, parents,fileExtension,iconLink,webViewLink)',
-          spaces: 'drive',
-          page_token: next_page_token
-        )
-        all_items.concat(response.files)
-        next_page_token = response.next_page_token
-      end while next_page_token.present?
+      if folder_id == 'root'
+        parent = Parent.find_by(id: 1)
+      else
+        parent = Parent.find_by(itemid: folder_id)
+      end
+      has_parents = HasParent.where(parent_id: parent.id)
+
+      has_parents.each do |item|
+        if item.item_type == 'UserFile'
+          file = UserFile.find_by(id: item.item_id)
+          if file && !file.trashed
+            all_items << file
+          end
+        else
+          folder = UserFolder.find_by(id: item.item_id)
+          if folder && !folder.trashed
+            puts folder.name
+            all_items << folder
+          end
+        end
+      end
 
       all_items
     end
 
-    def get_files_and_folders_in_bin(drive_service)
+    def get_files_and_folders_in_bin()
       all_items = []
-      next_page_token = nil
 
-      begin
-        response = drive_service.list_files(
-          q: "trashed = true",
-          fields: 'nextPageToken, files(id, name, mimeType, parents)',
-          spaces: 'drive',
-          page_token: next_page_token
-        )
-        all_items.concat(response.files)
-        next_page_token = response.next_page_token
-      end while next_page_token.present?
+      all_items = UserFolder.where(trashed: true) + UserFile.where(trashed: true)
 
       all_items
     end
 
-    def search_files(drive_service, query)
+    def search_files(query)
+      drive_service = initialize_drive_service
       all_items = []
       next_page_token = nil
 
@@ -784,31 +784,26 @@ class DriveController < ApplicationController
       all_items
     end
 
-    def get_files_and_folders(drive_service)
+    def get_files_and_folders()
       all_items = []
-      next_page_token = nil
 
-      begin
-        response = drive_service.list_files(
-          q: 'trashed = false or sharedWithMe = true',
-          fields: 'nextPageToken, files(id, name, mime_type, parents, trashed, size, created_time, modified_time, owners, permissions, shared)',
-          spaces: 'drive',
-          page_token: next_page_token
-        )
-        all_items.concat(response.files)
-        next_page_token = response.next_page_token
-      end while next_page_token.present?
+      all_items = UserFolder.where(trashed: false) + UserFile.where(trashed: false)
 
       all_items
     end
 
-    def get_parent_folder(drive_service, folder_id)
+    def get_parent_folder(folder_id)
       return if folder_id == 'root'
 
-      folder = drive_service.get_file(folder_id, fields: 'id, name, parents')
-      parents = folder.parents || []
+      folder = UserFolder.find_by(user_folder_id: folder_id)
+      return if folder.mime_type == 'root'
+      hasParent = HasParent.find_by(item_id: folder.id, item_type: 'UserFolder')
 
-      parents.empty? ? nil : drive_service.get_file(parents.first, fields: 'id, name')
+      parent = Parent.find_by(id: hasParent.parent_id)
+
+      folder = UserFolder.find_by(user_folder_id: parent.itemid)
+
+      folder
     end
 
     def get_current_parents(drive_service, item_id)
@@ -816,19 +811,27 @@ class DriveController < ApplicationController
       file.parents.join(',')
     end
 
-    def get_folder_name(drive_service, folder_id)
-      folder = drive_service.get_file(folder_id, fields: 'name')
+    def get_folder_name(folder_id)
+      folder = UserFolder.find_by(user_folder_id: folder_id)
       folder.name
     end
 
-    def get_root_name(drive_service)
-      folder = drive_service.get_file('root', fields: 'name')
-      folder.name
+    def get_root_name()
+      folder = UserFolder.find_by(mime_type: 'root')
+      if folder
+        folder.name
+      else
+        'Root'
+      end
     end
 
-    def get_root_id(drive_service)
-      folder = drive_service.get_file('root', fields: 'id')
-      folder.id
+    def get_root_id()
+      folder = UserFolder.find_by(mime_type: 'root')
+      if folder
+        folder.user_folder_id
+      else
+        "id"
+      end
     end
 
     def create_folder_in_drive(folder_name)
@@ -897,8 +900,8 @@ class DriveController < ApplicationController
 
       begin
         response = drive_service.list_files(
-          q: 'trashed = false or sharedWithMe = true',
-          fields: 'nextPageToken, files(id, name, mime_type, parents, trashed, size, created_time, modified_time, owners, permissions, shared)',
+          q: 'trashed = false or trashed = true or sharedWithMe = true',
+          fields: 'nextPageToken, files(id, name, mime_type, parents, trashed, size, created_time, modified_time, owners, permissions, shared, webViewLink, iconLink, fileExtension)',
           spaces: 'drive',
           page_token: next_page_token
         )
@@ -906,32 +909,43 @@ class DriveController < ApplicationController
         next_page_token = response.next_page_token
       end while next_page_token.present?
 
+      root = UserFolder.find_by(mime_type: 'root')
+      if root.nil?
+        rootFolder = drive_service.get_file('root', fields: 'id, name, parents, trashed, size, created_time, modified_time, shared')
+        UserFolder.create(user_folder_id: rootFolder.id, name: rootFolder.name, mime_type: 'root', size: rootFolder.size.to_i, created_time: rootFolder.created_time, modified_time: rootFolder.modified_time, shared: rootFolder.shared)
+      end
+
       all_items.each do |item|
         idString = item.id.to_s
         if item.mime_type == 'application/vnd.google-apps.folder'
-          unless UserFolder.exists?(user_folder_id: idString)
-            UserFolder.create(
-              user_folder_id: idString,
-              name: item.name,
-              mime_type: item.mime_type,
-              size: item.size,
-              created_time: item.created_time,
-              modified_time: item.modified_time,
-              shared: item.shared
-            )
-          end
+          UserFolder.upsert({
+            user_folder_id: idString,
+            name: item.name,
+            mime_type: item.mime_type,
+            size: item.size.to_i,
+            created_time: item.created_time,
+            modified_time: item.modified_time,
+            shared: item.shared,
+            trashed: item.trashed,
+            created_at: Time.current,  # Aggiungi questo
+            updated_at: Time.current   # Aggiungi questo
+          }, unique_by: :user_folder_id)
         else
-          unless UserFile.exists?(user_file_id: idString)
-            UserFile.create(
-              user_file_id: idString,
-              name: item.name,
-              mime_type: item.mime_type,
-              size: item.size,
-              created_time: item.created_time,
-              modified_time: item.modified_time,
-              shared: item.shared
-            )
-          end
+          UserFile.upsert({
+            user_file_id: idString,
+            name: item.name,
+            mime_type: item.mime_type,
+            size: item.size.to_i,
+            created_time: item.created_time,
+            modified_time: item.modified_time,
+            shared: item.shared,
+            web_view_link: item.web_view_link,
+            icon_link: item.icon_link,
+            file_extension: item.file_extension,
+            trashed: item.trashed,
+            created_at: Time.current,  # Aggiungi questo
+            updated_at: Time.current   # Aggiungi questo
+          }, unique_by: :user_file_id)
         end
 
         temp = 0
@@ -945,15 +959,22 @@ class DriveController < ApplicationController
 
         if item.parents
           item.parents.each do |parent|
-            if not Parent.exists?(itemid: idString)
-              parent = Parent.create(itemid: idString, num: temp)
+            if item.mime_type == 'application/vnd.google-apps.folder'
+              puts "parent " + parent.to_s
+              puts "son " + item.name
+            end
+            if not Parent.exists?(itemid: parent.to_s)
+              parent = Parent.create(itemid: parent.to_s, num: temp)
               temp += 1
             end
-            parent = Parent.find_by(itemid: idString)
-            unless HasParent.exists?(item_id: id, parent_id: parent.id)
+            parent = Parent.find_by(itemid: parent.to_s)
+            unless HasParent.exists?(item_id: id, parent_id: parent.id, item_type: 'UserFolder')
               if item.mime_type == 'application/vnd.google-apps.folder'
                 hp = HasParent.create(item_id: id, parent_id: parent.id, item_type: 'UserFolder')
-              else
+              end
+            end
+            unless HasParent.exists?(item_id: id, parent_id: parent.id, item_type: 'UserFile')
+              if item.mime_type != 'application/vnd.google-apps.folder'
                 hp = HasParent.create(item_id: id, parent_id: parent.id, item_type: 'UserFile')
               end
             end

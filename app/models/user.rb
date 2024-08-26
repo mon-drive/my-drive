@@ -6,7 +6,7 @@ class User < ApplicationRecord
   has_many :possesses
   has_many :user_folders, through: :possesses
   has_many :share_folders
-  has_many :shared_folders, through: :share_folders, source: :iser_folder
+  has_many :shared_folders, through: :share_folders, source: :user_folder
   has_many :share_files
   has_many :shared_files, through: :share_files, source: :user_file
 

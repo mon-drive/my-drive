@@ -260,12 +260,12 @@
         <% end %>
       <% end %>
           <div id="folderTree" class="list-group">
-            <% if @current_folder != 'root' %>
+            <% if @current_folder != 'root' and @current_folder != @root_folder_id %>
               <% if @parent_folder and @parent_folder.name != @root_folder_name %>
                 <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
               <% end %>
               <% if @parent_folder %>
-                <%= link_to @parent_folder.name, dashboard_path(folder_id: @parent_folder.id), class: 'list-group-item list-group-item-action' %>
+                <%= link_to @parent_folder.name, dashboard_path(folder_id: @parent_folder.user_folder_id), class: 'list-group-item list-group-item-action' %>
               <% else %>
                 <%= link_to @root_folder_name, dashboard_path(folder_id: 'root'), class: 'list-group-item list-group-item-action' %>
               <% end %>
@@ -278,17 +278,25 @@
               <div class="list-group-item list-group-item-action folder-item">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-folder-fill fs-3 me-2"></i>
-                  <%= link_to folder.name, dashboard_path(folder_id: folder.id), class: 'text-dark w-100' %>
+                  <%= link_to folder.name, dashboard_path(folder_id: folder.user_folder_id), class: 'text-dark w-100' %>
                   <button class="btn btn-link folder-toggle" type="button">
                     <i class="bi bi-chevron-down ms-2"></i>
                   </button>
                 </div>
                 <div class="folder-contents" style="display: none;">
-                  <% @all_items.select { |item| item.parents&.include?(folder.id) && item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
-                    <div class="list-group-item list-group-item-action">
-                      <i class="bi bi-folder-fill fs-3 me-2"></i>
-                      <%= link_to subfolder.name, dashboard_path(folder_id: subfolder.id), class: 'text-dark w-100' %>
-                    </div>
+                  <% @all_items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |subfolder| %>
+                    <% parent = Parent.find_by(itemid: folder.user_folder_id)%>
+                    <% son = UserFolder.find_by(user_folder_id: subfolder.user_folder_id)%>
+                    <% if parent and son %>
+                      <% hasParent = HasParent.find_by(parent_id: parent.id, item_id: son.id) %>
+                      <% if hasParent and hasParent.parent_id != hasParent.item_id %>
+                        <div class="list-group-item list-group-item-action">
+                          <i class="bi bi-folder-fill fs-3 me-2"></i>
+                          <%= link_to subfolder.name, dashboard_path(folder_id: subfolder.user_folder_id), class: 'text-dark w-100' %>
+                        </div>
+                      <% end %>
+                    <% end %>
+                    
                   <% end %>
                 </div>
               </div>
