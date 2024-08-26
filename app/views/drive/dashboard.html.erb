@@ -469,7 +469,11 @@
                         <button type="submit" class="dropdown-item"><%= t('dash.delete')%></button>
                         <% end %>
                     </li>
-                    <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" data-is-folder="<%= item.mime_type %>"><%= t('dash.properties')%></a></li>
+                    <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                      <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.user_folder_id %>" data-folder-id="<%= @current_folder %>" data-is-folder="<%= item.mime_type %>"><%= t('dash.properties')%></a></li>
+                    <% else %>
+                      <li><a href="javascript:void(0);" class="dropdown-item properties-item" data-id="<%= item.user_file_id %>" data-file-id="<%= @current_folder %>" data-is-folder="<%= item.mime_type %>"><%= t('dash.properties')%></a></li>
+                    <% end %>
                   </ul>
                 </div>
               </div>

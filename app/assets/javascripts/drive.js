@@ -105,7 +105,7 @@ $(document).on('turbolinks:load', function() {
 
   // Properties
   $('.properties-item').on('click', function() {
-    $('#md_loading').modal('show');
+    //$('#md_loading').modal('show');
     var itemId = $(this).data('id');
     var isFolder = $(this).data('is-folder');
     if(isFolder == "application/vnd.google-apps.folder"){
@@ -145,7 +145,7 @@ $(document).on('turbolinks:load', function() {
         }else{
           $('#file-contains').text("-");
         }
-        $('#md_loading').modal('hide');
+        //$('#md_loading').modal('hide');
         $('#filePropertiesModal').modal('show');
       }
     });

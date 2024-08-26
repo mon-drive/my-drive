@@ -220,27 +220,37 @@ class DriveController < ApplicationController
 
 
     def properties
-      # Initialize drive service
-      drive_service = initialize_drive_service
-
       # Get file id
       file_id = params[:id]
 
       # Save file data
-      file = drive_service.get_file(file_id, fields: 'owners, permissions')
       myFile = UserFile.find_by(user_file_id: file_id)
       if myFile.nil?
         myFile = UserFolder.find_by(user_folder_id: file_id)
       end
 
-      if file.mime_type == 'application/vnd.google-apps.folder'
+      owners = []
+      hasOwner = HasOwner.where(item: myFile.id)
+      hasOwner.each do |owner|
+        own = Owner.find_by(id: owner.owner_id)
+        owners << { display_name: own.displayName, email: own.emailAddress }
+      end
+
+      permissions = []
+      hasPermission = HasPermission.where(item_id: myFile.id)
+      hasPermission.each do |permission|
+        perm = Permission.find_by(id: permission.permission_id)
+        permissions << { role: perm.role, type: perm.permission_type, email: perm.emailAddress }
+      end
+
+      if myFile.mime_type == 'application/vnd.google-apps.folder'
         # Calcola la dimensione, il numero di file e cartelle ricorsivamente
-        result = calculate_folder_stats(drive_service, file_id)
+        result = calculate_folder_stats(file_id)
         total_size = result[:size]
         folder_number = result[:folder_count]
         file_number = result[:file_count]
       else
-        total_size = file.size.to_i
+        total_size = myFile.size
         folder_number = 0
         file_number = 1
       end
@@ -253,8 +263,8 @@ class DriveController < ApplicationController
         size: total_size,
         created_time: myFile.created_time.to_s,
         modified_time: myFile.modified_time.to_s,
-        owners: file.owners.map { |owner| { display_name: owner.display_name, email: owner.email_address } },
-        permissions: file.permissions,
+        owners: owners,
+        permissions: permissions,
         folders: folder_number,
         files: file_number,
         shared: myFile.shared,
@@ -269,7 +279,7 @@ class DriveController < ApplicationController
     private
 
     # Funzione ricorsiva per calcolare la dimensione totale della cartella, il numero di file e cartelle
-    def calculate_folder_stats(drive_service, folder_id)
+    def calculate_folder_stats(folder_id)
       total_size = 0
       folder_count = 0
       file_count = 0
@@ -281,14 +291,14 @@ class DriveController < ApplicationController
         if item.mime_type == 'application/vnd.google-apps.folder'
           # Se è una cartella, incremento il conteggio delle cartelle e faccio una chiamata ricorsiva
           folder_count += 1
-          result = calculate_folder_stats(drive_service, item.id)
+          result = calculate_folder_stats(item.user_folder_id)
           total_size += result[:size]
           folder_count += result[:folder_count]
           file_count += result[:file_count]
         else
           # Se è un file, incremento il conteggio dei file e aggiungo la sua dimensione al totale
           file_count += 1
-          total_size += item.size.to_i if item.size
+          total_size += item.size if item.size
         end
       end
 
