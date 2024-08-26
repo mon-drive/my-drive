@@ -1070,6 +1070,6 @@ class DriveController < ApplicationController
     end
 
     # Avvia la pianificazione quando il controller è caricato
-    after_action :schedule_update, only: [:dashboard]
+    #after_action :schedule_update, only: [:dashboard]
 
   end

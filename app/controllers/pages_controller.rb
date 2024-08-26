@@ -1,5 +1,4 @@
 class PagesController < ApplicationController
-  before_action :authenticate_user, only: [:payment_complete]
 
   def pricing
     # logica per la pagina di pricing, se necessaria
@@ -20,17 +19,32 @@ class PagesController < ApplicationController
         # User is not logged in
         redirect_to '/auth/google_oauth2'
       end
-    else
+    else #(premium)
       # Logica per completare l'iscrizione, ad esempio:
       # - Aggiornare l'utente con il piano selezionato
       # - Inviare una conferma via email
       # - Eseguire altre azioni necessarie
 
-      # Redirect alla homepage o a una pagina di conferma
-      redirect_to root_path, notice: "Iscrizione completata con successo."
+      # Stripe logic
+      token = params[:stripeToken]
+      begin
+        charge = Stripe::Charge.create({
+          amount: @plan == 'annual' ? 9900 : 999, # in cents
+          currency: 'eur',
+          description: 'Example charge',
+          source: token,
+        })
+        redirect_to root_path, notice: "Iscrizione completata con successo."
+      rescue Stripe::CardError => e
+        flash[:error] = e.message
+        redirect_to payment_path
+      rescue => e
+        logger.error "Stripe charge failed: #{e.message}"
+        flash[:error] = "Internal Server Error"
+        redirect_to payment_path
+      end
     end
   end
-
   private
 
   def authenticate_user
