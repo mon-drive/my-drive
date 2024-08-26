@@ -356,14 +356,14 @@
             <div class="card mb-4 shadow-sm">
               <div class="card-body text-center position-relative">
                 <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                  <%= link_to dashboard_path(folder_id: item.id), class: 'text-decoration-none text-dark' do %>
+                  <%= link_to dashboard_path(folder_id: item.user_folder_id), class: 'text-decoration-none text-dark' do %>
                     <i class="bi bi-folder-fill fs-3 mb-2"></i>
-                    <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+                    <h5 class="card-title" id="item-name-<%= item.user_folder_id %>"><%= item.name %></h5>
                   <% end %>
                 <% else %>
                   <%= link_to item.web_view_link, target: "_blank" ,class: 'text-decoration-none text-dark' do %>
                     <img src="<%= item.icon_link %>" alt="Icona" class="bi img-fluid mb-2" style="width: 22px; height: 22px;" />
-                    <h5 class="card-title" id="item-name-<%= item.id %>"><%= item.name %></h5>
+                    <h5 class="card-title" id="item-name-<%= item.user_file_id %>"><%= item.name %></h5>
                   <% end %>
                 <% end %>
 
@@ -374,7 +374,7 @@
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="dropdownMenu<%= item.id %>">
                     <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                      <li><%= link_to t('dash.open'), dashboard_path(folder_id: item.id), class: 'dropdown-item' %></li>
+                      <li><%= link_to t('dash.open'), dashboard_path(folder_id: item.user_folder_id), class: 'dropdown-item' %></li>
                     <% else %>
                       <li><a href="<%=item.web_view_link%>" class="dropdown-item file-preview-link" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" target="_blank"><%= t('dash.open')%></a></li>
                     <% end %>
