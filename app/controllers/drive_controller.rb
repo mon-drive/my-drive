@@ -737,6 +737,14 @@ class DriveController < ApplicationController
       else
         parent = Parent.find_by(itemid: folder_id)
       end
+      if parent.nil?
+        update_database
+        if folder_id == 'root'
+          parent = Parent.find_by(id: 1)
+        else
+          parent = Parent.find_by(itemid: folder_id)
+        end
+      end
       has_parents = HasParent.where(parent_id: parent.id)
 
       has_parents.each do |item|
@@ -963,10 +971,11 @@ class DriveController < ApplicationController
               puts "parent " + parent.to_s
               puts "son " + item.name
             end
-            if not Parent.exists?(itemid: parent.to_s)
-              parent = Parent.create(itemid: parent.to_s, num: temp)
+            unless Parent.exists?(itemid: parent.to_s)
+              Parent.create(itemid: parent.to_s, num: temp)
               temp += 1
             end
+            puts "parent " + parent.to_s
             parent = Parent.find_by(itemid: parent.to_s)
             unless HasParent.exists?(item_id: id, parent_id: parent.id, item_type: 'UserFolder')
               if item.mime_type == 'application/vnd.google-apps.folder'
