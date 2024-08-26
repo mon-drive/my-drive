@@ -72,3 +72,6 @@ gem 'rubyzip'
 gem "net-http"
 
 gem 'rufus-scheduler'
+
+#Stripe
+gem 'stripe'
