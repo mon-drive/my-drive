@@ -606,6 +606,7 @@ class DriveController < ApplicationController
     end
 
     def create_folder
+      logger.info "create_folder action called"
       folder_name = params[:folder_name]
       if folder_name.blank?
         redirect_to dashboard_path, alert: "Il nome della cartella non può essere vuoto."
@@ -861,6 +862,8 @@ class DriveController < ApplicationController
         mime_type: "application/vnd.google-apps.folder"
       }
       file = drive_service.create_file(metadata, content_type: "application/vnd.google-apps.folder")
+      UserFolder.create(user_folder_id: file.id, name: folder_name, mime_type: 'application/vnd.google-apps.folder', size: 0, created_time: Time.current, modified_time: Time.current, shared: false)
+      file
     end
 
     def file_params
