@@ -74,5 +74,4 @@ Rails.application.routes.draw do
 
   post '/update_name', to: 'drive#update_name'
 
-
 end

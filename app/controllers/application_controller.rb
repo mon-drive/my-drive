@@ -15,7 +15,13 @@ class ApplicationController < ActionController::Base
     private
 
     def current_user
-      @current_user ||= User.find(session[:user_id]) if session[:user_id]
+      @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+      if @current_user
+        @current_user
+      else
+        # /auth/google_oauth2
+        redirect_to '/auth/google_oauth2' and return
+      end
     end
 
     def load_locale

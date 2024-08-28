@@ -276,8 +276,6 @@ class DriveController < ApplicationController
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
-    private
-
     # Funzione ricorsiva per calcolare la dimensione totale della cartella, il numero di file e cartelle
     def calculate_folder_stats(folder_id)
       total_size = 0
@@ -902,7 +900,7 @@ class DriveController < ApplicationController
     end
 
     def authenticate_user!
-      redirect_to root_path unless current_user
+      current_user
     end
 
     def item_params
@@ -948,8 +946,8 @@ class DriveController < ApplicationController
             modified_time: item.modified_time,
             shared: item.shared,
             trashed: item.trashed,
-            created_at: Time.current,  # Aggiungi questo
-            updated_at: Time.current   # Aggiungi questo
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
           }, unique_by: :user_folder_id)
         else
           UserFile.upsert({
@@ -964,8 +962,8 @@ class DriveController < ApplicationController
             icon_link: item.icon_link,
             file_extension: item.file_extension,
             trashed: item.trashed,
-            created_at: Time.current,  # Aggiungi questo
-            updated_at: Time.current   # Aggiungi questo
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
           }, unique_by: :user_file_id)
         end
 
@@ -984,57 +982,86 @@ class DriveController < ApplicationController
               puts "parent " + parent.to_s
               puts "son " + item.name
             end
-            unless Parent.exists?(itemid: parent.to_s)
-              Parent.create(itemid: parent.to_s, num: temp)
+            result = Parent.upsert({
+              itemid: parent.to_s,
+              num: temp,
+              created_at: item.created_time,  # Aggiungi questo
+              updated_at: item.modified_time   # Aggiungi questo
+            }, unique_by: :itemid)
+            if result
               temp += 1
             end
-            puts "parent " + parent.to_s
+
             parent = Parent.find_by(itemid: parent.to_s)
-            unless HasParent.exists?(item_id: id, parent_id: parent.id, item_type: 'UserFolder')
-              if item.mime_type == 'application/vnd.google-apps.folder'
-                hp = HasParent.create(item_id: id, parent_id: parent.id, item_type: 'UserFolder')
-              end
-            end
-            unless HasParent.exists?(item_id: id, parent_id: parent.id, item_type: 'UserFile')
-              if item.mime_type != 'application/vnd.google-apps.folder'
-                hp = HasParent.create(item_id: id, parent_id: parent.id, item_type: 'UserFile')
-              end
+
+            if item.mime_type == 'application/vnd.google-apps.folder'
+              result = HasParent.upsert({
+                item_id: id,
+                parent_id: parent.id,
+                item_type: 'UserFolder',
+                created_at: item.created_time,  # Aggiungi questo
+                updated_at: item.modified_time   # Aggiungi questo
+              }, unique_by: %i[item_id parent_id item_type])
+            else
+              result = HasParent.upsert({
+                item_id: id,
+                parent_id: parent.id,
+                item_type: 'UserFile',
+                created_at: item.created_time,  # Aggiungi questo
+                updated_at: item.modified_time   # Aggiungi questo
+              }, unique_by: %i[item_id parent_id item_type])
             end
           end
         end
 
         if item.permissions
           item.permissions.each do |permission|
-            unless Permission.exists?(permission_id: permission.id.to_s)
-              permiss = Permission.create(
-                permission_id: permission.id.to_s,
-                permission_type: permission.type,
-                role: permission.role,
-                emailAddress: permission.email_address
-              )
-            end
+            Permission.upsert({
+              permission_id: permission.id.to_s,
+              permission_type: permission.type,
+              role: permission.role,
+              emailAddress: permission.email_address,
+              created_at: item.created_time,  # Aggiungi questo
+              updated_at: item.modified_time   # Aggiungi questo
+            }, unique_by: :permission_id)
             permiss = Permission.find_by(permission_id: permission.id.to_s)
-            unless HasPermission.exists?(item_id: id, permission_id: permiss.id)
-              if item.mime_type == 'application/vnd.google-apps.folder'
-                hp = HasPermission.create(item_id: id, permission_id: permiss.id, item_type: 'UserFolder')
-              else
-                hp = HasPermission.create(item_id: id, permission_id: permiss.id, item_type: 'UserFile')
-              end
+            if item.mime_type == 'application/vnd.google-apps.folder'
+              hp = HasPermission.upsert({
+                item_id: id,
+                permission_id: permiss.id,
+                item_type: 'UserFolder',
+                created_at: item.created_time,  # Aggiungi questo
+                updated_at: item.modified_time   # Aggiungi questo
+              }, unique_by: %i[item_id permission_id item_type])
+            else
+              hp = HasPermission.upsert({
+                item_id: id,
+                permission_id: permiss.id,
+                item_type: 'UserFile',
+                created_at: item.created_time,  # Aggiungi questo
+                updated_at: item.modified_time   # Aggiungi questo
+              }, unique_by: %i[item_id permission_id item_type])
             end
           end
         end
 
         if item.owners
           item.owners.each do |owner|
-            unless Owner.exists?(emailAddress: owner.email_address)
-              own = Owner.create(displayName: owner.display_name, emailAddress: owner.email_address)
-              HasOwner.create(item: id, owner_id: own.id)
-            end
+            Owner.upsert({
+              displayName: owner.display_name,
+              emailAddress: owner.email_address,
+              created_at: item.created_time,  # Aggiungi questo
+              updated_at: item.modified_time   # Aggiungi questo
+            }, unique_by: :emailAddress)
 
             ow = Owner.find_by(displayName: owner.display_name, emailAddress: owner.email_address)
-            unless HasOwner.exists?(item: id, owner_id: ow.id)
-              HasOwner.create(item: id, owner_id: ow.id)
-            end
+
+            HasOwner.upsert({
+              item: id,
+              owner_id: ow.id,
+              created_at: item.created_time,  # Aggiungi questo
+              updated_at: item.modified_time   # Aggiungi questo
+            }, unique_by: %i[item owner_id])
           end
         end
       end
@@ -1043,30 +1070,25 @@ class DriveController < ApplicationController
         idString = item.id.to_s
         user = User.find(current_user.id)
         if item.mime_type == 'application/vnd.google-apps.folder'
-          unless UserFolder.exists?(user_folder_id: idString)
-            folder = UserFolder.find_by(user_folder_id: idString)
-          end
           folder = UserFolder.find_by(user_folder_id: idString)
-          unless Possess.exists?(user_id: user.id, user_folder_id: folder.id)
-            Possess.create(user_id: user.id, user_folder_id: folder.id)
-          end
+          Possess.upsert({
+            user_id: user.id,
+            user_folder_id: folder.id,
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
+          }, unique_by: %i[user_id user_folder_id])
         end
 
         if item.parents
           parent = UserFolder.find_by(user_folder_id: item.parents[0])
           file = UserFile.find_by(user_file_id: idString)
           if parent && file
-            unless Contains.exists?(user_folder_id: parent, user_file_id: file)
-              con = Contains.create(user_folder_id: parent.id, user_file_id: file.id)
-              if con.save
-                puts "Contains salvato correttamente."
-              else
-                puts "Errore: #{con.errors.full_messages}"
-                file = UserFile.find_by(id: file.id)
-                puts "File ID: #{file.id}"
-                puts "Folder ID: #{parent.id}"
-              end
-            end
+            Contains.upsert({
+              user_folder_id: parent.id,
+              user_file_id: file.id,
+              created_at: item.created_time,  # Aggiungi questo
+              updated_at: item.modified_time   # Aggiungi questo
+            }, unique_by: %i[user_folder_id user_file_id])
           end
         end
 

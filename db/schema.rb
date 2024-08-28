@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_26_090911) do
+ActiveRecord::Schema.define(version: 2024_08_28_135836) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -18,6 +18,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_file_id"], name: "index_contains_on_user_file_id"
+    t.index ["user_folder_id", "user_file_id"], name: "index_contains_on_user_folder_id_and_user_file_id", unique: true
     t.index ["user_folder_id"], name: "index_contains_on_user_folder_id"
   end
 
@@ -35,6 +36,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.string "item"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["item", "owner_id"], name: "index_has_owners_on_item_and_owner_id", unique: true
     t.index ["owner_id"], name: "index_has_owners_on_owner_id"
   end
 
@@ -44,6 +46,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.integer "item_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["item_id", "parent_id", "item_type"], name: "index_has_parents_on_item_and_parent_and_type", unique: true
     t.index ["item_type", "item_id"], name: "index_has_parents_on_item"
     t.index ["parent_id"], name: "index_has_parents_on_parent_id"
   end
@@ -54,6 +57,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "permission_id"
+    t.index ["item_id", "permission_id", "item_type"], name: "index_has_permissions_on_item_id_and_permission_id_and_item_type", unique: true
     t.index ["item_type", "item_id"], name: "index_has_permissions_on_item"
   end
 
@@ -71,6 +75,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.string "emailAddress"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["emailAddress"], name: "index_owners_on_emailAddress", unique: true
   end
 
   create_table "parents", force: :cascade do |t|
@@ -78,6 +83,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.integer "num"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["itemid"], name: "index_parents_on_itemid", unique: true
   end
 
   create_table "permissions", force: :cascade do |t|
@@ -87,7 +93,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "permission_id"
-    t.index ["permission_id"], name: "index_permissions_on_permission_id"
+    t.index ["permission_id"], name: "index_permissions_on_permission_id", unique: true
   end
 
   create_table "possesses", force: :cascade do |t|
@@ -96,6 +102,7 @@ ActiveRecord::Schema.define(version: 2024_08_26_090911) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_folder_id"], name: "index_possesses_on_user_folder_id"
+    t.index ["user_id", "user_folder_id"], name: "index_possesses_on_user_id_and_user_folder_id", unique: true
     t.index ["user_id"], name: "index_possesses_on_user_id"
   end
 
