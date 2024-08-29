@@ -1,13 +1,14 @@
 class PagesController < ApplicationController
   before_action :authenticate_user, only: [:payment_complete]
-  
+  before_action :check_active_subscription, only: [:payment]
+
   def pricing
     # logica per la pagina di pricing, se necessaria
   end
   def payment
     @plan = params[:plan]
     if @plan.nil?
-      redirect_to pricing_path, alert: 'Nessun piano selezionato.'
+      redirect_to pricing_path, alert: t('payment.nothing')
     end
   end
   def payment_complete
@@ -16,7 +17,7 @@ class PagesController < ApplicationController
     if plan == 'free'
       if session[:user_id].present?
         # User is logged in
-        redirect_to root_path, notice: 'Sei già loggato.'
+        redirect_to root_path, notice: t('payment.logged')
       else
         # User is not logged in
         redirect_to '/auth/google_oauth2'
@@ -38,18 +39,18 @@ class PagesController < ApplicationController
         })
         #Payment was successful
         logger.info "Stripe charge was successful: #{charge.inspect}"
-        #if charge.amount == 9900
-        #  PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
-        #else 
-        #  PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
-        #end
-        redirect_to root_path, notice: "Iscrizione completata con successo."
+        # if charge.amount == 9900
+        #   PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
+        # else 
+        #   PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
+        # end
+        redirect_to root_path, notice: t('payment.success')
       rescue Stripe::CardError => e
         flash[:error] = e.message
         redirect_to payment_path
       rescue => e
         logger.error "Stripe charge failed: #{e.message}"
-        flash[:error] = "Internal Server Error"
+        flash[:error] = t('payment.error')
         redirect_to payment_path
       end
     end
@@ -58,9 +59,15 @@ class PagesController < ApplicationController
 
   def authenticate_user
     if params[:plan] == 'free' && session[:user_id].present?
-      redirect_to root_path, notice: 'Sei già loggato.'
+      redirect_to root_path, notice: t('payment.logged')
     end
     # If the plan is premium, do not redirect, allowing payment to proceed
+  end
+
+  def check_active_subscription #TODO? add a way to check if the subscription is expired
+    if PremiumUser.find_by(user: @user)
+      redirect_to root_path, alert: t('payment.subscribed')
+    end
   end
 
 end

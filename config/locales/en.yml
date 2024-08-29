@@ -85,3 +85,8 @@ en:
     summary: "Summary"
     plan: "MyDrive Plan"
     total: "Total"
+    success: "Registration completed successfully"
+    error: "An error occurred"
+    nothing: "No plan selected"
+    logged: "You are already logged in"
+    subscibed: "You already have an active plan"
