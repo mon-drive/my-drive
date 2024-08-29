@@ -1,4 +1,5 @@
 class PagesController < ApplicationController
+  before_action :authenticate_user, only: [:payment_complete]
 
   def pricing
     # logica per la pagina di pricing, se necessaria
@@ -48,8 +49,10 @@ class PagesController < ApplicationController
   private
 
   def authenticate_user
-    # Here you can check if the user is authenticated, e.g., by checking session or current_user
-    redirect_to root_path, notice: 'Sei già loggato.' if session[:user_id].present?
+    if params[:plan] == 'free' && session[:user_id].present?
+      redirect_to root_path, notice: 'Sei già loggato.'
+    end
+    # If the plan is premium, do not redirect, allowing payment to proceed
   end
 
 end

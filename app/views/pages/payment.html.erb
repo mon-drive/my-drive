@@ -108,7 +108,8 @@
         <!-- Stripe Payment Form -->
         <div id="credit_card_form" class="payment-form">
           <h4>Dettagli della carta</h4>
-          <form id="payment-form">
+          <%= form_with url: payment_complete_path, method: :post, id:'payment-form' do |form| %>
+            <%= form.hidden_field :plan, value: @plan %>
             <div class="form-group">
               <label for="card-element">Numero della carta</label>
               <div id="card-element" class="form-control">
@@ -118,7 +119,7 @@
             <!-- Used to display form errors -->
             <div id="card-errors" role="alert"></div>
             <button type="submit" class="btn btn-primary mt-4" id="submit-button">Paga</button>
-          </form>
+          <% end %>
         </div>
 
         <!-- Pulsante di pagamento PayPal -->
@@ -141,10 +142,6 @@
           <p><strong><%= @plan == 'premium' ? 'Premium' : 'Free' %></strong></p>
           <h5>Totale</h5>
           <p id="total_amount">9.99€</p>
-          <%= form_with url: payment_complete_path, method: :post, id:'payment-form' do |form| %>
-            <%= form.hidden_field :plan, value: @plan %>
-            <%= form.submit 'Paga', class: 'btn btn-primary', id: 'submit-button' %>
-          <% end %>
         </div>
       </div>
     </div>
@@ -177,7 +174,7 @@
       var stripeKey = $('meta[name="stripe-publishable-key"]').attr('content');
       var stripe = Stripe(stripeKey);
       var elements = stripe.elements();
-      var card = elements.create('card', {style: {base: {color: "#32325d", fontSize: '16px'}}}); // Added font size
+      var card = elements.create('card', {style: {base: {color: "#32325d", fontSize: '16px'}}});
       card.mount('#card-element');
 
       card.on('change', function(event) {
