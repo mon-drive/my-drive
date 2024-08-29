@@ -268,8 +268,6 @@ class DriveController < ApplicationController
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
-    private
-
     # Funzione ricorsiva per calcolare la dimensione totale della cartella, il numero di file e cartelle
     def calculate_folder_stats(drive_service, folder_id)
       total_size = 0
