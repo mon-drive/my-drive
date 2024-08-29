@@ -74,19 +74,19 @@
     <div class="row">
       <!-- Parte sinistra: Dati di pagamento -->
       <div class="col-md-8">
-        <h2>Pagamento</h2>
+        <h2><%= t('payment.payment')%></h2>
 
         <!-- Selezione del piano e frequenza -->
         <div class="mb-3">
-          <h4>Seleziona la frequenza di pagamento</h4>
+          <h4><%= t('payment.frequency')%></h4>
           <div class="d-flex">
             <div class="btn-toggle" id="monthly_btn" data-value="monthly">
-              Fatturazione Mensile
+              <%= t('payment.monthly')%>
               <span class="price">9.99€</span>
             </div>
             <div class="btn-separator"></div>
             <div class="btn-toggle" id="annual_btn" data-value="annual">
-              Fatturazione Annuale
+              <%= t('payment.yearly')%>
               <span class="price">99.00€</span>
             </div>
           </div>
@@ -94,38 +94,38 @@
 
         <!-- Opzioni di pagamento -->
         <div class="mb-4">
-          <h4>Metodo di pagamento</h4>
+          <h4><%= t('payment.payment-method')%></h4>
           <div class="form-check">
             <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
-            <label class="form-check-label" for="credit_card">Pagamento con Carta</label>
+            <label class="form-check-label" for="credit_card"><%= t('payment.card')%></label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal">
-            <label class="form-check-label" for="paypal">Pagamento con PayPal</label>
+            <label class="form-check-label" for="paypal"><%= t('payment.paypal')%></label>
           </div>
         </div>
 
         <!-- Stripe Payment Form -->
         <div id="credit_card_form" class="payment-form">
-          <h4>Dettagli della carta</h4>
+          <h4><%= t('payment.details')%></h4>
           <%= form_with url: payment_complete_path, method: :post, id:'payment-form' do |form| %>
             <%= form.hidden_field :plan, value: @plan %>
             <div class="form-group">
-              <label for="card-element">Numero della carta</label>
+              <label for="card-element"><%= t('payment.card-number')%></label>
               <div id="card-element" class="form-control">
                 <!-- A Stripe Element will be inserted here. -->
               </div>
             </div>
             <!-- Used to display form errors -->
             <div id="card-errors" role="alert"></div>
-            <button type="submit" class="btn btn-primary mt-4" id="submit-button">Paga</button>
+            <button type="submit" class="btn btn-primary mt-4" id="submit-button"><%= t('payment.pay')%></button>
           <% end %>
         </div>
 
         <!-- Pulsante di pagamento PayPal -->
         <div id="paypal_button" class="payment-form" style="display: none;">
-          <h4>Pagamento PayPal</h4>
-          <a href="https://www.paypal.com" class="btn btn-primary">Paga con PayPal</a>
+          <h4><%= t('payment.paypal')%></h4>
+          <a href="https://www.paypal.com" class="btn btn-primary"><%= t('payment.pay-paypal')%></a>
         </div>
       </div>
 
@@ -136,11 +136,11 @@
 
       <!-- Parte destra: Resoconto del pagamento -->
       <div class="col-md-3">
-        <h2>Resoconto</h2>
+        <h2><%= t('payment.summary')%></h2>
         <div class="border p-3 mb-3">
-          <h4>Piano MyDrive</h4>
+          <h4><%= t('payment.plan')%></h4>
           <p><strong><%= @plan == 'premium' ? 'Premium' : 'Free' %></strong></p>
-          <h5>Totale</h5>
+          <h5><%= t('payment.total')%></h5>
           <p id="total_amount">9.99€</p>
         </div>
       </div>
