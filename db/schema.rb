@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_29_125819) do
+ActiveRecord::Schema.define(version: 2024_08_29_145042) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -177,7 +177,7 @@ ActiveRecord::Schema.define(version: 2024_08_29_125819) do
     t.string "profile_picture"
     t.date "expire_date"
     t.string "provider"
-    t.string "uid"
+    t.string "user_id"
     t.string "oauth_token"
     t.string "refresh_token"
     t.datetime "oauth_expires_at"
