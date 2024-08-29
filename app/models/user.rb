@@ -13,7 +13,7 @@ class User < ApplicationRecord
   has_many :shared_files, through: :share_files, source: :user_file
 
   def self.from_omniauth(auth)
-    user = where(provider: auth.provider, uid: auth.user_id).first_or_create do |user|
+    user = where(provider: auth.provider, user_id: auth.uid).first_or_create do |user|
       user.username = auth.info.name if user.username.blank?
       user.email = auth.info.email
     end
