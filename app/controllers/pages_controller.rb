@@ -35,6 +35,7 @@ class PagesController < ApplicationController
           description: 'Example charge',
           source: token,
         })
+        #Successful payment
         redirect_to root_path, notice: "Iscrizione completata con successo."
       rescue Stripe::CardError => e
         flash[:error] = e.message
