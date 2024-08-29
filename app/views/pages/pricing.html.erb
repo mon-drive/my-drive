@@ -1,23 +1,22 @@
-<!-- app/views/pages/pricing.html.erb -->
 <div class="container text-center mt-5">
-  <h1>Choose your plan</h1>
+  <h1><%= t('pricing.choose')%></h1>
 
   <div class="row justify-content-center mt-4">
     <div class="col-md-4">
       <div class="card">
         <div class="card-header">
-          <h2>Free</h2>
+          <h2><%= t('pricing.free')%></h2>
         </div>
         <div class="card-body">
-          <p class="card-text">0€/month</p>
+          <p class="card-text"><%= t('pricing.price1')%></p>
           <ul class="list-unstyled">
-            <li>Characteristics 1</li>
-            <li>Characteristics 2</li>
-            <li>Characteristics 3</li>
+            <li><%= t('pricing.char1')%></li>
+            <li><%= t('pricing.char2')%></li>
+            <li><%= t('pricing.char3')%></li>
           </ul>
           <%= form_with url: payment_complete_path, method: :post do %>
             <%= hidden_field_tag :plan, 'free' %>
-            <%= submit_tag 'Select', class: 'btn btn-primary' %>
+            <%= submit_tag t('pricing.select'), class: 'btn btn-primary' %>
           <% end %>
         </div>
       </div>
@@ -26,16 +25,16 @@
     <div class="col-md-4">
       <div class="card">
         <div class="card-header">
-          <h2>Premium</h2>
+          <h2><%= t('pricing.premium')%></h2>
         </div>
         <div class="card-body">
-          <p class="card-text">10€/month</p>
+          <p class="card-text"><%= t('pricing.price2')%></p>
           <ul class="list-unstyled">
-            <li>Premium Characteristics 1</li>
-            <li>Premium Characteristics 2</li>
-            <li>Premium Characteristics 3</li>
+            <li><%= t('pricing.premium-char1')%></li>
+            <li><%= t('pricing.premium-char2')%></li>
+            <li><%= t('pricing.premium-char3')%></li>
           </ul>
-          <%= link_to 'Select', payment_path(plan: 'premium'), class: 'btn btn-primary' %>
+          <%= link_to t('pricing.select'), payment_path(plan: 'premium'), class: 'btn btn-primary' %>
         </div>
       </div>
     </div>

@@ -16,13 +16,11 @@ Rails.application.routes.draw do
 
   # Route for creating new folder
   post 'new_folder', to: 'drive#create_folder'
-
+  
   # Route for pricing page
   get 'pricing', to: 'pages#pricing'
-
   # Route for payment page
   get 'payment', to: 'pages#payment', as: 'payment'
-
   # Route for payment complete
   post 'payment_complete', to: 'pages#payment_complete', as: 'payment_complete'
 
