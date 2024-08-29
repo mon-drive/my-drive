@@ -50,9 +50,14 @@ class DriveController < ApplicationController
       new_name = params[:item][:name]
 
       file_metadata = Google::Apis::DriveV3::File.new(name: new_name)
-
       drive_service.update_file(file_id, file_metadata, fields: 'name')
+      file = UserFile.find_by(user_file_id: file_id)
+      if file
+        file.update(name: new_name)
+      end
 
+      json_response = { success: true, name: new_name, message: 'Nome file aggiornato con successo.' }
+      render json: json_response
     end
 
     def share
@@ -748,7 +753,12 @@ class DriveController < ApplicationController
       next_page_token = nil
 
       if folder_id == 'root'
-        parent = Parent.find_by(id: 1)
+        home = UserFolder.find_by(mime_type: 'root')
+        if home.nil?
+          update_database
+          home = UserFolder.find_by(mime_type: 'root')
+        end
+        parent = Parent.find_by(itemid: home.user_folder_id)
       else
         parent = Parent.find_by(itemid: folder_id)
       end

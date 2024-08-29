@@ -72,17 +72,17 @@ $(document).on('turbolinks:load', function() {
           headers: {
             'X-CSRF-Token': csrfToken
           },
-          success: function(response) {
-            if (response.success) {
-              $('#item-name-' + itemId).text(response.name);
+          success: function(data) {
+            if (data.success) {
+              $('#item-name-' + itemId).text(data.name);
               $('#renameItemModal').modal('hide');
+              location.reload();
             } else {
-              alert('Errore: ' + response.errors.join(', '));
+              alert('Errore: ' + data.errors.join(', '));
             }
           }
         });
       }
-      location.reload();
     });
 
     // Add event listener for the "Rinomina" button click

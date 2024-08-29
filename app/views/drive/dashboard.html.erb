@@ -376,13 +376,17 @@
                     <% else %>
                       <li><a href="<%=item.web_view_link%>" class="dropdown-item file-preview-link" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" target="_blank"><%= t('dash.open')%></a></li>
                     <% end %>
-                    
-                    <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
-                    <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
                     <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                      <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" id="folder-export-<%= item.id %>">Scarica</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.user_folder_id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.user_folder_id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
                     <% else %>
-                      <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.id %>" data-folder-id="<%= @current_folder %>" type="SELF">Scarica</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= item.user_file_id %>" data-folder-id="<%= @current_folder %>">Rinomina</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= item.user_file_id %>" data-folder-id="<%= @current_folder %>">Condividi</a></li>
+                    <% end %>
+                    <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                      <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= item.user_folder_id %>" data-folder-id="<%= @current_folder %>" id="folder-export-<%= item.id %>">Scarica</a></li>
+                    <% else %>
+                      <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= item.user_file_id %>" data-folder-id="<%= @current_folder %>" type="SELF">Scarica</a></li>
                       <!-- If per i file supportati alla conversione-->
                       <% if item.file_extension=="docx" %>
                         <li class="dropdown-submenu">
