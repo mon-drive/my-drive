@@ -39,11 +39,11 @@ class PagesController < ApplicationController
         })
         #Payment was successful
         logger.info "Stripe charge was successful: #{charge.inspect}"
-        # if charge.amount == 9900
-        #   PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
-        # else 
-        #   PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
-        # end
+        if charge.amount == 9900
+          PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
+        else 
+          PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
+        end
         redirect_to root_path, notice: t('payment.success')
       rescue Stripe::CardError => e
         flash[:error] = e.message
@@ -65,8 +65,15 @@ class PagesController < ApplicationController
   end
 
   def check_active_subscription #TODO? add a way to check if the subscription is expired
-    if PremiumUser.find_by(user: @user)
-      redirect_to root_path, alert: t('payment.subscribed')
+    test = User.first
+    pu = PremiumUser.find_by(user: test) 
+    logger.info "Checking subscription for user: #{pu.inspect}"
+    if pu.nil?
+      # User has no subscription
+      logger.info "User has no subscription"
+    elsif pu.expire_date > Date.today
+      logger.info "User has an active subscription"
+      redirect_to root_path, notice: t('payment.subscribed')
     end
   end
 
