@@ -34,12 +34,10 @@ class DriveController < ApplicationController
           @items = get_files_and_folders_in_folder(@current_folder)
         end
       end
-      storage_info()
     end
 
     def setting
       # Logica per le impostazioni
-      drive_service = initialize_drive_service
       @user = current_user
     end
 
@@ -487,6 +485,9 @@ class DriveController < ApplicationController
         mime_type: params[:file].content_type
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
+      file = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
+      folder = UserFolder.find_by(user_folder_id: @current_folder)
+      HasParent.create(item_id: file.id, item_type: 'UserFile', parent_id: folder.id)
       #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
     end
 
@@ -588,6 +589,8 @@ class DriveController < ApplicationController
         parents: [params[:folder_id]]
       }
       folder = drive_service.create_file(folder_metadata, fields: 'id')
+      folder = UserFolder.create(user_folder_id: folder.id, name: folder.name, mime_type: folder.mime_type, created_time: folder.created_time, modified_time: folder.modified_time)
+      Parent.create(itemid: folder.id, num: 0)
 
       # Itera su tutti i file nella cartella e caricali su Google Drive
       params[:files].each do |file|
@@ -597,6 +600,9 @@ class DriveController < ApplicationController
           mime_type: file.content_type
         }
         drive_service.create_file(file_metadata, upload_source: file.tempfile, content_type: file.content_type)
+        file = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
+        HasParent.create(item_id: file.id, item_type: 'UserFile', parent_id: folder.id)
+
       end
 
       #redirect_to dashboard_path, notice: 'Cartella caricata su Google Drive con successo'
@@ -909,7 +915,7 @@ class DriveController < ApplicationController
 
     def fetch_google_profile_image
       auth = request.env['omniauth.auth']
-      @google_profile_image = session[:image]
+      @google_profile_image = @current_user.profile_picture
     end
 
     def update_database
@@ -927,6 +933,8 @@ class DriveController < ApplicationController
         all_items.concat(response.files)
         next_page_token = response.next_page_token
       end while next_page_token.present?
+
+      storage_info
 
       root = UserFolder.find_by(mime_type: 'root')
       if root.nil?
@@ -949,6 +957,12 @@ class DriveController < ApplicationController
             created_at: item.created_time,  # Aggiungi questo
             updated_at: item.modified_time   # Aggiungi questo
           }, unique_by: :user_folder_id)
+          Parent.upsert({
+            itemid: idString,
+            num: 0,
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
+          }, unique_by: :itemid)
         else
           UserFile.upsert({
             user_file_id: idString,
@@ -1096,15 +1110,14 @@ class DriveController < ApplicationController
     end
 
     # Esegue l'aggiornamento del database ogni 30 secondi
+    $scheduler = Rufus::Scheduler.new
     def schedule_update
-      scheduler = Rufus::Scheduler.new
-
-      scheduler.every '30s' do
+      $scheduler.every '60s' do
         update_database
       end
     end
 
     # Avvia la pianificazione quando il controller è caricato
-    after_action :schedule_update, only: [:dashboard]
+    #after_action :schedule_update, only: [:dashboard]
 
   end

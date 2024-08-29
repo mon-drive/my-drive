@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   self.inheritance_column = :type
 
+  has_one :premium_user, dependent: :destroy
+
   has_many :makes
   has_many :transactions, through: :makes
   has_many :possesses

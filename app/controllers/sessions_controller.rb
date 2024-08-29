@@ -6,7 +6,7 @@ class SessionsController < ApplicationController
         auth = request.env['omniauth.auth']
         user = User.from_omniauth(auth)
         session[:user_id] = user.id
-        session[:image] = auth.info.image
+        user.update_column(:profile_picture, auth.info.image)
         redirect_to dashboard_path
       rescue OmniAuth::Strategies::OAuth2::CallbackError => e
         redirect_to root_path, alert: "Access denied: #{e.error_reason}. Please try again."

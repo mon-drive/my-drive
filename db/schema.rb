@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_28_135836) do
+ActiveRecord::Schema.define(version: 2024_08_29_125819) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -106,6 +106,14 @@ ActiveRecord::Schema.define(version: 2024_08_28_135836) do
     t.index ["user_id"], name: "index_possesses_on_user_id"
   end
 
+  create_table "premium_users", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.date "expire_date"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_premium_users_on_user_id"
+  end
+
   create_table "share_files", force: :cascade do |t|
     t.integer "user_id"
     t.integer "user_file_id"
@@ -190,6 +198,7 @@ ActiveRecord::Schema.define(version: 2024_08_28_135836) do
   add_foreign_key "makes", "users"
   add_foreign_key "possesses", "user_folders"
   add_foreign_key "possesses", "users"
+  add_foreign_key "premium_users", "users"
   add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "users"
