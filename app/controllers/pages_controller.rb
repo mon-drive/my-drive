@@ -65,8 +65,7 @@ class PagesController < ApplicationController
   end
 
   def check_active_subscription #TODO? add a way to check if the subscription is expired
-    test = User.first
-    pu = PremiumUser.find_by(user: test) 
+    pu = PremiumUser.find_by(user_id: session[:user_id]) 
     logger.info "Checking subscription for user: #{pu.inspect}"
     if pu.nil?
       # User has no subscription
