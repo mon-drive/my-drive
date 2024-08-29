@@ -1,6 +1,6 @@
 class PagesController < ApplicationController
   before_action :authenticate_user, only: [:payment_complete]
-
+  
   def pricing
     # logica per la pagina di pricing, se necessaria
   end
@@ -12,6 +12,7 @@ class PagesController < ApplicationController
   end
   def payment_complete
     plan = params[:plan]
+    @user = current_user
     if plan == 'free'
       if session[:user_id].present?
         # User is logged in
@@ -35,7 +36,13 @@ class PagesController < ApplicationController
           description: 'Example charge',
           source: token,
         })
-        #Successful payment
+        #Payment was successful
+        logger.info "Stripe charge was successful: #{charge.inspect}"
+        #if charge.amount == 9900
+        #  PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
+        #else 
+        #  PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
+        #end
         redirect_to root_path, notice: "Iscrizione completata con successo."
       rescue Stripe::CardError => e
         flash[:error] = e.message
