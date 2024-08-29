@@ -388,6 +388,7 @@ class DriveController < ApplicationController
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
+      puts "Scan action called"
       file_id = params[:file]
       if file_id.nil?
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
@@ -399,7 +400,7 @@ class DriveController < ApplicationController
         file_path = params[:file].path
 
         response_upload = upload_scan(file_path)
-
+        puts "Response upload"
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
 
@@ -411,7 +412,7 @@ class DriveController < ApplicationController
             break if ['completed', 'failed'].include?(status)
             sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
-
+          puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
@@ -477,7 +478,7 @@ class DriveController < ApplicationController
     end
 
 
-    def upload(file)
+    def upload(file_id)
       # Initialize the API
       drive_service = initialize_drive_service
 
@@ -490,9 +491,11 @@ class DriveController < ApplicationController
         mime_type: params[:file].content_type
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
-      file = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
+      puts "File uploaded to Google Drive"
+      file_db = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
       folder = UserFolder.find_by(user_folder_id: @current_folder)
       HasParent.create(item_id: file.id, item_type: 'UserFile', parent_id: folder.id)
+      #update_database
       #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
     end
 
