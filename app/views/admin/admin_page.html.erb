@@ -1,78 +1,78 @@
-<h1>Admin#admin_page</h1>
-<p>Find me in app/views/admin/admin_page.html.erb</p>
+<h1 class="text-center my-4">Admin - Gestione Utenti</h1>
 
-<%= javascript_include_tag 'admin_page', 'data-turbolinks-track': 'reload' %>
+<div class="container">
+  <%= javascript_include_tag 'admin_page', 'data-turbolinks-track': 'reload' %>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Username</th>
-      <th>Email</th>
-      <th>tipo</th>
-      <th>sospeso</th>
-      <th>fine sospensione</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @users.each do |user| %>
-      <% next if user.username.nil? || user.email.nil? %>
-      <tr>
-        <td><%= user.id %></td>
-        <td><%= user.username %></td>
-        <td><%= user.email %></td>
-        <td><%= user.premium_user.present? ? "PremiumUser" : "RegularUser" %></td>
-        <td>
-          <% if user.suspended %>
-            si
-          <% else %>
-            No
-          <% end %>
-        </td>
-        <td>
-          <% if user.suspended && user.end_suspend.present? %>
-            <%= user.end_suspend.strftime("%d-%m-%Y %H:%M") %>
-          <% else %>
-            --
-          <% end %>
-        </td>
-        <td>
-          <!-- Button to open the suspend modal -->
-          <% if user.suspended %>
-            <!-- Button is disabled if user is suspended -->
-            <button type="button" class="btn btn-warning" disabled>
-              Sospeso
-            </button>
-          <% else %>
-            <!-- Active button for suspending user -->
-            <button type="button" class="btn btn-warning suspend-user-btn" data-bs-toggle="modal" data-bs-target="#md_suspend" data-user-id="<%= user.id %>">
-              Sospendi utente
-            </button>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Tipo</th>
+          <th>Sospeso</th>
+          <th>Fine Sospensione</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @users.each do |user| %>
+          <% next if user.username.nil? || user.email.nil? %>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.username %></td>
+            <td><%= user.email %></td>
+            <td><%= user.premium_user.present? ? "PremiumUser" : "RegularUser" %></td>
+            <td>
+              <% if user.suspended %>
+                <span class="badge bg-danger">Sì</span>
+              <% else %>
+                <span class="badge bg-success">No</span>
+              <% end %>
+            </td>
+            <td>
+              <% if user.suspended && user.end_suspend.present? %>
+                <%= user.end_suspend.strftime("%d-%m-%Y %H:%M") %>
+              <% else %>
+                <span class="text-muted">--</span>
+              <% end %>
+            </td>
+            <td>
+              <% if user.suspended %>
+                <button type="button" class="btn btn-secondary" disabled>
+                  Sospeso
+                </button>
+              <% else %>
+                <button type="button" class="btn btn-warning suspend-user-btn" data-bs-toggle="modal" data-bs-target="#md_suspend" data-user-id="<%= user.id %>">
+                  Sospendi Utente
+                </button>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-<!-- The Modal -->
+<!-- modal sospensione-->
 <div class="modal fade" id="md_suspend" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Suspend User</h5>
+        <h5 class="modal-title">Sospendi Utente</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <form id="suspendForm" action="#" method="post">
+      <div class="modal-body d-flex justify-content-center">
+        <form id="suspendForm" action="#" method="post" class="text-center">
           <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <input type="hidden" name="user_id" id="modalUserId">
-          <div class="form-group">
-            <label for="days">Suspend for (days):</label>
-            <input type="number" class="form-control" name="days" id="days" min="1" step="1" required>
+          <div class="form-group mb-3">
+            <label for="days" class="form-label">Inserisci giorni di sospensione:</label>
+            <input type="number" class="form-control form-control-sm mx-auto" name="days" id="days" min="1" step="1" required style="width: 100px; -moz-appearance: textfield; text-align: center;" oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.abs(this.value) : null">
           </div>
-          <button type="submit" class="btn btn-primary">Suspend</button>
+          <button type="submit" class="btn btn-primary mt-2">Sospendi</button>
         </form>
       </div>
     </div>
