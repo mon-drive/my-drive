@@ -2,22 +2,8 @@ require 'google/apis/drive_v3'
 require 'googleauth'
 
 Given('two registered users named “Bob” and “Amin”') do
-  # Mocking OmniAuth for Google OAuth login
-  OmniAuth.config.test_mode = true
-  OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
-    provider: 'google_oauth2',
-    uid: '123545',
-    info: {
-      name: 'Bob',
-      email: 'bob@example.com',
-      first_name: 'Bob',
-      last_name: 'Test'
-    },
-    credentials: {
-      token: 'mock_token',
-      refresh_token: 'mock_refresh_token'
-    }
-  })
+  #TODO: use service account token
+  
 end
 
 Given("Bob is on a folder") do

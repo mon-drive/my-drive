@@ -5,32 +5,17 @@ require 'googleauth'
 Drive = Google::Apis::DriveV3
 
 Given('a registered user named "Bob"') do
-  # Mocking OmniAuth for Google OAuth login
-  OmniAuth.config.test_mode = true
-  OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
-    provider: 'google_oauth2',
-    uid: '123545',
-    info: {
-      name: 'Bob',
-      email: 'bob@example.com',
-      first_name: 'Bob',
-      last_name: 'Test'
-    },
-    credentials: {
-      token: 'mock_token',
-      refresh_token: 'mock_refresh_token'
-    }
-  })
+  # Using service account token
+  SCOPES = ['https://www.googleapis.com/auth/drive']
 
+  @drive_service = initialize_drive_service
 end
 
 Given("Bob wants to upload one or more valid files") do
-  # Simulate Bob preparing files for upload
-  @files = [
-    { name: "file1.txt", content: "Sample content for file1" },
-    { name: "file2.png", content: "Sample content for file2" },
-    { name: "file3.pdf", content: "Sample content for file3" }
-  ]
+  # Temporarily create a file for testing
+  @file = Tempfile.new('file1.txt')
+  @file.write("Sample content for testing")
+  @file.rewind  # Reset file pointer to the beginning
 end
 
 And("Bob has sufficient space") do
@@ -59,25 +44,32 @@ Then("Bob should see a box where he can choose the files") do
 end
 
 And("the file should be checked for viruses") do
-  # Mock virus scanning (assume passing)
-  @virus_scan_passed = true
+  @file_checked_for_viruses = true #TODO: Implement virus check with virustotal API ? 
+  expect(@file_checked_for_viruses).to be true
 end
 
 Then("The file should be successfully uploaded to the server") do
-  # Simulate file upload to Google Drive
-  if @files && @permission_granted && @space_available
-    # Here you would typically call the Google Drive API to upload files
-    # For testing, we're assuming the upload is successful
-    @upload_successful = true
-  else
-    @upload_successful = false
-  end
-  expect(@upload_successful).to be true
+  file_metadata = {
+    name: 'file1.txt'
+  }
+
+  file = @drive_service.create_file(
+    file_metadata,
+    upload_source: @file.path,
+    content_type: 'text/plain',
+    fields: 'id'
+  )
+
+  @uploaded_file_id = file.id
+  expect(@uploaded_file_id).not_to be_nil
+
+  @file.close
+  @file.unlink
 end
 
 And("Bob should see a confirmation message indicating successful upload") do
   # Check for confirmation message
-  if @upload_successful
+  if @uploaded_file_id
     @confirmation_message = "Upload successful!"
   else
     @confirmation_message = "Upload failed."
@@ -86,9 +78,22 @@ And("Bob should see a confirmation message indicating successful upload") do
 end
 
 And("The uploaded file should be visible in Bob's files list or designated storage area") do
-  # Verify file appears in the list (mocking)
-  if @upload_successful
-    @files_uploaded = @files.map { |file| file[:name] }
-    expect(@files_uploaded).to include("file1.txt", "file2.png")
-  end
+  # Check that the file appears in the list
+  file_list = @drive_service.list_files(q: "name = 'file1.txt'")
+  expect(file_list.files.map(&:id)).to include(@uploaded_file_id)
+end
+
+
+def initialize_drive_service
+  authorization = Google::Auth::ServiceAccountCredentials.make_creds(
+    json_key_io: File.open(Rails.root.join('config', 'mydrive-430108-3e571c4c5538.json')),
+    scope: SCOPES
+  )
+
+  authorization.fetch_access_token!
+
+  drive_service = Google::Apis::DriveV3::DriveService.new
+  drive_service.authorization = authorization
+
+  drive_service
 end
