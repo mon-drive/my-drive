@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  #get 'admin/admin_page'
   get 'settings/show'
   get 'settings/update'
   root 'home#index'
@@ -16,7 +17,7 @@ Rails.application.routes.draw do
 
   # Route for creating new folder
   post 'new_folder', to: 'drive#create_folder'
-  
+
   # Route for pricing page
   get 'pricing', to: 'pages#pricing'
   # Route for payment page
@@ -71,5 +72,10 @@ Rails.application.routes.draw do
   post 'set_locale', to: 'application#change_locale'
 
   post '/update_name', to: 'drive#update_name'
+
+  # Route for admin
+  get 'admin/admin_page', to: 'admin#admin_page', as: 'admin_page'
+  patch 'admin/suspend_user/:id', to: 'admin#suspend_user', as: 'suspend_user_admin'
+
 
 end

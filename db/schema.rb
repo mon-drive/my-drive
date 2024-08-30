@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_29_145042) do
+ActiveRecord::Schema.define(version: 2024_08_30_175713) do
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -183,6 +183,8 @@ ActiveRecord::Schema.define(version: 2024_08_29_145042) do
     t.datetime "oauth_expires_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "end_suspend"
+    t.boolean "suspended"
   end
 
   add_foreign_key "contains", "user_files"
