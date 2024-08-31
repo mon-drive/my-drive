@@ -11,27 +11,30 @@ class DriveController < ApplicationController
 
     require 'rufus-scheduler'
 
+    $current_folder = ''
+
     def dashboard
-      @current_folder = params[:folder_id] || 'root'
+      $current_folder = params[:folder_id] || 'root'
       @all_items = get_files_and_folders
+      puts "Current folder: #{$current_folder}"
 
       @root_folder_name = get_root_name
       @root_folder_id = get_root_id
       if params[:folder_id] == 'bin'
-        @current_folder_name = 'Cestino'
+        $current_folder_name = 'Cestino'
       else
-        @current_folder_name = @current_folder == 'root' ? @root_folder_name : get_folder_name(@current_folder)
-        @parent_folder = get_parent_folder(@current_folder) unless @current_folder == 'root'
+        $current_folder_name = $current_folder == 'root' ? @root_folder_name : get_folder_name($current_folder)
+        @parent_folder = get_parent_folder($current_folder) unless $current_folder == 'root'
       end
       if params[:search].present?
-        @current_folder = 'null'
+        $current_folder = 'null'
         @items = search_files(params[:search])
       else
         if params[:folder_id] == 'bin'
-          @current_folder = 'bin'
+          $current_folder = 'bin'
           @items = get_files_and_folders_in_bin
         else
-          @items = get_files_and_folders_in_folder(@current_folder)
+          @items = get_files_and_folders_in_folder($current_folder)
         end
       end
     end
@@ -394,7 +397,6 @@ class DriveController < ApplicationController
         redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
-      @current_folder = params[:folder_id] || 'root'
 
       begin
         file_path = params[:file].path
@@ -417,26 +419,26 @@ class DriveController < ApplicationController
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
               if malicious_count > 0
-                redirect_to dashboard_path(folder_id: @current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
+                redirect_to dashboard_path(folder_id: $current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
               else
                 upload(file_id)
-                redirect_to dashboard_path(folder_id: @current_folder), notice: "File caricato con successo"
+                redirect_to dashboard_path(folder_id: $current_folder), notice: "File caricato con successo"
               end
             else
-              redirect_to dashboard_path(folder_id: @current_folder), alert: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi."
+              redirect_to dashboard_path(folder_id: $current_folder), alert: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi."
             end
           else
             error = analyze_response['error'] ? analyze_response['error']['message'] : "Errore sconosciuto durante l'analisi"
-            redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
+            redirect_to dashboard_path(folder_id: $current_folder), alert: "Si è verificato un errore: #{error}"
           end
         else
           error = response_upload['error'] ? response_upload['error']['message'] : "Errore sconosciuto durante il caricamento"
-          redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore: #{error}"
+          redirect_to dashboard_path(folder_id: $current_folder), alert: "Si è verificato un errore: #{error}"
         end
       rescue => e
         puts "Error in scan: #{e.message}"
         puts e.backtrace.join("\n")
-        redirect_to dashboard_path(folder_id: @current_folder), alert: "Si è verificato un errore durante la scansione: #{e.message}"
+        redirect_to dashboard_path(folder_id: $current_folder), alert: "Si è verificato un errore durante la scansione: #{e.message}"
       end
     end
 
@@ -482,19 +484,23 @@ class DriveController < ApplicationController
       # Initialize the API
       drive_service = initialize_drive_service
 
-      # Verify file is present
-      # if params[:file].present?
-        # Upload file to Google Drive
+      puts params[:file]
       metadata = {
         name: params[:file].original_filename,
-        parents: [@current_folder],
+        parents: [$current_folder],
         mime_type: params[:file].content_type
       }
       file = drive_service.create_file(metadata, upload_source: params[:file].tempfile, content_type: params[:file].content_type)
       puts "File uploaded to Google Drive"
       file_db = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
-      folder = UserFolder.find_by(user_folder_id: @current_folder)
-      HasParent.create(item_id: file.id, item_type: 'UserFile', parent_id: folder.id)
+      if $current_folder == 'root'
+        folder = UserFolder.find_by(mime_type: 'root')
+      else
+        folder = UserFolder.find_by(user_folder_id: $current_folder)
+      end
+      parent = Parent.find_by(itemid: folder.user_folder_id)
+      HasParent.create(item_id: file_db.id, item_type: 'UserFile', parent_id: parent.id)
+      Contains.create(user_folder_id: folder.id, user_file_id: file_db.id)
       #update_database
       #redirect_to dashboard_path, notice: 'File uploaded to Google Drive successfully'
     end
@@ -538,7 +544,7 @@ class DriveController < ApplicationController
                 return
               else
                 upload_folder
-                redirect_to dashboard_path, notice: "Cartella caricata con successo"
+                redirect_to dashboard_path(folder_id: $current_folder), notice: "Cartella caricata con successo"
                 return
               end
             else
@@ -597,20 +603,28 @@ class DriveController < ApplicationController
         parents: [params[:folder_id]]
       }
       folder = drive_service.create_file(folder_metadata, fields: 'id')
-      folder = UserFolder.create(user_folder_id: folder.id, name: folder.name, mime_type: folder.mime_type, created_time: folder.created_time, modified_time: folder.modified_time)
-      Parent.create(itemid: folder.id, num: 0)
+      folder_db = UserFolder.create(user_folder_id: folder.id, name: folder_name, mime_type: 'application/vnd.google-apps.folder', created_time: folder.created_time, modified_time: folder.modified_time)
+      parent = Parent.create(itemid: folder.id, num: 0)
+      parent_folder = UserFolder.find_by(user_folder_id: $current_folder)
+      if parent_folder.nil?
+        parent_folder = UserFolder.find_by(mime_type: 'root')
+      end
+      puts "Current folder: #{$current_folder}"
+      puts "Parent folder: #{parent_folder.name}"
+      folder_parent = Parent.find_by(itemid: parent_folder.user_folder_id)
+      HasParent.create(item_id: folder_db.id, item_type: 'UserFolder', parent_id: folder_parent.id)
 
       # Itera su tutti i file nella cartella e caricali su Google Drive
-      params[:files].each do |file|
+      params[:files].each do |fil|
         file_metadata = {
-          name: file.original_filename,
+          name: fil.original_filename,
           parents: [folder.id],
-          mime_type: file.content_type
+          mime_type: fil.content_type
         }
-        drive_service.create_file(file_metadata, upload_source: file.tempfile, content_type: file.content_type)
-        file = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
-        HasParent.create(item_id: file.id, item_type: 'UserFile', parent_id: folder.id)
-
+        file = drive_service.create_file(file_metadata, upload_source: fil.tempfile, content_type: fil.content_type)
+        file_db = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
+        HasParent.create(item_id: file_db.id, item_type: 'UserFile', parent_id: parent.id)
+        Contains.create(user_folder_id: folder_db.id, user_file_id: file_db.id)
       end
 
       #redirect_to dashboard_path, notice: 'Cartella caricata su Google Drive con successo'
@@ -627,12 +641,9 @@ class DriveController < ApplicationController
 
       # Logica per creare la cartella, ad esempio tramite un'API di Google Drive
       # Supponiamo che ci sia una funzione create_folder_in_drive(folder_name) che crea la cartella
-
-      @current_folder = params[:folder_id] || 'root'
-
       begin
         create_folder_in_drive(folder_name)
-        redirect_to dashboard_path(folder_id: @current_folder), notice: "Cartella '#{folder_name}' creata con successo."
+        redirect_to dashboard_path(folder_id: $current_folder), notice: "Cartella '#{folder_name}' creata con successo."
         return
       rescue => e
         redirect_to dashboard_path, alert: "Si è verificato un errore durante la creazione della cartella: #{e.message}"
@@ -875,7 +886,7 @@ class DriveController < ApplicationController
       drive_service = initialize_drive_service
       metadata = {
         name: folder_name,
-        parents: [@current_folder],
+        parents: [$current_folder],
         mime_type: "application/vnd.google-apps.folder"
       }
       file = drive_service.create_file(metadata, content_type: "application/vnd.google-apps.folder")
