@@ -1,6 +1,7 @@
 class AdminController < ApplicationController
   before_action :set_user, only: [:suspend_user]
   before_action :update_suspend
+  before_action :check_admin
 
   def admin_page
     @users = User.where.not(id: current_user.id).includes(:premium_user) # Escludi l'utente corrente
@@ -18,6 +19,12 @@ class AdminController < ApplicationController
 
   def set_user
     @user = User.find(params[:id])
+  end
+
+  def check_admin
+    unless current_user.admin_user.present?
+      redirect_to root_path
+    end
   end
 
   def update_suspend

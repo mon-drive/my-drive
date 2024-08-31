@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_30_175713) do
+ActiveRecord::Schema.define(version: 2024_08_31_103027) do
+
+  create_table "admin_users", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_admin_users_on_user_id"
+  end
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -172,7 +179,7 @@ ActiveRecord::Schema.define(version: 2024_08_30_175713) do
 
   create_table "users", force: :cascade do |t|
     t.string "username"
-    t.string "type" 
+    t.string "type"
     t.string "email"
     t.string "profile_picture"
     t.date "expire_date"
@@ -187,6 +194,7 @@ ActiveRecord::Schema.define(version: 2024_08_30_175713) do
     t.boolean "suspended"
   end
 
+  add_foreign_key "admin_users", "users"
   add_foreign_key "contains", "user_files"
   add_foreign_key "contains", "user_files"
   add_foreign_key "contains", "user_folders"

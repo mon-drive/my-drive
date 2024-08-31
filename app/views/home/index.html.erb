@@ -4,7 +4,7 @@
     <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans')%></a>
   </div>
   <div class="navbar-nav ms-auto">
-    <% if session[:user_id]%>
+    <% if session[:user_id] && current_user.admin_user.present?%>
       <a class="nav-link" href="<%= admin_path %>">pagina admin (da tradurre)</a>
     <%end%>    
     <% if session[:user_id] %>
