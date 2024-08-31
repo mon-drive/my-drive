@@ -725,7 +725,19 @@ class DriveController < ApplicationController
       folder_id = params[:folder_id]
 
       # Ottieni le informazioni dell'elemento
-      item = drive_service.get_file(item_id, fields: 'mimeType, name')
+      item = drive_service.get_file(item_id, fields: 'mimeType, name, parents')
+      item_db = UserFile.find_by(user_file_id: item_id) || UserFolder.find_by(user_folder_id: item_id)
+      has_parents = HasParent.where(item_id: item_db.id)
+      has_parents.each do |parent|
+        parent.destroy
+      end
+      folder = UserFolder.find_by(user_folder_id: folder_id)
+      parent = Parent.find_by(itemid: folder_id)
+      if item_db.mime_type == 'application/vnd.google-apps.folder'
+        HasParent.create(item_id: item_db.id, item_type: 'UserFolder', parent_id: parent.id)
+      else
+        HasParent.create(item_id: item_db.id, item_type: 'UserFile', parent_id: parent.id)
+      end
 
       if item.mime_type == 'application/vnd.google-apps.folder'
         # L'elemento è una cartella
@@ -736,18 +748,9 @@ class DriveController < ApplicationController
           parents: [folder_id]
         }
 
-        # Crea una nuova cartella in folder_id
-        new_folder = drive_service.create_file(folder_metadata, fields: 'id')
+        parents = item.parents.join(',')
 
-        # Recupera tutti i file e cartelle all'interno della cartella originale
-        child_files = drive_service.list_files(q: "'#{item_id}' in parents or sharedWithMe = true", fields: 'files(id, name)')
-
-        # Sposta ogni file nella nuova cartella
-        child_files.files.each do |child_file|
-          drive_service.update_file(child_file.id, add_parents: new_folder.id, remove_parents: item_id)
-        end
-
-        drive_service.delete_file(item_id)
+        drive_service.update_file(item_id, add_parents: folder_id, remove_parents: parents)
 
       else
         # L'elemento è un file
