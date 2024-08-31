@@ -89,7 +89,7 @@ it:
     table:
       type: "Tipo"
       yess: "Si" #ho messo una s in piu senno non funziona
-      suspend: "Sospeso"
+      suspended: "Sospeso"
       end-suspend: "Fine sospensione"
       suspend-buttun: "Sospendi utente"
       suspended-buttun: "Sospeso"
@@ -97,3 +97,5 @@ it:
       Standar: "Utente Standard"
     admin-title: "Gestione utenti"
     suspend-message: "Il tuo account è sospeso fino al "
+    suspend: "Sospendi"
+    suspend-day: "Inserisci giorni di sospensione:"

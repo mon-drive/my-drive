@@ -11,7 +11,7 @@
           <th>Username</th>
           <th>Email</th>
           <th><%=t('admin.table.type')%></th>
-          <th><%=t('admin.table.suspend')%></th>
+          <th><%=t('admin.table.suspended')%></th>
           <th><%=t('admin.table.end-suspend')%></th>
           <th></th>
         </tr>
@@ -61,7 +61,7 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Sospendi Utente</h5>
+        <h5 class="modal-title"><%=t('admin.table.suspend-buttun')%></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body d-flex justify-content-center">
@@ -69,10 +69,10 @@
           <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <input type="hidden" name="user_id" id="modalUserId">
           <div class="form-group mb-3">
-            <label for="days" class="form-label">Inserisci giorni di sospensione:</label>
+            <label for="days" class="form-label"><%=t('admin.suspend-day')%></label>
             <input type="number" class="form-control form-control-sm mx-auto" name="days" id="days" min="1" step="1" required style="width: 100px; -moz-appearance: textfield; text-align: center;" oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.abs(this.value) : null">
           </div>
-          <button type="submit" class="btn btn-primary mt-2">Sospendi</button>
+          <button type="submit" class="btn btn-primary mt-2"><%=t('admin.suspend')%></button>
         </form>
       </div>
     </div>
