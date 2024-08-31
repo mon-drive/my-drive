@@ -172,7 +172,7 @@ ActiveRecord::Schema.define(version: 2024_08_30_175713) do
 
   create_table "users", force: :cascade do |t|
     t.string "username"
-    t.string "type"
+    t.string "type" 
     t.string "email"
     t.string "profile_picture"
     t.date "expire_date"

@@ -74,7 +74,7 @@ Rails.application.routes.draw do
   post '/update_name', to: 'drive#update_name'
 
   # Route for admin
-  get 'admin/admin_page', to: 'admin#admin_page', as: 'admin_page'
+  get '/admin', to: 'admin#admin_page', as: 'admin'
   patch 'admin/suspend_user/:id', to: 'admin#suspend_user', as: 'suspend_user_admin'
 
 

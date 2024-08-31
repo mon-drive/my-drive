@@ -1,8 +1,9 @@
 class AdminController < ApplicationController
   before_action :set_user, only: [:suspend_user]
+  before_action :update_suspend
 
   def admin_page
-    @users = User.all.includes(:premium_user) # Include associazione per evitare query N+1
+    @users = User.where.not(id: current_user.id).includes(:premium_user) # Escludi l'utente corrente
   end
 
   def suspend_user
@@ -17,5 +18,14 @@ class AdminController < ApplicationController
 
   def set_user
     @user = User.find(params[:id])
+  end
+
+  def update_suspend
+    users = User.where.not(id: current_user.id).includes(:premium_user) # Escludi l'utente corrente
+    for user in users
+      if user.suspended==true and user.end_suspend!=nil and user.end_suspend < Time.now
+        user.update(suspended: false, end_suspend: nil)
+      end
+    end
   end
 end

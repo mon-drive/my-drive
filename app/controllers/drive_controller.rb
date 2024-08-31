@@ -1,6 +1,7 @@
 class DriveController < ApplicationController
     before_action :authenticate_user!
     before_action :fetch_google_profile_image
+    before_action :check_suspension, only: [:dashboard]
 
     require 'google/apis/drive_v3'
     require 'googleauth'
@@ -1119,6 +1120,17 @@ class DriveController < ApplicationController
           end
         end
 
+      end
+    end
+
+    #controllo sospensione
+    def check_suspension
+      if current_user.suspended
+        if current_user.end_suspend < Time.now
+          current_user.update(suspended: false,end_suspend: nil)
+        else
+          redirect_to root_path, notice: 'Il tuo account è sospeso. Contatta il supporto per ulteriori informazioni.'
+        end
       end
     end
 
