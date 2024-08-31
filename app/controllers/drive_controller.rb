@@ -85,11 +85,12 @@ class DriveController < ApplicationController
       temp = UserFile.find_by(user_file_id: file_id)
       if temp.nil?
         temp = UserFolder.find_by(user_folder_id: file_id)
-        if not temp.nil?
-          ShareFolder.create(user_folder_id: file_id, user_id: current_user.id)
+        if temp
+          ShareFolder.create(user_folder_id: temp.id, user_id: current_user.id)
         end
       else
-        ShareFile.create(user_file_id: file_id, user_id: current_user.id)
+        file = UserFile.find_by(user_file_id: file_id)
+        ShareFile.create(user_file_id: file.id, user_id: current_user.id)
       end
 
       respond_to do |format|
