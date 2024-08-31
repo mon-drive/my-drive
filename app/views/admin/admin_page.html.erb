@@ -1,4 +1,4 @@
-<h1 class="text-center my-4">Admin - Gestione Utenti</h1>
+<h1 class="text-center my-4">Admin - <%=t('admin.admin-title')%></h1>
 
 <div class="container">
   <%= javascript_include_tag 'admin_page', 'data-turbolinks-track': 'reload' %>
@@ -10,30 +10,30 @@
           <th>ID</th>
           <th>Username</th>
           <th>Email</th>
-          <th>Tipo</th>
-          <th>Sospeso</th>
-          <th>Fine Sospensione</th>
-          <th>Azioni</th>
+          <th><%=t('admin.table.type')%></th>
+          <th><%=t('admin.table.suspend')%></th>
+          <th><%=t('admin.table.end-suspend')%></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         <% @users.each do |user| %>
-          <% next if user.username.nil? || user.email.nil? %>
+          <% next if user.username.nil? || user.email.nil? || user.admin_user.present?%>
           <tr>
             <td><%= user.id %></td>
             <td><%= user.username %></td>
             <td><%= user.email %></td>
-            <td><%= user.premium_user.present? ? "PremiumUser" : "RegularUser" %></td>
+            <td><%= user.premium_user.present? ? t('admin.table.Premium') : t('admin.table.Standard') %></td>
             <td>
               <% if user.suspended %>
-                <span class="badge bg-danger">Sì</span>
+                <span class="badge bg-danger"><%=t('admin.table.yess')%></span>
               <% else %>
                 <span class="badge bg-success">No</span>
               <% end %>
             </td>
             <td>
               <% if user.suspended && user.end_suspend.present? %>
-                <%= user.end_suspend.strftime("%d-%m-%Y %H:%M") %>
+                <%= user.end_suspend.strftime("%d-%m-%Y") %>
               <% else %>
                 <span class="text-muted">--</span>
               <% end %>
@@ -41,11 +41,11 @@
             <td>
               <% if user.suspended %>
                 <button type="button" class="btn btn-secondary" disabled>
-                  Sospeso
+                  <%=t('admin.table.suspended-buttun')%>
                 </button>
               <% else %>
                 <button type="button" class="btn btn-warning suspend-user-btn" data-bs-toggle="modal" data-bs-target="#md_suspend" data-user-id="<%= user.id %>">
-                  Sospendi Utente
+                  <%=t('admin.table.suspend-buttun')%>
                 </button>
               <% end %>
             </td>

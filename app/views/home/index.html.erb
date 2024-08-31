@@ -5,7 +5,7 @@
   </div>
   <div class="navbar-nav ms-auto">
     <% if session[:user_id] && current_user.admin_user.present?%>
-      <a class="nav-link" href="<%= admin_path %>">pagina admin (da tradurre)</a>
+      <a class="nav-link" href="<%= admin_path %>"><%= t('admin.access-admin')%></a>
     <%end%>    
     <% if session[:user_id] %>
       <a class="nav-link" href="<%= dashboard_path %>"><%= t('home.access-drive')%></a>
@@ -23,6 +23,12 @@
 <% if notice %>
   <div class="alert alert-info">
     <%= notice %>
+  </div>
+<% end %>
+
+<% if alert %>
+  <div class="alert alert-danger">
+    <%= alert %>
   </div>
 <% end %>
 

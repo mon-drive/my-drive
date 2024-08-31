@@ -84,3 +84,16 @@ it:
     summary: "Resoconto"
     plan: "Piano MyDrive"
     total: "Totale"
+  admin:
+    access-admin: "pagina admin"
+    table:
+      type: "Tipo"
+      yess: "Si" #ho messo una s in piu senno non funziona
+      suspend: "Sospeso"
+      end-suspend: "Fine sospensione"
+      suspend-buttun: "Sospendi utente"
+      suspended-buttun: "Sospeso"
+      Premium: "Utente Premium"
+      Standar: "Utente Standard"
+    admin-title: "Gestione utenti"
+    suspend-message: "Il tuo account è sospeso fino al "

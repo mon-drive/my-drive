@@ -85,3 +85,16 @@ en:
     summary: "Summary"
     plan: "MyDrive Plan"
     total: "Total"
+  admin:
+    access-admin: "admin page"
+    table:
+      type: "type"
+      yess: "Yes"
+      suspend: "Suspended"
+      end-suspend: "End suspend"
+      suspend-buttun: "Suspend user"
+      suspended-buttun: "Suspended"
+      Premium: "Premium User"
+      Standar: "Standard User"
+    admin-title: "User management"
+    suspend-message: "Your account is suspended until "

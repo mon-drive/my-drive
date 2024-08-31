@@ -8,7 +8,8 @@ class AdminController < ApplicationController
   end
 
   def suspend_user
-    if @user.update(suspended: true, end_suspend: Time.current + params[:days].to_i.days)
+    end_of_day = (Time.current + params[:days].to_i.days).end_of_day
+    if @user.update(suspended: true, end_suspend: end_of_day)
       render json: { success: true }
     else
       render json: { success: false, errors: @user.errors.full_messages }, status: :unprocessable_entity
