@@ -89,3 +89,18 @@ it:
     nothing: "Nessun piano selezionato"
     logged: "Sei già loggato"
     subscribed: "Hai già un piano attivo"
+  admin:
+    access-admin: "pagina admin"
+    table:
+      type: "Tipo"
+      yess: "Si" #ho messo una s in piu senno non funziona
+      suspended: "Sospeso"
+      end-suspend: "Fine sospensione"
+      suspend-buttun: "Sospendi utente"
+      suspended-buttun: "Sospeso"
+      Premium: "Utente Premium"
+      Standar: "Utente Standard"
+    admin-title: "Gestione utenti"
+    suspend-message: "Il tuo account è sospeso fino al "
+    suspend: "Sospendi"
+    suspend-day: "Inserisci giorni di sospensione:"
