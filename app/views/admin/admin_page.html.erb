@@ -1,0 +1,80 @@
+<h1 class="text-center my-4">Admin - <%=t('admin.admin-title')%></h1>
+
+<div class="container">
+  <%= javascript_include_tag 'admin_page', 'data-turbolinks-track': 'reload' %>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th><%=t('admin.table.type')%></th>
+          <th><%=t('admin.table.suspended')%></th>
+          <th><%=t('admin.table.end-suspend')%></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @users.each do |user| %>
+          <% next if user.username.nil? || user.email.nil? || user.admin_user.present?%>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.username %></td>
+            <td><%= user.email %></td>
+            <td><%= user.premium_user.present? ? t('admin.table.Premium') : t('admin.table.Standard') %></td>
+            <td>
+              <% if user.suspended %>
+                <span class="badge bg-danger"><%=t('admin.table.yess')%></span>
+              <% else %>
+                <span class="badge bg-success">No</span>
+              <% end %>
+            </td>
+            <td>
+              <% if user.suspended && user.end_suspend.present? %>
+                <%= user.end_suspend.strftime("%d-%m-%Y") %>
+              <% else %>
+                <span class="text-muted">--</span>
+              <% end %>
+            </td>
+            <td>
+              <% if user.suspended %>
+                <button type="button" class="btn btn-secondary" disabled>
+                  <%=t('admin.table.suspended-buttun')%>
+                </button>
+              <% else %>
+                <button type="button" class="btn btn-warning suspend-user-btn" data-bs-toggle="modal" data-bs-target="#md_suspend" data-user-id="<%= user.id %>">
+                  <%=t('admin.table.suspend-buttun')%>
+                </button>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- modal sospensione-->
+<div class="modal fade" id="md_suspend" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><%=t('admin.table.suspend-buttun')%></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex justify-content-center">
+        <form id="suspendForm" action="#" method="post" class="text-center">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <input type="hidden" name="user_id" id="modalUserId">
+          <div class="form-group mb-3">
+            <label for="days" class="form-label"><%=t('admin.suspend-day')%></label>
+            <input type="number" class="form-control form-control-sm mx-auto" name="days" id="days" min="1" step="1" required style="width: 100px; -moz-appearance: textfield; text-align: center;" oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.abs(this.value) : null">
+          </div>
+          <button type="submit" class="btn btn-primary mt-2"><%=t('admin.suspend')%></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

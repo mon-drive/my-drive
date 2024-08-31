@@ -90,3 +90,18 @@ en:
     nothing: "No plan selected"
     logged: "You are already logged in"
     subscribed: "You already have an active plan"
+  admin:
+    access-admin: "admin page"
+    table:
+      type: "type"
+      yess: "Yes"
+      suspended: "Suspended"
+      end-suspend: "End suspend"
+      suspend-buttun: "Suspend user"
+      suspended-buttun: "Suspended"
+      Premium: "Premium User"
+      Standar: "Standard User"
+    admin-title: "User management"
+    suspend-message: "Your account is suspended until "
+    suspend: "Suspend"
+    suspend-day: "Enter suspension days:"
