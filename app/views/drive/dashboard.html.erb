@@ -466,7 +466,11 @@
                       </ul>
                     </li>
                     <li><%= form_with url: delete_item_path, method: :delete, local: true, class: 'd-inline' do %>
-                        <%= hidden_field_tag :item_id, item.id %>
+                        <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                          <%= hidden_field_tag :item_id, item.user_folder_id %>
+                        <% else %>
+                          <%= hidden_field_tag :item_id, item.user_file_id %>
+                        <% end %>
                         <%= hidden_field_tag :folder_id, $current_folder %>
                         <button type="submit" class="dropdown-item"><%= t('dash.delete')%></button>
                         <% end %>

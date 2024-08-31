@@ -668,9 +668,14 @@ class DriveController < ApplicationController
       item_id = params[:item_id]
       folder_id = params[:folder_id] # Recupera il parametro folder_id
 
+      puts "Deleting item: #{item_id} from folder: #{folder_id}"
+
       begin
-        if params[:folder_id] == 'bin'
+        if folder_id == 'bin'
           drive_service.delete_file(item_id)
+          item = UserFile.find_by(user_file_id: item_id) || UserFolder.find_by(user_folder_id: item_id)
+          delete_aux(item_id)
+
           respond_to do |format|
             format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento eliminato con successo.' }
             format.json { render json: { message: 'Elemento eliminato con successo.' }, status: :ok }
@@ -682,6 +687,8 @@ class DriveController < ApplicationController
           trashed: true
         }
         drive_service.update_file(item_id, file_metadata, fields: 'trashed')
+        item = UserFile.find_by(user_file_id: item_id) || UserFolder.find_by(user_folder_id: item_id)
+        item.update(trashed: true)
         respond_to do |format|
           format.html { redirect_to dashboard_path(folder_id: folder_id), notice: 'Elemento eliminato con successo.' }
           format.json { render json: { message: 'Elemento eliminato con successo.' }, status: :ok }
@@ -699,7 +706,13 @@ class DriveController < ApplicationController
       items = get_files_and_folders_in_bin
 
       items.each do |item|
-        drive_service.delete_file(item.id)
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          drive_service.delete_file(item.user_folder_id)
+          delete_aux(item.user_folder_id)
+        else
+          drive_service.delete_file(item.user_file_id)
+          delete_aux(item.user_file_id)
+        end
       end
 
       redirect_to dashboard_path(folder_id: 'bin'), notice: 'Cestino svuotato con successo.'
@@ -940,6 +953,91 @@ class DriveController < ApplicationController
     def fetch_google_profile_image
       auth = request.env['omniauth.auth']
       @google_profile_image = @current_user.profile_picture
+    end
+
+    def delete_aux(file_id)
+      file = UserFile.find_by(user_file_id: file_id)
+      if file.nil?
+        folder1 = UserFolder.find_by(user_folder_id: file_id)
+        parent1 = Parent.find_by(itemid: file_id)
+        possesses1 = Possess.find_by(user_folder_id: folder1.id)
+        hasOwner1 = HasOwner.where(item: folder1.id)
+        hasPermission1 = HasPermission.where(item_id: folder1.id)
+        shareFolder1 = ShareFolder.where(user_folder_id: folder1.id)
+        hasParent = HasParent.where(parent_id: parent1.id)
+        hasParent.each do |item|
+          if item.item_type == 'UserFile'
+            file = UserFile.find_by(id: item.item_id)
+            if file
+              delete_aux(file.user_file_id)
+              file.destroy
+            end
+          else
+            folder = UserFolder.find_by(user_folder_id: item.item_id)
+            possesses = Possess.find_by(user_folder_id: folder.id)
+            parent = Parent.find_by(itemid: folder.user_folder_id)
+            hasOwner = HasOwner.where(item: folder.id)
+            hasPermission = HasPermission.where(item_id: folder.id)
+            shareFolder = ShareFolder.where(user_folder_id: folder.id)
+            delete_aux(item.user_folder_id)
+            if possesses
+              possesses.destroy
+            end
+            if parent
+              parent.destroy
+            end
+            hasOwner.each do |owner|
+              owner.destroy
+            end
+            hasPermission.each do |permission|
+              if permission.item_type == 'UserFolder'
+                permission.destroy
+              end
+            end
+            shareFolder.each do |share|
+              share.destroy
+            end
+            folder.destroy
+          end
+          item.destroy
+        end
+        if possesses1
+          possesses1.destroy
+        end
+        hasOwner1.each do |owner|
+          owner.destroy
+        end
+        hasPermission1.each do |permission|
+          if permission.item_type == 'UserFolder'
+            permission.destroy
+          end
+        end
+        shareFolder1.each do |share|
+          share.destroy
+        end
+        if parent1
+          parent1.destroy
+        end
+        folder1.destroy
+      else
+        contains = Contains.find_by(user_file_id: file.id)
+        hasOwner = HasOwner.where(item: file.id)
+        hasPermission = HasPermission.where(item_id: file.id)
+        shareFile = ShareFile.where(user_file_id: file.id)
+        hasOwner.each do |owner|
+          owner.destroy
+        end
+        hasPermission.each do |permission|
+          if permission.item_type == 'UserFile'
+            permission.destroy
+          end
+        end
+        shareFile.each do |share|
+          share.destroy
+        end
+        contains.destroy
+        file.destroy
+      end
     end
 
     def update_database
