@@ -21,6 +21,9 @@ class DriveController < ApplicationController
 
       @root_folder_name = get_root_name
       @root_folder_id = get_root_id
+
+      storage_info
+
       if params[:folder_id] == 'bin'
         $current_folder_name = 'Cestino'
       else
@@ -660,6 +663,8 @@ class DriveController < ApplicationController
 
         @total_space = storage_info[:total_space]
         @used_space = storage_info[:used_space]
+
+
       rescue => e
         render json: { error: "Si è verificato un errore: #{e.message}" }, status: :unprocessable_entity
       end
