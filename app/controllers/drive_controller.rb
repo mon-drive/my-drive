@@ -843,7 +843,7 @@ class DriveController < ApplicationController
       begin
         response = drive_service.list_files(
           q: "name contains '#{query}' and trashed = false or sharedWithMe = true",
-          fields: 'nextPageToken, files(id, name, mimeType, parents)',
+          fields: 'nextPageToken, files(id, name, mimeType, parents, webViewLink, iconLink)',
           spaces: 'drive',
           page_token: next_page_token
         )
