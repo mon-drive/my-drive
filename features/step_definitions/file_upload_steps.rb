@@ -12,6 +12,7 @@ Given('a registered user named "Bob"') do
 end
 
 Given("Bob wants to upload one or more valid files") do
+  visit 'http://localhost:3000'
   # Temporarily create a file for testing
   @file = Tempfile.new('file1.txt')
   @file.write("Sample content for testing")
@@ -29,6 +30,7 @@ And("Bob has permission to write in that directory") do
 end
 
 When("Bob clicks the “+” button") do
+  visit 'http://localhost:3000/dashboard'
   # Simulate the action of Bob initiating the upload process
   @button_clicked = true
 end
