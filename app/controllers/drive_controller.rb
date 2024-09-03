@@ -785,19 +785,54 @@ class DriveController < ApplicationController
       drive_service
     end
 
+    def user_folders
+      all_folders = []
+      puts "Current user: #{current_user.id}"
+      possess = Possess.where(user_id: current_user.id)
+      possess.each do |item|
+        folder = UserFolder.find_by(id: item.user_folder_id)
+        if folder
+          all_folders << folder.id
+        end
+      end
+      puts "Number of folders: #{all_folders.length}"
+      all_folders
+    end
+
     def get_files_and_folders_in_folder(folder_id)
       all_items = []
       next_page_token = nil
 
+      folders = user_folders
+
       if folder_id == 'root'
-        home = UserFolder.find_by(mime_type: 'root')
+        roots = UserFolder.where(mime_type: 'root')
+        home = nil
+        roots.each do |root|
+          puts folders.include?(root.id)
+          if folders.include?(root.id)
+            home = root
+          end
+        end
         if home.nil?
           update_database
-          home = UserFolder.find_by(mime_type: 'root')
+          folders = user_folders
+          roots = UserFolder.where(mime_type: 'root')
+          home = nil
+          roots.each do |root|
+            if folders.include?(root.id)
+              home = root
+            end
+          end
         end
         parent = Parent.find_by(itemid: home.user_folder_id)
       else
-        parent = Parent.find_by(itemid: folder_id)
+        folders = UserFolder.where(user_folder_id: folder_id)
+        folders.each do |folder|
+          if user_folders.include?(folder.id)
+            parent = Parent.find_by(itemid: folder.user_folder_id)
+          end
+        end
       end
       if parent.nil?
         update_database
@@ -857,8 +892,20 @@ class DriveController < ApplicationController
     def get_files_and_folders()
       all_items = []
 
-      all_items = UserFolder.where(trashed: false) + UserFile.where(trashed: false)
-
+      possess = Possess.where(user_id: current_user.id)
+      possess.each do |item|
+        folder = UserFolder.find_by(id: item.user_folder_id, trashed: false)
+        if folder
+          all_items << folder
+          contains = Contains.where(user_folder_id: folder.id)
+          contains.each do |file|
+            file_db = UserFile.find_by(id: file.user_file_id, trashed: false)
+            if file_db
+              all_items << file_db
+            end
+          end
+        end
+      end
       all_items
     end
 
@@ -1068,10 +1115,12 @@ class DriveController < ApplicationController
 
       storage_info
 
-      root = UserFolder.find_by(mime_type: 'root')
+      rootFolder = drive_service.get_file('root', fields: 'id, name, parents, trashed, size, created_time, modified_time, shared')
+
+      root = UserFolder.find_by(user_folder_id: rootFolder.id)
       if root.nil?
-        rootFolder = drive_service.get_file('root', fields: 'id, name, parents, trashed, size, created_time, modified_time, shared')
-        UserFolder.create(user_folder_id: rootFolder.id, name: rootFolder.name, mime_type: 'root', size: rootFolder.size.to_i, created_time: rootFolder.created_time, modified_time: rootFolder.modified_time, shared: rootFolder.shared)
+        folder = UserFolder.create(user_folder_id: rootFolder.id, name: rootFolder.name, mime_type: 'root', size: rootFolder.size.to_i, created_time: rootFolder.created_time, modified_time: rootFolder.modified_time, shared: rootFolder.shared)
+        Possess.create(user_id: current_user.id, user_folder_id: folder.id)
       end
 
       all_items.each do |item|

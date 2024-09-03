@@ -78,3 +78,13 @@
     </div>
   </div>
 </div>
+
+<script>
+
+  document.addEventListener('turbolinks:load', function () {
+    if (event.data.timing.visitStart) {
+      location.reload();
+    }
+  });
+
+</script>
