@@ -4,7 +4,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-  <meta name="stripe-publishable-key" content="<%= ENV['STRIPE_PUBLISHABLE_KEY'] %>">
+  <meta name="stripe-publishable-key" content="<%= @stripe_key %>">
 
   <style>
     .btn-toggle {
@@ -149,7 +149,10 @@
 
   <!-- Custom Script for Stripe-->
   <script>
-    $(document).ready(function() {
+    document.addEventListener('turbolinks:load', function () {
+      if (event.data.timing.visitStart) {
+        location.reload();
+      }
       $('.btn-toggle').click(function() {
         $('.btn-toggle').removeClass('active');
         $(this).addClass('active');
@@ -172,6 +175,7 @@
 
       // Stripe Integration
       var stripeKey = $('meta[name="stripe-publishable-key"]').attr('content');
+
       var stripe = Stripe(stripeKey);
       var elements = stripe.elements();
       var card = elements.create('card', {style: {base: {color: "#32325d", fontSize: '16px'}}});

@@ -7,6 +7,7 @@ class PagesController < ApplicationController
   end
   def payment
     @plan = params[:plan]
+    @stripe_key = ENV['stripe_publishable_key']
     if @plan.nil?
       redirect_to pricing_path, alert: t('payment.nothing')
     end
@@ -41,7 +42,7 @@ class PagesController < ApplicationController
         logger.info "Stripe charge was successful: #{charge.inspect}"
         if charge.amount == 9900
           PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
-        else 
+        else
           PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
         end
         redirect_to root_path, notice: t('payment.success')
@@ -65,7 +66,7 @@ class PagesController < ApplicationController
   end
 
   def check_active_subscription #TODO? add a way to check if the subscription is expired
-    pu = PremiumUser.find_by(user_id: session[:user_id]) 
+    pu = PremiumUser.find_by(user_id: session[:user_id])
     logger.info "Checking subscription for user: #{pu.inspect}"
     if pu.nil?
       # User has no subscription
