@@ -104,7 +104,7 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center">Esportazione in corso può richiedere un pò di tempo:</h5>
+        <h5 class="modal-title text-center"><%= t('dash.export-message')%></h5>
       </div>
       <div class="modal-body">
         <div class="text-center">
@@ -428,20 +428,20 @@
                       <li><a href="<%=item.web_view_link%>" class="dropdown-item file-preview-link" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" target="_blank"><%= t('dash.open')%></a></li>
                     <% end %>
                     <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Rinomina</a></li>
-                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Condividi</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.rename')%></a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.share')%></a></li>
                     <% else %>
-                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Rinomina</a></li>
-                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Condividi</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.rename')%></a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.share')%></a></li>
                     <% end %>
                     <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                      <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" id="folder-export-<%= id %>">Scarica</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" id="folder-export-<%= id %>"><%= t('dash.download')%></a></li>
                     <% else %>
-                      <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" type="SELF">Scarica</a></li>
+                      <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" type="SELF"><%= t('dash.download')%></a></li>
                       <!-- If per i file supportati alla conversione-->
                       <% if item.file_extension=="docx" %>
                         <li class="dropdown-submenu">
-                          <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                          <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                           <ul id="submenu" class="dropdown-menu submenu">
                             <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
                           </ul>
@@ -449,7 +449,7 @@
                       <% elsif item.file_extension=="odt"%>
 
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="DOCX">DOCX</a></li>
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
@@ -457,40 +457,40 @@
 
                       <% elsif item.file_extension=="xlsx"%>
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
                         </ul>
                       <% elsif item.file_extension=="ods"%>
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="XLSX">XLSX</a></li>
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
                         </ul>
                       <% elsif item.file_extension=="pptx"%>
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
                         </ul>
                       <% elsif item.file_extension=="odp"%>
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PPTX">PPTX</a></li>
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
                         </ul>
                       <%elsif item.file_extension=="png"%>
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="JPG">JPG</a></li>
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>
                         </ul>
                       <%elsif item.file_extension=="jpg"%>
                         <li class="dropdown-submenu">
-                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Scarica come</a>
+                        <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.download-as')%></a>
                         <ul id="submenu" class="dropdown-menu submenu">
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PNG">PNG</a></li>
                           <li><a href="javascript:void(0);" class="dropdown-item export-item" data-id="<%= id%>" data-folder-id="<%= $current_folder %>" type="PDF">PDF</a></li>

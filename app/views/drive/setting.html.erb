@@ -23,43 +23,43 @@
     <div class="settings-container">
         <div class="settings-sidebar">
         <%= link_to dashboard_path, class: 'btn btn-link text-decoration-none text-dark' do %>
-            Tutti i file
+            <%= t('settings.all-files')%>
         <% end %>
         </div>
         <div class="settings-content">
-          <h4>INFORMAZIONI DI BASE</h4>
+          <h4><%= t('settings.info')%></h4>
           <hr>
           <div class="settings-item">
-            <h5>Nome</h5>
+            <h5><%= t('settings.name')%></h5>
             <div>
               <span id="nome"><%= @user.username %></span>
-              <a id="edit-name" href="#" data-bs-toggle="modal" data-bs-target="#editNameModal">Modifica</a>
+              <a id="edit-name" href="#" data-bs-toggle="modal" data-bs-target="#editNameModal"><%= t('settings.modify')%></a>
             </div>
           </div>
           <hr>
           <div class="settings-item">
-            <h5>Indirizzo mail</h5>
+            <h5><%= t('settings.email')%></h5>
             <div>
               <span id="mail"><%= @user.email %></span>
             </div>
           </div>
           <hr>
           <div class="settings-item">
-            <h5>Immagine del profilo</h5>
+            <h5><%= t('settings.profile-image')%></h5>
             <div>
               <% if @google_profile_image.present? %>
                 <img src="<%= @google_profile_image %>" alt="Google Profile Image" class="rounded-circle" width="100" height="100">
               <% else %>
-                <p>Nessuna immagine trovata su Google</p>
+                <p><%= t('settings.no-image')%></p>
               <% end %>
             </div>
           </div>
           <hr>
-          <h4>ELIMINA ACCOUNT</h4>
+          <h4><%= t('settings.delete-account')%></h4>
           <hr>
           <div class="settings-item">
-            <h5>Elimina il mio Drive</h5>
-            <a id="delete-account" onclick="deleteAccount()">Elimina Account</a>
+            <h5><%= t('settings.delete-drive')%></h5>
+            <a id="delete-account" onclick="deleteAccount()"><%= t('settings.delete-account-lower')%></a>
           </div>
         </div>
 
@@ -103,7 +103,7 @@
 
 <script>
 function deleteAccount() {
-    if (confirm('Sei sicuro di voler eliminare il tuo account?')) {
+    if (confirm(<%= t('settings.delete-confirmation')%>)) {
       // Esegui la logica di eliminazione dell'account
       fetch('/delete_account', {
         method: 'DELETE',
@@ -120,12 +120,12 @@ function deleteAccount() {
           window.location.href = '/';
         } else {
           // Gestisci l'errore in caso di fallimento della richiesta
-          alert('Errore durante l\'eliminazione dell\'account');
+          alert(<%= t('settings.delete-message')%>);
         }
       })
       .catch(error => {
         // Gestisci l'errore in caso di fallimento della richiesta
-        alert('Errore durante l\'eliminazione dell\'account');
+        alert(<%= t('settings.delete-message')%>);
       });
     }
 }
