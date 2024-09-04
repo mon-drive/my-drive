@@ -22,7 +22,13 @@ class DriveController < ApplicationController
       @root_folder_name = get_root_name
       @root_folder_id = get_root_id
 
-      storage_info
+      user = current_user
+      @total_space = 1
+      @used_space = 0
+      if user.total_space and user.used_space
+        @total_space = user.total_space
+        @used_space = user.used_space
+      end
 
       if params[:folder_id] == 'bin'
         $current_folder_name = 'Cestino'
@@ -663,7 +669,7 @@ class DriveController < ApplicationController
 
         @total_space = storage_info[:total_space]
         @used_space = storage_info[:used_space]
-
+        current_user.update(total_space: @total_space, used_space: @used_space)
 
       rescue => e
         render json: { error: "Si è verificato un errore: #{e.message}" }, status: :unprocessable_entity
@@ -1310,6 +1316,6 @@ class DriveController < ApplicationController
     end
 
     # Avvia la pianificazione quando il controller è caricato
-    #after_action :schedule_update, only: [:dashboard]
+    after_action :schedule_update, only: [:dashboard]
 
   end
