@@ -1,12 +1,13 @@
 Rails.application.routes.draw do
 
+  #get 'admin/admin_page'
   get 'settings/show'
   get 'settings/update'
   root 'home#index'
 
   # Route for OmniAuth
   match 'auth/:provider/callback', to: 'sessions#create', via: [:get, :post]
-  get 'auth/failure', to: redirect('/')
+  get 'auth/failure', to: 'sessions#auth_failure'
 
   # Route for logout
   get 'signout', to: 'sessions#destroy', as: 'signout'
@@ -19,10 +20,8 @@ Rails.application.routes.draw do
 
   # Route for pricing page
   get 'pricing', to: 'pages#pricing'
-
   # Route for payment page
   get 'payment', to: 'pages#payment', as: 'payment'
-
   # Route for payment complete
   post 'payment_complete', to: 'pages#payment_complete', as: 'payment_complete'
 
@@ -60,11 +59,23 @@ Rails.application.routes.draw do
   # Route for export folder
   post 'export_folder', to: 'drive#export_folder'
 
+  # Route for move item
+  get 'move_item', to: 'drive#move_item'
+
+  # Route for move folder
+  delete 'delete_account', to: 'sessions#delete_account'
 
   # Route for upload folder
   post 'upload_folder/:folder_id', to: 'drive#folder_scan', as: 'upload_folder'
 
   # Route for changing locale
   post 'set_locale', to: 'application#change_locale'
+
+  post '/update_name', to: 'drive#update_name'
+
+  # Route for admin
+  get '/admin', to: 'admin#admin_page', as: 'admin'
+  patch 'admin/suspend_user/:id', to: 'admin#suspend_user', as: 'suspend_user_admin'
+
 
 end

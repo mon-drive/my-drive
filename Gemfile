@@ -46,6 +46,9 @@ group :test do
   gem 'selenium-webdriver', '>= 4.0.0.rc1'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
+  gem 'cucumber-rails', require: false
+  gem 'rspec-rails', '~> 5.0'
+  gem 'database_cleaner'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
@@ -68,3 +71,10 @@ gem 'popper_js', '~> 2.11', '>= 2.11.8'
 # VirusTotal
 gem 'httparty'
 gem 'rubyzip'
+
+gem "net-http"
+
+gem 'rufus-scheduler'
+
+#Stripe
+gem 'stripe'
