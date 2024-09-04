@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_25_161155) do
+ActiveRecord::Schema.define(version: 2024_09_04_130032) do
+
+  create_table "admin_users", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_admin_users_on_user_id"
+  end
 
   create_table "contains", force: :cascade do |t|
     t.integer "user_folder_id"
@@ -18,6 +25,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_file_id"], name: "index_contains_on_user_file_id"
+    t.index ["user_folder_id", "user_file_id"], name: "index_contains_on_user_folder_id_and_user_file_id", unique: true
     t.index ["user_folder_id"], name: "index_contains_on_user_folder_id"
   end
 
@@ -35,6 +43,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.string "item"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["item", "owner_id"], name: "index_has_owners_on_item_and_owner_id", unique: true
     t.index ["owner_id"], name: "index_has_owners_on_owner_id"
   end
 
@@ -44,6 +53,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.integer "item_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["item_id", "parent_id", "item_type"], name: "index_has_parents_on_item_and_parent_and_type", unique: true
     t.index ["item_type", "item_id"], name: "index_has_parents_on_item"
     t.index ["parent_id"], name: "index_has_parents_on_parent_id"
   end
@@ -54,6 +64,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "permission_id"
+    t.index ["item_id", "permission_id", "item_type"], name: "index_has_permissions_on_item_id_and_permission_id_and_item_type", unique: true
     t.index ["item_type", "item_id"], name: "index_has_permissions_on_item"
   end
 
@@ -71,6 +82,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.string "emailAddress"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["emailAddress"], name: "index_owners_on_emailAddress", unique: true
   end
 
   create_table "parents", force: :cascade do |t|
@@ -78,6 +90,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.integer "num"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["itemid"], name: "index_parents_on_itemid", unique: true
   end
 
   create_table "permissions", force: :cascade do |t|
@@ -87,7 +100,7 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "permission_id"
-    t.index ["permission_id"], name: "index_permissions_on_permission_id"
+    t.index ["permission_id"], name: "index_permissions_on_permission_id", unique: true
   end
 
   create_table "possesses", force: :cascade do |t|
@@ -96,7 +109,16 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_folder_id"], name: "index_possesses_on_user_folder_id"
+    t.index ["user_id", "user_folder_id"], name: "index_possesses_on_user_id_and_user_folder_id", unique: true
     t.index ["user_id"], name: "index_possesses_on_user_id"
+  end
+
+  create_table "premium_users", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.date "expire_date"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_premium_users_on_user_id"
   end
 
   create_table "share_files", force: :cascade do |t|
@@ -134,6 +156,11 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.boolean "shared"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "web_view_link"
+    t.string "icon_link"
+    t.string "file_extension"
+    t.boolean "trashed", default: false
+    t.index ["user_file_id"], name: "index_user_files_on_user_file_id", unique: true
   end
 
   create_table "user_folders", force: :cascade do |t|
@@ -146,6 +173,8 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.boolean "shared"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "trashed", default: false
+    t.index ["user_folder_id"], name: "index_user_folders_on_user_folder_id", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -155,14 +184,20 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
     t.string "profile_picture"
     t.date "expire_date"
     t.string "provider"
-    t.string "uid"
+    t.string "user_id"
     t.string "oauth_token"
     t.string "refresh_token"
     t.datetime "oauth_expires_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "end_suspend"
+    t.boolean "suspended"
+    t.integer "total_space"
+    t.integer "used_space"
   end
 
+  add_foreign_key "admin_users", "users"
+  add_foreign_key "contains", "user_files"
   add_foreign_key "contains", "user_files"
   add_foreign_key "contains", "user_folders"
   add_foreign_key "converts", "user_files"
@@ -175,6 +210,8 @@ ActiveRecord::Schema.define(version: 2024_08_25_161155) do
   add_foreign_key "makes", "users"
   add_foreign_key "possesses", "user_folders"
   add_foreign_key "possesses", "users"
+  add_foreign_key "premium_users", "users"
+  add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "user_files"
   add_foreign_key "share_files", "users"
   add_foreign_key "share_folders", "user_folders"

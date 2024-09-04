@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  #get 'admin/admin_page'
   get 'settings/show'
   get 'settings/update'
   root 'home#index'
@@ -19,10 +20,8 @@ Rails.application.routes.draw do
 
   # Route for pricing page
   get 'pricing', to: 'pages#pricing'
-
   # Route for payment page
   get 'payment', to: 'pages#payment', as: 'payment'
-
   # Route for payment complete
   post 'payment_complete', to: 'pages#payment_complete', as: 'payment_complete'
 
@@ -73,6 +72,10 @@ Rails.application.routes.draw do
   post 'set_locale', to: 'application#change_locale'
 
   post '/update_name', to: 'drive#update_name'
+
+  # Route for admin
+  get '/admin', to: 'admin#admin_page', as: 'admin'
+  patch 'admin/suspend_user/:id', to: 'admin#suspend_user', as: 'suspend_user_admin'
 
 
 end

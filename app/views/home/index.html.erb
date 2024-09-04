@@ -4,6 +4,9 @@
     <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans')%></a>
   </div>
   <div class="navbar-nav ms-auto">
+    <% if session[:user_id] && current_user.admin_user.present?%>
+      <a class="nav-link" href="<%= admin_path %>"><%= t('admin.access-admin')%></a>
+    <%end%>    
     <% if session[:user_id] %>
       <a class="nav-link" href="<%= dashboard_path %>"><%= t('home.access-drive')%></a>
     <%end%>
@@ -12,6 +15,7 @@
     <% else %>
       <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
     <% end %>
+
   </div>
 <% end %>
 
@@ -19,6 +23,12 @@
 <% if notice %>
   <div class="alert alert-info">
     <%= notice %>
+  </div>
+<% end %>
+
+<% if alert %>
+  <div class="alert alert-danger">
+    <%= alert %>
   </div>
 <% end %>
 

@@ -72,17 +72,17 @@ $(document).on('turbolinks:load', function() {
           headers: {
             'X-CSRF-Token': csrfToken
           },
-          success: function(response) {
-            if (response.success) {
-              $('#item-name-' + itemId).text(response.name);
+          success: function(data) {
+            if (data.success) {
+              $('#item-name-' + itemId).text(data.name);
               $('#renameItemModal').modal('hide');
+              location.reload();
             } else {
-              alert('Errore: ' + response.errors.join(', '));
+              alert('Errore: ' + data.errors.join(', '));
             }
           }
         });
       }
-      location.reload();
     });
 
     // Add event listener for the "Rinomina" button click
@@ -105,7 +105,7 @@ $(document).on('turbolinks:load', function() {
 
   // Properties
   $('.properties-item').on('click', function() {
-    $('#md_loading').modal('show');
+    //$('#md_loading').modal('show');
     var itemId = $(this).data('id');
     var isFolder = $(this).data('is-folder');
     if(isFolder == "application/vnd.google-apps.folder"){
@@ -145,7 +145,7 @@ $(document).on('turbolinks:load', function() {
         }else{
           $('#file-contains').text("-");
         }
-        $('#md_loading').modal('hide');
+        //$('#md_loading').modal('hide');
         $('#filePropertiesModal').modal('show');
       }
     });
@@ -190,6 +190,7 @@ function handleFolderSelect() {
 function apri_modal(id){
   modal = new bootstrap.Modal(document.getElementById(id));
   modal.show();  
+  return modal;
 }
 
 function get_file_size(size){
@@ -212,47 +213,46 @@ function get_file_size(size){
   return human_size;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const shareItemButtons = document.querySelectorAll('.share-item');
-  const shareFileButton = document.getElementById('share-file');
-  const shareForm = document.getElementById('share-item-form');
-  let currentFileId = null;
+$(document).on('turbolinks:load', function() {
+    const shareItemButtons = document.querySelectorAll('.share-item');
+    const shareFileButton = document.getElementById('share-file');
+    const shareForm = document.getElementById('share-item-form');
+    let currentFileId = null;
 
-  shareItemButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      currentFileId = this.getAttribute('data-id');
-      const shareModal = new bootstrap.Modal(document.getElementById('shareItemModal'));
-      shareModal.show();
+    shareItemButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        currentFileId = this.getAttribute('data-id');
+        const shareModal = new bootstrap.Modal(document.getElementById('shareItemModal'));
+        shareModal.show();
+      });
     });
-  });
 
-  shareFileButton.addEventListener('click', function() {
-    const email = shareForm.querySelector('#share-email').value;
-    const permission = shareForm.querySelector('#share-permission').value;
-    const notify = shareForm.querySelector('#share-notify').checked;
-    const message = shareForm.querySelector('#share-message').value;
-    const token = shareForm.querySelector('input[name="authenticity_token"]').value;
+    shareFileButton.addEventListener('click', function() {
+      const email = shareForm.querySelector('#share-email').value;
+      const permission = shareForm.querySelector('#share-permission').value;
+      const notify = shareForm.querySelector('#share-notify').checked;
+      const message = shareForm.querySelector('#share-message').value;
+      const token = shareForm.querySelector('input[name="authenticity_token"]').value;
 
-    fetch('/share', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': token
-      },
-      body: JSON.stringify({ file_id: currentFileId, email: email, permission: permission, notify: notify, message: message })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        shareForm.reset();
-        alert('File condiviso con successo.');
-      } else {
-        alert('Errore durante la condivisione del file.');
-      }
+      fetch('/share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': token
+        },
+        body: JSON.stringify({ file_id: currentFileId, email: email, permission: permission, notify: notify, message: message })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          shareForm.reset();
+          alert('File condiviso con successo.');
+        } else {
+          alert('Errore durante la condivisione del file.');
+        }
+      });
     });
-  });
 });
-
 
 
 
@@ -261,7 +261,8 @@ document.addEventListener('DOMContentLoaded', function() {
 document.querySelectorAll('.export-item').forEach(item => {
   item.addEventListener('click', function(event) {
     event.preventDefault();
-    apri_modal('md_export');
+    export_moad= apri_modal('md_export');
+
     const fileId = this.getAttribute('data-id');
     const type = this.getAttribute('type');
 
@@ -276,16 +277,22 @@ document.querySelectorAll('.export-item').forEach(item => {
       body: JSON.stringify({ id: fileId, type: type })
     })
     .then(response => {
+
+
+      if (response.status === 403) {
+        $('#md_export').modal('dispose')
+        apri_modal('md_non_premium');
+        throw new Error('Utente non premium');
+      }
+
       if (!response.ok) {
-        console.error('Error:', error);
-        const modal = document.getElementById('md_export');
-        const bootstrapModal = bootstrap.Modal.getInstance(modal);
-        bootstrapModal.hide();
+
+
+        export_moad.hide();
         throw new Error('Network response was not ok');
       }
-      const modal = document.getElementById('md_export');
-      const bootstrapModal = bootstrap.Modal.getInstance(modal);
-      bootstrapModal.hide();
+
+      export_moad.hide();
       const fileName = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '').split(';')[0];
       return response.blob().then(blob => ({ blob, fileName }));
     })
@@ -302,7 +309,9 @@ document.querySelectorAll('.export-item').forEach(item => {
     })
     .catch(error => {
 
-      alert('Si è verificato un errore durante la conversione del file.');
+      if (error.message !== 'Utente non premium') {
+        alert('Si è verificato un errore durante la conversione del file.');
+      }
     });
   });
 });
