@@ -23,7 +23,7 @@
             <td><%= user.id %></td>
             <td><%= user.username %></td>
             <td><%= user.email %></td>
-            <td><%= user.premium_user.present? ? t('admin.table.Premium') : t('admin.table.Standard') %></td>
+            <td><%= user.premium_user.present? ? t('admin.table.Premium') : t('admin.table.Standar') %></td>
             <td>
               <% if user.suspended %>
                 <span class="badge bg-danger"><%=t('admin.table.yess')%></span>

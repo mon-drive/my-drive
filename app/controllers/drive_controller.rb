@@ -108,6 +108,12 @@ class DriveController < ApplicationController
     end
 
     def export
+
+      unless current_user.premium_user.present?
+        render json: { error: 'Utente non premium' }, status: :forbidden
+        return
+      end
+
       file_id = params[:id]
       type = params[:type]
       drive_service = initialize_drive_service

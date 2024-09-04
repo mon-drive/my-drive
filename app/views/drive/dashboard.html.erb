@@ -44,6 +44,28 @@
   </script>
 
 <% end %>
+<!--modal per diventare premium -->
+<div class="modal fade" id="md_non_premium" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Accesso Premium Richiesto</h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <p>Per convertire questo file, devi essere un utente premium.</p>
+          <div class="mt-4">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annulla</button>
+            <button type="button" class="btn btn-primary" onclick="window.location.href='<%= payment_path(plan: 'premium') %>'">Diventa Premium</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <!--modal durante scansione virus-->
 <div class="modal fade" id="md_scan" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered" role="document">

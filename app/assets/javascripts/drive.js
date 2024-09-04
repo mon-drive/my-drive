@@ -190,6 +190,7 @@ function handleFolderSelect() {
 function apri_modal(id){
   modal = new bootstrap.Modal(document.getElementById(id));
   modal.show();  
+  return modal;
 }
 
 function get_file_size(size){
@@ -260,7 +261,8 @@ $(document).on('turbolinks:load', function() {
 document.querySelectorAll('.export-item').forEach(item => {
   item.addEventListener('click', function(event) {
     event.preventDefault();
-    apri_modal('md_export');
+    export_moad= apri_modal('md_export');
+
     const fileId = this.getAttribute('data-id');
     const type = this.getAttribute('type');
 
@@ -275,16 +277,22 @@ document.querySelectorAll('.export-item').forEach(item => {
       body: JSON.stringify({ id: fileId, type: type })
     })
     .then(response => {
+
+
+      if (response.status === 403) {
+        $('#md_export').modal('dispose')
+        apri_modal('md_non_premium');
+        throw new Error('Utente non premium');
+      }
+
       if (!response.ok) {
-        console.error('Error:', error);
-        const modal = document.getElementById('md_export');
-        const bootstrapModal = bootstrap.Modal.getInstance(modal);
-        bootstrapModal.hide();
+
+
+        export_moad.hide();
         throw new Error('Network response was not ok');
       }
-      const modal = document.getElementById('md_export');
-      const bootstrapModal = bootstrap.Modal.getInstance(modal);
-      bootstrapModal.hide();
+
+      export_moad.hide();
       const fileName = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '').split(';')[0];
       return response.blob().then(blob => ({ blob, fileName }));
     })
@@ -301,7 +309,9 @@ document.querySelectorAll('.export-item').forEach(item => {
     })
     .catch(error => {
 
-      alert('Si è verificato un errore durante la conversione del file.');
+      if (error.message !== 'Utente non premium') {
+        alert('Si è verificato un errore durante la conversione del file.');
+      }
     });
   });
 });
