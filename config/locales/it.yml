@@ -42,6 +42,7 @@ it:
     upload-folder: "Carica Cartella"
     rename: "Rinomina"
     export: "Esporta"
+    move: "Sposta"
     delete: "Elimina"
     properties: "Proprietà"
     open: "Apri"
@@ -119,3 +120,6 @@ it:
     delete-account-lower: "Elimina Account"
     delete-confirmation: "Sei sicuro di voler eliminare il tuo account?"
     delete-message: "Account eliminato"
+    type-inscription: "Tipo di iscrizione"
+    inscription-deadline: "Scadenza iscrizione"
+    

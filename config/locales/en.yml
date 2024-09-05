@@ -43,6 +43,7 @@ en:
     upload-folder: "Upload Folder"
     rename: "Rename"
     export: "Export"
+    move: "Move"
     delete: "Delete"
     properties: "Properties"
     open: "Open"
@@ -122,3 +123,5 @@ en:
     delete-account-lower: "Delete Account"
     delete-confirmation: "Are you sure you want to delete your account?"
     delete-message: "Account deleted"
+    type-inscription: "Type of inscription"
+    inscription-deadline: "Inscription deadline"

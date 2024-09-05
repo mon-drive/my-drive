@@ -75,6 +75,33 @@
             </div>
           </div>
           <hr>
+
+            
+          <% if current_user.premium_user.present?%>
+            <div class="settings-item">
+              <h5><%= t('settings.type-inscription')%></h5>
+                <div>
+                  <span>Premium</span>
+                </div>
+            </div>
+            <hr>
+            <div class="settings-item">
+              <h5><%= t('settings.inscription-deadline')%></h5>
+                <div>
+                  <span><%= current_user.premium_user.expire_date.strftime("%d-%m-%Y") %></span>
+                </div>
+            </div>
+          <% else %>
+            <div class="settings-item">
+              <h5>tipo di account</h5>
+                <div>
+                  <span>Standard</span>
+                </div>
+            </div>
+            
+          <% end %>
+
+          <hr>
           <h4><%= t('settings.delete-account')%></h4>
           <hr>
           <div class="settings-item">
