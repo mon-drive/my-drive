@@ -49,14 +49,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center">Accesso Premium Richiesto</h5>
+        <h5 class="modal-title text-center"><%=t('dash.premium-msg2')%></h5>
       </div>
       <div class="modal-body">
         <div class="text-center">
-          <p>Per convertire questo file, devi essere un utente premium.</p>
+          <p><%=t('dash.premium-msg1')%></p>
           <div class="mt-4">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annulla</button>
-            <button type="button" class="btn btn-primary" onclick="window.location.href='<%= payment_path(plan: 'premium') %>'">Diventa Premium</button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><%=t('dash.cancel')%></button>
+            <button type="button" class="btn btn-primary" onclick="window.location.href='<%= payment_path(plan: 'premium') %>'"><%=t('dash.premium')%></button>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@
           <span class="input-group-text" id="search-icon">
             <i class="bi bi-search"></i>
           </span>
-          <input id="search-input" class="form-control" type="search" placeholder="search" name="search" aria-label="Search">
+          <input id="search-input" class="form-control" type="search" placeholder="<%=t('dash.search')%>" name="search" aria-label="Search">
         </div>
       </form>
     </div>
@@ -284,7 +284,9 @@
       <% if $current_folder == 'bin' %>
         <%= form_with url: empty_bin_path, method: :post, local: true do %>
           <div class="d-flex justify-content-center mt-3">
-            <%= button_to 'Svuota Cestino', empty_bin_path, method: :post, class: 'btn btn-danger', data: { confirm: 'Sei sicuro di voler svuotare il cestino?' } %>
+            <%# button_to t('dash.empty-bin'), empty_bin_path, method: :post, class: 'btn btn-danger', data: { confirm: 'Sei sicuro di voler svuotare il cestino?' } %>
+
+            <%= button_to t('dash.empty-bin'), empty_bin_path, method: :post, class: 'btn btn-danger' %>
           </div>
         <% end %>
       <% end %>
@@ -381,12 +383,12 @@
       </div>
     </div>
     <div class="col-md-9">
-      <h3>Contents of: <%= $current_folder_name %></h3>
+      <h3><%=t('dash.contents')%> <%= $current_folder_name %></h3>
       <div class="row mb-4">
         <div class="col-md-3">
           <select id="order-selector" class="form-select">
-            <option value="asc">Ordina per Nome (A-Z)</option>
-            <option value="desc">Ordina per Nome (Z-A)</option>
+            <option value="asc"><%=t('dash.order-AZ')%></option>
+            <option value="desc"><%=t('dash.order-ZA')%></option>
           </select>
         </div>
       </div>
@@ -507,7 +509,7 @@
                       <%end%>
                     <% end %>
                     <li class="dropdown-submenu">
-                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>">Sposta</a>
+                      <a id="expot_as"href="javascript:void(0);" class="dropdown-item dropdown-toggle" href="#" role="button" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%=t('dash.move')%></a>
                       <ul id="submenu" class="dropdown-menu submenu">
                         <% if $current_folder_name != @root_folder_name %>
                           <li>
