@@ -108,3 +108,7 @@
   width: 40vh;
   margin-left: auto !important;
 }
+
+.navbar .dropdown-toggle::after {
+  display: none;
+}

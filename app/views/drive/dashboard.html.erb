@@ -130,21 +130,30 @@
       </form>
     </div>
     
-    <div class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <% if @google_profile_image.present? %>
-          <img src="<%= @google_profile_image %>" alt="Google Profile Image" class="rounded-circle" width="30" height="30">
-        <% else %>
-          <i class="bi bi-person-circle"></i>
-        <% end %>
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item" href="<%= settings_path %>"><%= t('dash.settings')%></a></li>
-        <li><a class="dropdown-item" href="<%= signout_path %>"><%= t('dash.signout')%></a></li>
-      </ul>
+    <%if !current_user.premium_user.present?%>
+      <%= link_to t('dash.premium'), payment_path(plan: 'premium'), class: 'nav-link' %>
+    <%end%>
+
+
+    <div class="navbar-nav ms-auto">  
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="<%= current_user.profile_picture %>" onerror="this.style.display='none'; document.getElementById('default-profile-icon').style.display='block';" class="rounded-circle" width="30" height="30" style="display: block;">
+          <i id="default-profile-icon" class="bi bi-person-circle" style="font-size: 1.5rem; display: none;"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="<%= dashboard_path %>"><%= t('home.access-drive') %></a>
+          <% if session[:user_id] && current_user.admin_user.present? %>
+            <a class="dropdown-item" href="<%= admin_path %>"><%= t('admin.access-admin') %></a>
+          <% end %>  
+          <a class="dropdown-item" href="<%= pricing_path %>"><%= t('home.plans') %></a>
+          <li><a class="dropdown-item" href="<%= settings_path %>"><%= t('dash.settings') %></a></li>
+          <li><a class="dropdown-item" href="<%= signout_path %>"><%= t('dash.signout') %></a></li>
+        </ul>
+      </div>
     </div>
 
-    <%= link_to t('dash.premium'), payment_path(plan: 'premium'), class: 'nav-link' %>
+    
     
   </div>
 <% end %>

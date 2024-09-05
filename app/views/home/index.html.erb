@@ -1,23 +1,33 @@
-
 <% content_for :navbar_custom_content do %>
-  <div class="navbar-nav">
-    <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans')%></a>
-  </div>
-  <div class="navbar-nav ms-auto">
-    <% if session[:user_id] && current_user.admin_user.present?%>
-      <a class="nav-link" href="<%= admin_path %>"><%= t('admin.access-admin')%></a>
-    <%end%>    
+  <div class="navbar-nav ms-auto">  
+
     <% if session[:user_id] %>
-      <a class="nav-link" href="<%= dashboard_path %>"><%= t('home.access-drive')%></a>
-    <%end%>
-    <% if session[:user_id] %>
-      <a class="nav-link" href="<%= signout_path %>"><%= t('home.signout')%></a>
+
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="<%= current_user.profile_picture %>" onerror="this.style.display='none'; document.getElementById('default-profile-icon').style.display='block';" class="rounded-circle" width="30" height="30" style="display: block;">
+          <i id="default-profile-icon" class="bi bi-person-circle" style="font-size: 1.5rem; display: none;"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="<%= dashboard_path %>"><%= t('home.access-drive') %></a>
+          <% if session[:user_id] && current_user.admin_user.present? %>
+            <a class="dropdown-item" href="<%= admin_path %>"><%= t('admin.access-admin') %></a>
+          <% end %>  
+          <a class="dropdown-item" href="<%= pricing_path %>"><%= t('home.plans') %></a>
+          <li><a class="dropdown-item" href="<%= settings_path %>"><%= t('dash.settings') %></a></li>
+          <li><a class="dropdown-item" href="<%= signout_path %>"><%= t('dash.signout') %></a></li>
+        </ul>
+      </div>
     <% else %>
+      <a class="nav-link" href="<%= pricing_path %>"><%= t('home.plans') %></a>
       <%= link_to 'Sign in with Google', '/auth/google_oauth2', class: 'nav-link' %>
     <% end %>
-
   </div>
 <% end %>
+
+
+
+
 
 
 <% if notice %>
