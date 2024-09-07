@@ -81,6 +81,7 @@ en:
     premium-char2: "Unlimited file conversion"
     premium-char3: "Stripe secure payments"
     select: "Select"
+    login: "You need to be logged"
   payment:
     payment: "Payment"
     frequency: "Select payment frequency"

@@ -7,7 +7,7 @@ class PagesController < ApplicationController
   end
   def payment
     @plan = params[:plan]
-    @stripe_key = ENV['stripe_publishable_key']
+    @stripe_key = ENV['STRIPE_PUBLISHABLE_KEY']
     if @plan.nil?
       redirect_to pricing_path, alert: t('payment.nothing')
     end
@@ -24,12 +24,6 @@ class PagesController < ApplicationController
         redirect_to '/auth/google_oauth2'
       end
     else #(premium)
-      # Logica per completare l'iscrizione, ad esempio:
-      # - Aggiornare l'utente con il piano selezionato
-      # - Inviare una conferma via email
-      # - Eseguire altre azioni necessarie
-
-      # Stripe logic
       token = params[:stripeToken]
       begin
         charge = Stripe::Charge.create({
@@ -60,12 +54,18 @@ class PagesController < ApplicationController
 
   def authenticate_user
     if params[:plan] == 'free' && session[:user_id].present?
-      redirect_to root_path, notice: t('payment.logged')
+      pu = PremiumUser.find_by(user_id: session[:user_id])
+      if pu.nil? #user has no subscription
+        redirect_to root_path, notice: t('payment.logged')
+      elsif pu.expire_date > Date.today
+        redirect_to root_path, notice: t('payment.subscribed')
+      end
     end
+    redirect_to '/auth/google_oauth2' unless session[:user_id].present?
     # If the plan is premium, do not redirect, allowing payment to proceed
   end
 
-  def check_active_subscription #TODO? add a way to check if the subscription is expired
+  def check_active_subscription 
     pu = PremiumUser.find_by(user_id: session[:user_id])
     logger.info "Checking subscription for user: #{pu.inspect}"
     if pu.nil?

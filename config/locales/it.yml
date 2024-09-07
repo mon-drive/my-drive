@@ -80,6 +80,7 @@ it:
     premium-char2: "Conversione file illimitata"
     premium-char3: "Pagamenti sicuri con Stripe"
     select: "Seleziona"
+    login: "Devi essere loggato"
   payment:
     payment: "Pagamento"
     frequency: "Seleziona la frequenza di pagamento"
