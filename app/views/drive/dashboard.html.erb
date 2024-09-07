@@ -130,7 +130,7 @@
       </form>
     </div>
     
-    <%if !current_user.premium_user.present?%>
+    <%if !current_user.premium_valid?%>
       <%= link_to t('dash.premium'), payment_path(plan: 'premium'), class: 'nav-link' %>
     <%end%>
 

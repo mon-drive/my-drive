@@ -25,4 +25,11 @@ class User < ApplicationRecord
     )
     user
   end
+
+  def premium_valid?
+    return false unless premium_user.present?
+    #controlla la data di scadenza del premium
+    premium_user.expire_date >= Date.today
+  end
+
 end

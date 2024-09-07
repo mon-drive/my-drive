@@ -73,7 +73,7 @@
           <hr>
 
             
-          <% if current_user.premium_user.present?%>
+          <% if current_user.premium_valid?%>
             <div class="settings-item">
               <h5><%= t('settings.type-inscription')%></h5>
                 <div>

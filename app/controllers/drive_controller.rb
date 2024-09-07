@@ -109,7 +109,7 @@ class DriveController < ApplicationController
 
     def export
 
-      unless current_user.premium_user.present?
+      unless current_user.premium_valid?
         render json: { error: 'Utente non premium' }, status: :forbidden
         return
       end

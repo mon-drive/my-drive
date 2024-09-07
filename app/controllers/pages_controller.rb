@@ -34,10 +34,17 @@ class PagesController < ApplicationController
         })
         #Payment was successful
         logger.info "Stripe charge was successful: #{charge.inspect}"
+
         if charge.amount == 9900
-          PremiumUser.create(user: @user, expire_date: Date.today + 1.year)
+          new_expire_date = Date.today + 1.year
         else
-          PremiumUser.create(user: @user, expire_date: Date.today + 1.month)
+          new_expire_date = Date.today + 1.month
+        end
+
+        if @user.premium_user.present?
+          @user.premium_user.update(expire_date: new_expire_date)
+        else
+          PremiumUser.create(user: @user, expire_date: new_expire_date)
         end
         redirect_to root_path, notice: t('payment.success')
       rescue Stripe::CardError => e
@@ -65,7 +72,7 @@ class PagesController < ApplicationController
     # If the plan is premium, do not redirect, allowing payment to proceed
   end
 
-  def check_active_subscription 
+  def check_active_subscription
     pu = PremiumUser.find_by(user_id: session[:user_id])
     logger.info "Checking subscription for user: #{pu.inspect}"
     if pu.nil?
