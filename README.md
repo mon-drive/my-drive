@@ -8,9 +8,13 @@ To connect to the webpage:
 localhost:3000
 ```
 
-To run the tests:
+To run unit and functional tests:
 ```
-rails db:test:prepare
+bundle exec rspec
+```
+
+To run integration tests:
+```
 cucumber --publish-quiet
 ```
 

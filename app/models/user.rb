@@ -32,4 +32,8 @@ class User < ApplicationRecord
     premium_user.expire_date >= Date.today
   end
 
+  def has_sufficient_space?(file_size = 0)
+    (used_space + file_size) <= total_space
+  end
+
 end
