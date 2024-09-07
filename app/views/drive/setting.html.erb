@@ -67,11 +67,7 @@
           <div class="settings-item">
             <h5><%= t('settings.profile-image')%></h5>
             <div>
-              <% if @google_profile_image.present? %>
-                <img src="<%= @google_profile_image %>" alt="Google Profile Image" class="rounded-circle" width="100" height="100">
-              <% else %>
-                <p><%= t('settings.no-image')%></p>
-              <% end %>
+              <img src="<%= current_user.profile_picture %>" onerror="this.style.display='none'; document.getElementById('default-profile-icon').style.display='block';" class="rounded-circle" width="100" height="100" style="display: block;">
             </div>
           </div>
           <hr>
