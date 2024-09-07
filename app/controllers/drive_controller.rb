@@ -10,8 +10,6 @@ class DriveController < ApplicationController
     require 'json'
     require 'zip'
 
-    require 'rufus-scheduler'
-
     $current_folder = ''
 
     def dashboard
@@ -22,12 +20,12 @@ class DriveController < ApplicationController
       @root_folder_name = get_root_name
       @root_folder_id = get_root_id
 
-      user = current_user
+      @user = current_user
       @total_space = 1
       @used_space = 0
-      if user.total_space and user.used_space
-        @total_space = user.total_space
-        @used_space = user.used_space
+      if @user.total_space and @user.used_space
+        @total_space = @user.total_space
+        @used_space = @user.used_space
       end
 
       if params[:folder_id] == 'bin'
@@ -76,6 +74,7 @@ class DriveController < ApplicationController
     def share
       # Logica per condividere l'elemento
       drive_service = initialize_drive_service
+      @user = current_user
 
       file_id = params[:file_id]
       email = params[:email]
@@ -95,11 +94,11 @@ class DriveController < ApplicationController
       if temp.nil?
         temp = UserFolder.find_by(user_folder_id: file_id)
         if temp
-          ShareFolder.create(user_folder_id: temp.id, user_id: current_user.id)
+          ShareFolder.create(user_folder_id: temp.id, user_id: @user.id)
         end
       else
         file = UserFile.find_by(user_file_id: file_id)
-        ShareFile.create(user_file_id: file.id, user_id: current_user.id)
+        ShareFile.create(user_file_id: file.id, user_id: @user.id)
       end
 
       respond_to do |format|
@@ -675,7 +674,7 @@ class DriveController < ApplicationController
 
         @total_space = storage_info[:total_space]
         @used_space = storage_info[:used_space]
-        current_user.update(total_space: @total_space, used_space: @used_space)
+        @user.update(total_space: @total_space, used_space: @used_space)
 
       rescue => e
         render json: { error: "Si è verificato un errore: #{e.message}" }, status: :unprocessable_entity
@@ -789,6 +788,11 @@ class DriveController < ApplicationController
       end
     end
 
+    def update_db(user)
+      @user = user
+      update_database
+    end
+
     private
 
     def initialize_drive_service
@@ -799,7 +803,6 @@ class DriveController < ApplicationController
 
     def user_folders
       all_folders = []
-      puts "Current user: #{current_user.id}"
       possess = Possess.where(user_id: current_user.id)
       possess.each do |item|
         folder = UserFolder.find_by(id: item.user_folder_id)
@@ -981,25 +984,37 @@ class DriveController < ApplicationController
     end
 
     def google_credentials
-      token = current_user.oauth_token
-      refresh_token = current_user.refresh_token
+      if @user.nil?
+        @user = User.find(current_user.id)
+      end
+      token = @user.oauth_token
+      refresh_token = @user.refresh_token
       client_id = ENV['GOOGLE_CLIENT_ID']
       client_secret = ENV['GOOGLE_CLIENT_SECRET']
 
-      Signet::OAuth2::Client.new(
+      client = Signet::OAuth2::Client.new(
         client_id: client_id,
         client_secret: client_secret,
         token_credential_uri: 'https://accounts.google.com/o/oauth2/token',
         access_token: token,
         refresh_token: refresh_token
-      ).tap do |client|
+      )
+      flag = false
+      if @user.nil?
+        flag = true
+      end
+      if !flag
+        flag = @user.oauth_expires_at < Time.now
+      end
+      if flag
         client.fetch_access_token!
-        current_user.update(
+        @user.update(
           oauth_token: client.access_token,
           refresh_token: client.refresh_token,
           oauth_expires_at: Time.at(client.expires_at)
         )
       end
+      client
     end
 
     def get_storage_info
@@ -1012,7 +1027,9 @@ class DriveController < ApplicationController
     end
 
     def authenticate_user!
-      current_user
+      unless logged_in?
+        redirect_to '/auth/google_oauth2' and return
+      end
     end
 
     def item_params
@@ -1132,7 +1149,7 @@ class DriveController < ApplicationController
       root = UserFolder.find_by(user_folder_id: rootFolder.id)
       if root.nil?
         folder = UserFolder.create(user_folder_id: rootFolder.id, name: rootFolder.name, mime_type: 'root', size: rootFolder.size.to_i, created_time: rootFolder.created_time, modified_time: rootFolder.modified_time, shared: rootFolder.shared)
-        Possess.create(user_id: current_user.id, user_folder_id: folder.id)
+        Possess.create(user_id: @user.id, user_folder_id: folder.id)
       end
 
       all_items.each do |item|
@@ -1275,7 +1292,7 @@ class DriveController < ApplicationController
 
       all_items.each do |item|
         idString = item.id.to_s
-        user = User.find(current_user.id)
+        user = @user
         if item.mime_type == 'application/vnd.google-apps.folder'
           folder = UserFolder.find_by(user_folder_id: idString)
           Possess.upsert({
@@ -1304,24 +1321,14 @@ class DriveController < ApplicationController
 
     #controllo sospensione
     def check_suspension
-      if current_user.suspended
-        if current_user.end_suspend < Time.now
-          current_user.update(suspended: false,end_suspend: nil)
+      @user = current_user
+      if @user.suspended
+        if @user.end_suspend < Time.now
+          @user.update(suspended: false,end_suspend: nil)
         else
           redirect_to root_path, alert: t('admin.suspend-message') + current_user.end_suspend.strftime("%d/%m/%Y")
         end
       end
     end
-
-    # Esegue l'aggiornamento del database ogni 30 secondi
-    $scheduler = Rufus::Scheduler.new
-    def schedule_update
-      $scheduler.every '60s' do
-        update_database
-      end
-    end
-
-    # Avvia la pianificazione quando il controller è caricato
-    after_action :schedule_update, only: [:dashboard]
 
   end

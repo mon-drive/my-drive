@@ -5,12 +5,15 @@ class SessionsController < ApplicationController
     auth = request.env['omniauth.auth']
     user = User.from_omniauth(auth)
     session[:user_id] = user.id
+    user.update(logged_in: true)
     user.update_column(:profile_picture, auth.info.image)
     redirect_to dashboard_path
   end
 
   def destroy
-    session[:user_id] = nil
+    user = User.find(session[:user_id])
+    user.update(logged_in: false) if user
+    session.delete(:user_id)
     redirect_to root_path
   end
 
