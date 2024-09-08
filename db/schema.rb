@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_07_161508) do
+ActiveRecord::Schema.define(version: 2024_09_08_133016) do
 
   create_table "admin_users", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -160,6 +160,7 @@ ActiveRecord::Schema.define(version: 2024_09_07_161508) do
     t.string "icon_link"
     t.string "file_extension"
     t.boolean "trashed", default: false
+    t.boolean "sharedWithMe", default: false
     t.index ["user_file_id"], name: "index_user_files_on_user_file_id", unique: true
   end
 
@@ -174,6 +175,7 @@ ActiveRecord::Schema.define(version: 2024_09_07_161508) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "trashed", default: false
+    t.boolean "sharedWithMe", default: false
     t.index ["user_folder_id"], name: "index_user_folders_on_user_folder_id", unique: true
   end
 

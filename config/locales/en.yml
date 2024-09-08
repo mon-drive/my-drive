@@ -26,6 +26,7 @@ en:
     close: "Close"
     search: "Search"
     trash: "Trash"
+    sharedWithMe: "Share With Me"
     warning: "Warning"
     virus-analysis: "Antivirus analysis started, it may take some time"
     virus-scan: "Scan started..."

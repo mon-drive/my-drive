@@ -25,6 +25,7 @@ it:
     close: "Chiudi"
     search: "Cerca"
     trash: "Cestino"
+    sharedWithMe: "Condiviso con me"
     warning: "Attenzione"
     virus-analysis: "Analisi antivurs in corso, può richiedere un pò di tempo"
     virus-scan: "Scansione in corso..."

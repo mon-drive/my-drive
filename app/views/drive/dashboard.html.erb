@@ -305,6 +305,10 @@
               <%= link_to t('dash.trash'), dashboard_path(folder_id: 'bin'), class: 'list-group-item list-group-item-action' %>
             <% end %>
 
+            <% if $current_folder != 'sharedWithMe' %>
+              <%= link_to t('dash.sharedWithMe'), dashboard_path(folder_id: 'sharedWithMe'), class: 'list-group-item list-group-item-action' %>
+            <% end %>
+
             <% @items.select { |item| item.mime_type == 'application/vnd.google-apps.folder' }.each do |folder| %>
               <div class="list-group-item list-group-item-action folder-item">
                 <div class="d-flex align-items-center">

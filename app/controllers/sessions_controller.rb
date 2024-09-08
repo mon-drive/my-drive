@@ -18,6 +18,32 @@ class SessionsController < ApplicationController
   end
 
   def delete_account
+    possess = Possess.where(user_id: current_user.id)
+    possess.each do |poss|
+    folder = UserFolder.find(poss.user_folder_id)
+      contains = Contains.where(user_folder_id: folder.id)
+      contains.each do |contain|
+        file = UserFile.find_by(id: contain.user_file_id)
+        shared = ShareFile.find_by(user_file_id: file.id)
+        hasParent = HasParent.find_by(item_type: 'UserFile', item_id: file.id)
+        owner = HasOwner.find_by(item: file.id)
+        owner.destroy if owner
+        hasParent.destroy if hasParent
+        shared.destroy if shared
+        contain.destroy
+        file.destroy if file
+      end
+      shared = ShareFolder.find_by(user_folder_id: folder.id)
+      hasParent = HasParent.find_by(item_type: 'UserFolder', item_id: folder.id)
+      owner = HasOwner.find_by(item: folder.id)
+      owner.destroy if owner
+      hasParent.destroy if hasParent
+      shared.destroy if shared
+      poss.destroy
+      folder.destroy
+    end
+    premium = PremiumUser.find_by(user: current_user)
+    premium.destroy if premium
     current_user.destroy
     session[:user_id] = nil
     respond_to do |format|

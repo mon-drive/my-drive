@@ -30,6 +30,8 @@ class DriveController < ApplicationController
 
       if params[:folder_id] == 'bin'
         $current_folder_name = 'Cestino'
+      elsif params[:folder_id] == 'sharedWithMe'
+        $current_folder_name = 'Condivisi con me'
       else
         $current_folder_name = $current_folder == 'root' ? @root_folder_name : get_folder_name($current_folder)
         @parent_folder = get_parent_folder($current_folder) unless $current_folder == 'root'
@@ -41,6 +43,9 @@ class DriveController < ApplicationController
         if params[:folder_id] == 'bin'
           $current_folder = 'bin'
           @items = get_files_and_folders_in_bin
+        elsif params[:folder_id] == 'sharedWithMe'
+          $current_folder = 'sharedWithMe'
+          @items = get_shared_files_and_folders
         else
           @items = get_files_and_folders_in_folder($current_folder)
         end
@@ -725,10 +730,16 @@ class DriveController < ApplicationController
 
       items.each do |item|
         if item.mime_type == 'application/vnd.google-apps.folder'
-          drive_service.delete_file(item.user_folder_id)
+          begin
+            drive_service.delete_file(item.user_folder_id)
+          rescue => e
+          end
           delete_aux(item.user_folder_id)
         else
-          drive_service.delete_file(item.user_file_id)
+          begin
+            drive_service.delete_file(item.user_file_id)
+          rescue => e
+          end
           delete_aux(item.user_file_id)
         end
       end
@@ -881,6 +892,14 @@ class DriveController < ApplicationController
       all_items = []
 
       all_items = UserFolder.where(trashed: true) + UserFile.where(trashed: true)
+
+      all_items
+    end
+
+    def get_shared_files_and_folders()
+      all_items = []
+
+      all_items = UserFolder.where(sharedWithMe: true) + UserFile.where(sharedWithMe: true)
 
       all_items
     end
@@ -1142,6 +1161,21 @@ class DriveController < ApplicationController
         next_page_token = response.next_page_token
       end while next_page_token.present?
 
+      next_page_token = nil
+
+      shared_items = []
+
+      begin
+        response = drive_service.list_files(
+          q: 'sharedWithMe = true',
+          fields: 'nextPageToken, files(id, name, mime_type, parents, trashed, size, created_time, modified_time, owners, permissions, shared, webViewLink, iconLink, fileExtension)',
+          spaces: 'drive',
+          page_token: next_page_token
+        )
+        shared_items.concat(response.files)
+        next_page_token = response.next_page_token
+      end while next_page_token.present?
+
       storage_info
 
       rootFolder = drive_service.get_file('root', fields: 'id, name, parents, trashed, size, created_time, modified_time, shared')
@@ -1315,7 +1349,48 @@ class DriveController < ApplicationController
             }, unique_by: %i[user_folder_id user_file_id])
           end
         end
+      end
 
+      shared_items.each do |item|
+        idString = item.id.to_s
+        if item.mime_type == 'application/vnd.google-apps.folder'
+          UserFolder.upsert({
+            user_folder_id: idString,
+            name: item.name,
+            mime_type: item.mime_type,
+            size: item.size.to_i,
+            created_time: item.created_time,
+            modified_time: item.modified_time,
+            shared: item.shared,
+            sharedWithMe: true,
+            trashed: item.trashed,
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
+          }, unique_by: :user_folder_id)
+          Parent.upsert({
+            itemid: idString,
+            num: 0,
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
+          }, unique_by: :itemid)
+        else
+          UserFile.upsert({
+            user_file_id: idString,
+            name: item.name,
+            mime_type: item.mime_type,
+            size: item.size.to_i,
+            created_time: item.created_time,
+            modified_time: item.modified_time,
+            shared: item.shared,
+            sharedWithMe: true,
+            web_view_link: item.web_view_link,
+            icon_link: item.icon_link,
+            file_extension: item.file_extension,
+            trashed: item.trashed,
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
+          }, unique_by: :user_file_id)
+        end
       end
     end
 
