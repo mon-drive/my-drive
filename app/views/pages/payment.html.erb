@@ -129,7 +129,7 @@
         <div id="credit_card_form" class="payment-form">
           <h4><%= t('payment.details')%></h4>
           <%= form_with url: payment_complete_path, method: :post, id:'payment-form' do |form| %>
-            <%= form.hidden_field :plan, value: @plan %>
+            <%= form.hidden_field :plan, value: @plan, id: 'plan-input' %>
             <div class="form-group">
               <label for="card-element"><%= t('payment.card-number')%></label>
               <div id="card-element" class="form-control">
@@ -179,6 +179,7 @@
         var selectedFrequency = $(this).data('value');
         var total = selectedFrequency === 'monthly' ? '9.99€' : '99.00€';
         $('#total_amount').text(total);
+        $('#plan-input').val(selectedFrequency);
       });
 
       $('input[name="payment_method"]').change(function() {
@@ -191,11 +192,10 @@
         }
       });
 
-      $('.btn-toggle').first().click(); // Set initial total
+      $('.btn-toggle').first().click();
 
       // Stripe Integration
       var stripeKey = $('meta[name="stripe-publishable-key"]').attr('content');
-
       var stripe = Stripe(stripeKey);
       var elements = stripe.elements();
       var card = elements.create('card', {style: {base: {color: "#32325d", fontSize: '16px'}}});
