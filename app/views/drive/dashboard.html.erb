@@ -442,13 +442,15 @@
                     <% else %>
                       <li><a href="<%=item.web_view_link%>" class="dropdown-item file-preview-link" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" target="_blank"><%= t('dash.open')%></a></li>
                     <% end %>
-                    <% if item.mime_type == 'application/vnd.google-apps.folder' %>
-                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.rename')%></a></li>
-                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.share')%></a></li>
-                    <% else %>
-                      <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.rename')%></a></li>
-                      <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.share')%></a></li>
-                    <% end %>
+                    <% if $current_folder!="sharedWithMe"%>
+                      <% if item.mime_type == 'application/vnd.google-apps.folder' %>
+                        <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.rename')%></a></li>
+                        <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.share')%></a></li>
+                      <% else %>
+                        <li><a href="javascript:void(0);" class="dropdown-item rename-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.rename')%></a></li>
+                        <li><a href="javascript:void(0);" class="dropdown-item share-item" data-id="<%= id %>" data-folder-id="<%= $current_folder %>"><%= t('dash.share')%></a></li>
+                      <% end %>
+                    <%end%>
                     <% if item.mime_type == 'application/vnd.google-apps.folder' %>
                       <li><a href="javascript:void(0);" class="dropdown-item export-folder" data-id="<%= id %>" data-folder-id="<%= $current_folder %>" id="folder-export-<%= id %>"><%= t('dash.download')%></a></li>
                     <% else %>
