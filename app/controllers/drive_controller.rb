@@ -407,7 +407,7 @@ class DriveController < ApplicationController
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
-      puts "Scan action called"
+      #puts "Scan action called"
       file_id = params[:file]
       if file_id.nil?
           redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
@@ -418,7 +418,7 @@ class DriveController < ApplicationController
         file_path = params[:file].path
 
         response_upload = upload_scan(file_path)
-        puts "Response upload"
+        #puts "Response upload"
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
 
@@ -430,14 +430,16 @@ class DriveController < ApplicationController
             break if ['completed', 'failed'].include?(status)
             sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
-          puts "Analyze response"
+          #puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
               if malicious_count > 0
                 redirect_to dashboard_path(folder_id: $current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
               else
-                upload(file_id)
+                unless Rails.env.test?
+                  upload(file_id)
+                end
                 redirect_to dashboard_path(folder_id: $current_folder), notice: "File caricato con successo"
               end
             else
