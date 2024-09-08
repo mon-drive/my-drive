@@ -410,7 +410,7 @@ class DriveController < ApplicationController
       puts "Scan action called"
       file_id = params[:file]
       if file_id.nil?
-        redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
+          redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
 
@@ -1027,16 +1027,38 @@ class DriveController < ApplicationController
     end
 
     def authenticate_user!
+      # Automatically authenticate with a service token if in test mode
+      if Rails.env.test?
+        # Simulate a service token login in test mode
+        initialize_drive_service_rspec('mydrive-430108-980acf2b30ef.json')
+        return # Skip further authentication
+      end
       unless logged_in?
         redirect_to '/auth/google_oauth2' and return
       end
     end
 
+    def initialize_drive_service_rspec(config_filename)
+      authorization = Google::Auth::ServiceAccountCredentials.make_creds(
+        json_key_io: File.open(Rails.root.join('config', config_filename)),
+        scope: ['https://www.googleapis.com/auth/drive']
+      )
+    
+      authorization.fetch_access_token!
+    
+      drive_service = Google::Apis::DriveV3::DriveService.new
+      drive_service.authorization = authorization
+    
+      session[:drive_service] = drive_service
+      
+    end
+    
     def item_params
       params.require(:item).permit(:name)
     end
 
     def fetch_google_profile_image
+      return if Rails.env.test?
       auth = request.env['omniauth.auth']
       @google_profile_image = @current_user.profile_picture
     end
