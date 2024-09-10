@@ -104,7 +104,7 @@ en:
     logged: "You are already logged in"
     subscribed: "You already have an active plan"
   admin:
-    access-admin: "admin page"
+    access-admin: "Admin page"
     table:
       type: "type"
       yess: "Yes"
