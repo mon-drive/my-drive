@@ -20,7 +20,7 @@ class SessionsController < ApplicationController
   def delete_account
     possess = Possess.where(user_id: current_user.id)
     possess.each do |poss|
-    folder = UserFolder.find(poss.user_folder_id)
+      folder = UserFolder.find(poss.user_folder_id)
       contains = Contains.where(user_folder_id: folder.id)
       contains.each do |contain|
         file = UserFile.find_by(id: contain.user_file_id)

@@ -1221,7 +1221,10 @@ class DriveController < ApplicationController
       if root.nil?
         folder = UserFolder.create(user_folder_id: rootFolder.id, name: rootFolder.name, mime_type: 'root', size: rootFolder.size.to_i, created_time: rootFolder.created_time, modified_time: rootFolder.modified_time, shared: rootFolder.shared)
         Possess.create(user_id: @user.id, user_folder_id: folder.id)
-        parent = Parent.create(itemid: rootFolder.id, num: 0)
+        parent = Parent.find_by(itemid: rootFolder.id)
+        if parent.nil?
+          parent = Parent.create(itemid: rootFolder.id, num: 0)
+        end
       end
 
       all_items.each do |item|
