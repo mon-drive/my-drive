@@ -104,7 +104,7 @@ it:
     logged: "Sei già loggato"
     subscribed: "Hai già un piano attivo"
   admin:
-    access-admin: "pagina admin"
+    access-admin: "Pagina admin"
     table:
       type: "Tipo"
       yess: "Si" #ho messo una s in piu senno non funziona
