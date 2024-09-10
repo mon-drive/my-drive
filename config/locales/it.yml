@@ -3,6 +3,7 @@ it:
   home:
     plans: "Piani"
     access-drive: "Accedi a Drive"
+    signout: "Esci"
     head-title: "SCEGLI L'ARCHIVIO GIUSTO PER LE TUE ESIGENZE"
     side-text: "Archivia i tuoi file in modo sicuro e convertili in uno dei molti formati supportati. I file sono sempre controllati con VirusTotal e i pagamenti sono gestiti tramite Stripe."
     first-card-title: "Archiviazione"
@@ -117,6 +118,8 @@ it:
     suspend-message: "Il tuo account è sospeso fino al "
     suspend: "Sospendi"
     suspend-day: "Inserisci giorni di sospensione:"
+    permissions: "Permissions"
+    shared: "Shared"
   settings:
     all-files: "Tutti i file"
     info: "INFORMAZIONI DI BASE"
@@ -132,4 +135,10 @@ it:
     delete-message: "Account eliminato"
     type-inscription: "Tipo di iscrizione"
     inscription-deadline: "Scadenza iscrizione"
-    
+  virus: 
+    infected1: "File infetto, non è possibile caricarlo. Risulta malevolo su "
+    infected2: " motori di ricerca"
+    success: "File caricato con successo"
+    timeout: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi"
+    error: "Errore sconosciuto durante l'analisi"
+    message: "Si è verificato un errore: "
