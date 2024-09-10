@@ -2,7 +2,6 @@ require 'google/apis/drive_v3'
 require 'googleauth'
 
 Given('two registered users named “Bob” and “Amin”') do
-  #TODO: use service account token
   SCOPES = ['https://www.googleapis.com/auth/drive']
 
   @drive_service1 = initialize_drive_service('mydrive-430108-980acf2b30ef.json') #Bob

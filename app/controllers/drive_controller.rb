@@ -412,10 +412,10 @@ class DriveController < ApplicationController
 
     #carica il file su virustotal e se non è infetto lo carica su google drive
     def scan
-      puts "Scan action called"
+      #puts "Scan action called"
       file_id = params[:file]
       if file_id.nil?
-        redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
+          redirect_to dashboard_path, alert: "Nessun file selezionato per il caricamento."
         return
       end
 
@@ -423,7 +423,7 @@ class DriveController < ApplicationController
         file_path = params[:file].path
 
         response_upload = upload_scan(file_path)
-        puts "Response upload"
+        #puts "Response upload"
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
 
@@ -435,14 +435,16 @@ class DriveController < ApplicationController
             break if ['completed', 'failed'].include?(status)
             sleep(10)  # Attendi 20 secondi tra ogni tentativo
           end
-          puts "Analyze response"
+          #puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
               if malicious_count > 0
                 redirect_to dashboard_path(folder_id: $current_folder), alert: t('virus.infected1') + "#{malicious_count}" + t('virus.infected2')
               else
-                upload(file_id)
+                unless Rails.env.test?
+                  upload(file_id)
+                end
                 redirect_to dashboard_path(folder_id: $current_folder), notice: t('virus.success')
               end
             else
@@ -453,10 +455,12 @@ class DriveController < ApplicationController
             redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + "#{error}"
           end
         else
-           error = response_upload['error'] ? response_upload['error']['message'] : t('virus.error')
+          error = response_upload['error'] ? response_upload['error']['message'] : t('virus.error')
           redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + "#{error}"
         end
       rescue => e
+        puts "Error in scan: #{e.message}"
+        puts e.backtrace.join("\n")
         redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + " #{e.message}"
       end
     end
@@ -1044,16 +1048,38 @@ class DriveController < ApplicationController
     end
 
     def authenticate_user!
+      # Automatically authenticate with a service token if in test mode
+      if Rails.env.test?
+        # Simulate a service token login in test mode
+        initialize_drive_service_rspec('mydrive-430108-980acf2b30ef.json')
+        return # Skip further authentication
+      end
       unless logged_in?
         redirect_to '/auth/google_oauth2' and return
       end
     end
 
+    def initialize_drive_service_rspec(config_filename)
+      authorization = Google::Auth::ServiceAccountCredentials.make_creds(
+        json_key_io: File.open(Rails.root.join('config', config_filename)),
+        scope: ['https://www.googleapis.com/auth/drive']
+      )
+    
+      authorization.fetch_access_token!
+    
+      drive_service = Google::Apis::DriveV3::DriveService.new
+      drive_service.authorization = authorization
+    
+      session[:drive_service] = drive_service
+      
+    end
+    
     def item_params
       params.require(:item).permit(:name)
     end
 
     def fetch_google_profile_image
+      return if Rails.env.test?
       auth = request.env['omniauth.auth']
       @google_profile_image = @current_user.profile_picture
     end
