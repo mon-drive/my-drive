@@ -452,16 +452,16 @@ class DriveController < ApplicationController
             end
           else
             error = analyze_response['error'] ? analyze_response['error']['message'] : t('virus.error')
-            redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + "#{error}"
+            redirect_to dashboard_path(folder_id: $current_folder), alert: t('virus.message') + "#{error}"
           end
         else
           error = response_upload['error'] ? response_upload['error']['message'] : t('virus.error')
-          redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + "#{error}"
+          redirect_to dashboard_path(folder_id: $current_folder), alert: t('virus.message') + "#{error}"
         end
       rescue => e
         puts "Error in scan: #{e.message}"
         puts e.backtrace.join("\n")
-        redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + " #{e.message}"
+        redirect_to dashboard_path(folder_id: $current_folder), alert: t('virus.message') + " #{e.message}"
       end
     end
 
@@ -517,7 +517,14 @@ class DriveController < ApplicationController
       puts "File uploaded to Google Drive"
       file_db = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
       if $current_folder == 'root'
+        possess = Possess.where(user_id: current_user.id)
         folder = UserFolder.find_by(mime_type: 'root')
+        possess.each do |item|
+          temp = UserFolder.find_by(id: item.user_folder_id)
+          if folder.mime_type == 'root'
+            folder = temp
+          end
+        end
       else
         folder = UserFolder.find_by(user_folder_id: $current_folder)
       end
@@ -627,6 +634,7 @@ class DriveController < ApplicationController
       }
       folder = drive_service.create_file(folder_metadata, fields: 'id')
       folder_db = UserFolder.create(user_folder_id: folder.id, name: folder_name, mime_type: 'application/vnd.google-apps.folder', created_time: folder.created_time, modified_time: folder.modified_time)
+      possess = Possess.create(user_id: current_user.id, user_folder_id: folder_db.id)
       parent = Parent.create(itemid: folder.id, num: 0)
       parent_folder = UserFolder.find_by(user_folder_id: $current_folder)
       if parent_folder.nil?
@@ -803,7 +811,7 @@ class DriveController < ApplicationController
 
     def update_db(user)
       @user = user
-      update_database
+      #update_database
     end
 
     private
