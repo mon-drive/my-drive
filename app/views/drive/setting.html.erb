@@ -146,7 +146,7 @@
 
 <script>
 function deleteAccount() {
-    if (confirm(<%= t('settings.delete-confirmation')%>)) {
+    if (confirm('aaaa')) {
       // Esegui la logica di eliminazione dell'account
       fetch('/delete_account', {
         method: 'DELETE',
@@ -163,12 +163,12 @@ function deleteAccount() {
           window.location.href = '/';
         } else {
           // Gestisci l'errore in caso di fallimento della richiesta
-          alert(<%= t('settings.delete-message')%>);
+          alert('ppp');
         }
       })
       .catch(error => {
         // Gestisci l'errore in caso di fallimento della richiesta
-        alert(<%= t('settings.delete-message')%>);
+        alert('aaa');
       });
     }
 }

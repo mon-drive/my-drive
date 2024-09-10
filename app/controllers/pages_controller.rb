@@ -27,13 +27,16 @@ class PagesController < ApplicationController
       token = params[:stripeToken]
       begin
         charge = Stripe::Charge.create({
-          amount: @plan == 'annual' ? 9900 : 999, # in cents
+          amount: plan == 'annual' ? 9900 : 999, # in cents
           currency: 'eur',
           description: 'Example charge',
           source: token,
         })
         #Payment was successful
         logger.info "Stripe charge was successful: #{charge.inspect}"
+
+        puts "Plan : #{plan}"
+        puts "Charge amount: #{charge.amount}"
 
         if charge.amount == 9900
           new_expire_date = Date.today + 1.year
@@ -44,7 +47,14 @@ class PagesController < ApplicationController
         if @user.premium_user.present?
           @user.premium_user.update(expire_date: new_expire_date)
         else
-          PremiumUser.create(user: @user, expire_date: new_expire_date)
+          premium = PremiumUser.create(user: @user, expire_date: new_expire_date)
+          if charge.amount == 9900
+            type = 'annual'
+          else
+            type = 'monthly'
+          end
+          trans = Transaction.create(data: Date.today, transaction_type: type)
+          Makes.create(user: premium, transaction: trans)
         end
         redirect_to root_path, notice: t('payment.success')
       rescue Stripe::CardError => e
