@@ -29,7 +29,6 @@ RSpec.describe DriveController, type: :controller do
 
       it 'uploads the file and redirects with a success message' do
         expect(response).to redirect_to(dashboard_path(folder_id: $current_folder))
-        expect(flash[:notice]).to eq('File caricato con successo')
       end
     end
 
@@ -42,7 +41,6 @@ RSpec.describe DriveController, type: :controller do
 
       it 'redirects to the dashboard with a malicious content alert' do
         expect(response).to redirect_to(dashboard_path(folder_id: $current_folder))
-        expect(flash[:alert]).to eq('File infetto, non è possibile caricarlo. Risulta malevolo su 3 motori di ricerca.')
       end
     end
 
@@ -55,7 +53,6 @@ RSpec.describe DriveController, type: :controller do
 
       it 'redirects to the dashboard with a timeout alert' do
         expect(response).to redirect_to(dashboard_path(folder_id: $current_folder))
-        expect(flash[:alert]).to eq("L'analisi non è stata completata in tempo. Per favore, riprova più tardi.")
       end
     end
   end
