@@ -832,6 +832,7 @@ class DriveController < ApplicationController
       next_page_token = nil
 
       folders = user_folders
+      possess = Possess.where(user_id: current_user.id)
 
       if folder_id == 'root'
         roots = UserFolder.where(mime_type: 'root')
@@ -974,7 +975,7 @@ class DriveController < ApplicationController
       if folder
         folder.name
       else
-        'Root'
+        'root'
       end
     end
 
@@ -1064,16 +1065,16 @@ class DriveController < ApplicationController
         json_key_io: File.open(Rails.root.join('config', config_filename)),
         scope: ['https://www.googleapis.com/auth/drive']
       )
-    
+
       authorization.fetch_access_token!
-    
+
       drive_service = Google::Apis::DriveV3::DriveService.new
       drive_service.authorization = authorization
-    
+
       session[:drive_service] = drive_service
-      
+
     end
-    
+
     def item_params
       params.require(:item).permit(:name)
     end
@@ -1208,6 +1209,7 @@ class DriveController < ApplicationController
       if root.nil?
         folder = UserFolder.create(user_folder_id: rootFolder.id, name: rootFolder.name, mime_type: 'root', size: rootFolder.size.to_i, created_time: rootFolder.created_time, modified_time: rootFolder.modified_time, shared: rootFolder.shared)
         Possess.create(user_id: @user.id, user_folder_id: folder.id)
+        parent = Parent.create(itemid: rootFolder.id, num: 0)
       end
 
       all_items.each do |item|
