@@ -1160,10 +1160,14 @@ class DriveController < ApplicationController
       else
         contains = Contains.find_by(user_file_id: file.id)
         hasOwner = HasOwner.where(item: file.id)
+        hasParent = HasParent.where(item_id: file.id)
         hasPermission = HasPermission.where(item_id: file.id)
         shareFile = ShareFile.where(user_file_id: file.id)
         hasOwner.each do |owner|
           owner.destroy
+        end
+        hasParent.each do |parent|
+          parent.destroy
         end
         hasPermission.each do |permission|
           if permission.item_type == 'UserFile'
