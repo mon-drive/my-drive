@@ -435,28 +435,28 @@ class DriveController < ApplicationController
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
               if malicious_count > 0
-                redirect_to dashboard_path(folder_id: $current_folder), alert: "File infetto, non è possibile caricarlo. Risulta malevolo su #{malicious_count} motori di ricerca."
+                redirect_to dashboard_path(folder_id: $current_folder), alert: t('virus.infected1') + "#{malicious_count}" + t('virus.infected2')
               else
                 unless Rails.env.test?
                   upload(file_id)
                 end
-                redirect_to dashboard_path(folder_id: $current_folder), notice: "File caricato con successo"
+                redirect_to dashboard_path(folder_id: $current_folder), notice: t('virus.success')
               end
             else
-              redirect_to dashboard_path(folder_id: $current_folder), alert: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi."
+              redirect_to dashboard_path(folder_id: $current_folder), alert: t('virus.timeout')
             end
           else
-            error = analyze_response['error'] ? analyze_response['error']['message'] : "Errore sconosciuto durante l'analisi"
-            redirect_to dashboard_path(folder_id: $current_folder), alert: "Si è verificato un errore: #{error}"
+            error = analyze_response['error'] ? analyze_response['error']['message'] : t('virus.error')
+            redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + "#{error}"
           end
         else
-          error = response_upload['error'] ? response_upload['error']['message'] : "Errore sconosciuto durante il caricamento"
-          redirect_to dashboard_path(folder_id: $current_folder), alert: "Si è verificato un errore: #{error}"
+          error = response_upload['error'] ? response_upload['error']['message'] : t('virus.error')
+          redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + "#{error}"
         end
       rescue => e
         puts "Error in scan: #{e.message}"
         puts e.backtrace.join("\n")
-        redirect_to dashboard_path(folder_id: $current_folder), alert: "Si è verificato un errore durante la scansione: #{e.message}"
+        redirect_to dashboard_path(folder_id: $current_folder), alert: t(virus.message) + " #{e.message}"
       end
     end
 

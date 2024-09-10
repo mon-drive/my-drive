@@ -134,3 +134,10 @@ en:
     delete-message: "Account deleted"
     type-inscription: "Type of inscription"
     inscription-deadline: "Inscription deadline"
+  virus: 
+    infected1: "File is infected, it cannot be uploaded. It is malicious on "
+    infected2: " search engines"
+    success: "File uploaded successfully"
+    timeout: "The analysis has timed out, please try again later"
+    error: "Unknown error during analysis"
+    message: "An error occurred: "
