@@ -103,6 +103,7 @@ it:
     error: "Errore durante l'iscrizione"
     nothing: "Nessun piano selezionato"
     logged: "Sei già loggato"
+    free-plan: "Sei già iscritto al piano gratuito"
     subscribed: "Hai già un piano attivo"
   admin:
     access-admin: "Pagina admin"

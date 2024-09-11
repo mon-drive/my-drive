@@ -119,10 +119,12 @@
             <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
             <label class="form-check-label" for="credit_card"><%= t('payment.card')%></label>
           </div>
+          <!--
           <div class="form-check">
             <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal">
             <label class="form-check-label" for="paypal"><%= t('payment.paypal')%></label>
           </div>
+          -->
         </div>
 
         <!-- Stripe Payment Form -->
@@ -142,11 +144,12 @@
           <% end %>
         </div>
 
-        <!-- Pulsante di pagamento PayPal -->
+        <!-- Pulsante di pagamento PayPal
         <div id="paypal_button" class="payment-form" style="display: none;">
           <h4><%= t('payment.paypal')%></h4>
           <a href="https://www.paypal.com" class="btn btn-primary"><%= t('payment.pay-paypal')%></a>
         </div>
+         -->
       </div>
 
       <!-- Separatore verticale -->
@@ -185,11 +188,11 @@
       $('input[name="payment_method"]').change(function() {
         if ($(this).val() === 'credit_card') {
           $('#credit_card_form').show();
-          $('#paypal_button').hide();
-        } else if ($(this).val() === 'paypal') {
-          $('#credit_card_form').hide();
-          $('#paypal_button').show();
-        }
+          // $('#paypal_button').hide();
+        } //else if ($(this).val() === 'paypal') {
+        //  $('#credit_card_form').hide();
+        //  $('#paypal_button').show();
+        //}
       });
 
       $('.btn-toggle').first().click();

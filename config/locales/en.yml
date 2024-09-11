@@ -103,6 +103,7 @@ en:
     error: "An error occurred"
     nothing: "No plan selected"
     logged: "You are already logged in"
+    free-plan: "You are already subscribed to the free plan"
     subscribed: "You already have an active plan"
   admin:
     access-admin: "Admin page"
