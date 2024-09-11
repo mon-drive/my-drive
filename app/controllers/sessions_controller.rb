@@ -43,6 +43,12 @@ class SessionsController < ApplicationController
       folder.destroy
     end
     premium = PremiumUser.find_by(user: current_user)
+    make = MakeTransaction.where(user: current_user)
+    make.each do |m|
+      pay_id = m.pay_transaction.id
+      m.destroy
+      PayTransaction.find(pay_id).destroy
+    end
     premium.destroy if premium
     current_user.destroy
     session[:user_id] = nil

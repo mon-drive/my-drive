@@ -1224,7 +1224,7 @@ class DriveController < ApplicationController
         parent = Parent.find_by(itemid: rootFolder.id)
         if parent.nil?
           parent = Parent.create(itemid: rootFolder.id, num: 0)
-        end
+        end 
       end
 
       all_items.each do |item|

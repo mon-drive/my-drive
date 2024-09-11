@@ -4,8 +4,8 @@ class User < ApplicationRecord
   has_one :premium_user, dependent: :destroy
   has_one :admin_user, dependent: :destroy
 
-  has_many :makes
-  has_many :transactions, through: :makes
+  has_many :make_transactions
+  has_many :pay_transaction, through: :make_transactions
   has_many :possesses
   has_many :user_folders, through: :possesses
   has_many :share_folders

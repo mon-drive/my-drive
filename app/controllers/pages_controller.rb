@@ -1,11 +1,9 @@
 class PagesController < ApplicationController
-  before_action :authenticate_user, only: [:payment_complete]
-  before_action :check_active_subscription, only: [:payment]
-
   def pricing
     # logica per la pagina di pricing, se necessaria
   end
   def payment
+    authenticate_user
     @plan = params[:plan]
     @stripe_key = ENV['STRIPE_PUBLISHABLE_KEY']
     if @plan.nil?
@@ -28,6 +26,7 @@ class PagesController < ApplicationController
   def payment_complete
     plan = params[:plan]
     @user = current_user
+
     if plan == 'free'
       if session[:user_id].present?
         # User is logged in
@@ -66,9 +65,10 @@ class PagesController < ApplicationController
           else
             type = 'monthly'
           end
-          trans = Transaction.create(data: Date.today, transaction_type: type)
-          Makes.create(user: premium, transaction: trans)
+          trans = PayTransaction.create(data: Date.today, transaction_type: type)
+          MakeTransaction.create(user: current_user, pay_transaction: trans)
         end
+        puts "redirecto to root_path"
         redirect_to root_path, notice: t('payment.success')
       rescue Stripe::CardError => e
         flash[:error] = e.message
@@ -91,20 +91,12 @@ class PagesController < ApplicationController
         redirect_to root_path, notice: t('payment.subscribed')
       end
     end
+    if params[:plan] == 'premium' && session[:user_id].present?
+      pu = PremiumUser.find_by(user_id: session[:user_id])
+      if pu.present? && pu.expire_date > Date.today
+        redirect_to root_path, notice: t('payment.subscribed')
+      end
+    end
     redirect_to '/auth/google_oauth2' unless session[:user_id].present?
     # If the plan is premium, do not redirect, allowing payment to proceed
   end
-
-  def check_active_subscription
-    pu = PremiumUser.find_by(user_id: session[:user_id])
-    logger.info "Checking subscription for user: #{pu.inspect}"
-    if pu.nil?
-      # User has no subscription
-      logger.info "User has no subscription"
-    elsif pu.expire_date > Date.today
-      logger.info "User has an active subscription"
-      redirect_to root_path, notice: t('payment.subscribed')
-    end
-  end
-
-end

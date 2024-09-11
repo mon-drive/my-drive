@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_08_133016) do
+ActiveRecord::Schema.define(version: 2024_09_11_191420) do
 
   create_table "admin_users", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -68,13 +68,13 @@ ActiveRecord::Schema.define(version: 2024_09_08_133016) do
     t.index ["item_type", "item_id"], name: "index_has_permissions_on_item"
   end
 
-  create_table "makes", force: :cascade do |t|
+  create_table "make_transactions", force: :cascade do |t|
     t.integer "user_id"
-    t.integer "transaction_id"
+    t.integer "pay_transaction_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["transaction_id"], name: "index_makes_on_transaction_id"
-    t.index ["user_id"], name: "index_makes_on_user_id"
+    t.index ["pay_transaction_id"], name: "index_make_transactions_on_pay_transaction_id"
+    t.index ["user_id"], name: "index_make_transactions_on_user_id"
   end
 
   create_table "owners", force: :cascade do |t|
@@ -91,6 +91,13 @@ ActiveRecord::Schema.define(version: 2024_09_08_133016) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["itemid"], name: "index_parents_on_itemid", unique: true
+  end
+
+  create_table "pay_transactions", force: :cascade do |t|
+    t.datetime "data"
+    t.string "transaction_type"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "permissions", force: :cascade do |t|
@@ -137,13 +144,6 @@ ActiveRecord::Schema.define(version: 2024_09_08_133016) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_folder_id"], name: "index_share_folders_on_user_folder_id"
     t.index ["user_id"], name: "index_share_folders_on_user_id"
-  end
-
-  create_table "transactions", force: :cascade do |t|
-    t.datetime "data"
-    t.string "transaction_type"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "user_files", force: :cascade do |t|
@@ -209,8 +209,8 @@ ActiveRecord::Schema.define(version: 2024_09_08_133016) do
   add_foreign_key "has_owners", "owners"
   add_foreign_key "has_parents", "parents"
   add_foreign_key "has_permissions", "permissions"
-  add_foreign_key "makes", "transactions"
-  add_foreign_key "makes", "users"
+  add_foreign_key "make_transactions", "pay_transactions"
+  add_foreign_key "make_transactions", "users"
   add_foreign_key "possesses", "user_folders"
   add_foreign_key "possesses", "users"
   add_foreign_key "premium_users", "users"
