@@ -246,7 +246,7 @@ $(document).on('turbolinks:load', function() {
       .then(data => {
         if (data.success) {
           shareForm.reset();
-          alert('File condiviso con successo.');
+          $('#md_share').modal('show');
         } else {
           alert('Errore durante la condivisione del file.');
         }

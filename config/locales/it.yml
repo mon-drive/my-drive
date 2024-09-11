@@ -15,6 +15,7 @@ it:
     fourth-card-title: "Pagamenti sicuri"
     fourth-card-text: "Tutti i pagamenti sono gestiti tramite Stripe."
   dash:
+    shared-ok: "File condiviso con successo"
     search: "Cerca"
     premium-msg1: "Per convertire questo file, devi essere un utente premium."
     premium-msg2: "Accesso Premium Richiesto"

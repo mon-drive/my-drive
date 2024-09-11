@@ -1,18 +1,18 @@
 <% if notice %>
   <div class="modal fade" id="md_notice" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <%= notice %>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= notice %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+        </div>
       </div>
     </div>
-  </div>
   </div>
   <script>
     modal = new bootstrap.Modal(document.getElementById('md_notice'));
@@ -64,7 +64,22 @@
   </div>
 </div>
 
-
+<!--modal condivisione-->
+<div class="modal fade" id="md_share" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= t('dash.shared-ok')%>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= t('dash.close')%></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!--modal durante scansione virus-->
 <div class="modal fade" id="md_scan" data-bs-backdrop="static">
