@@ -816,6 +816,106 @@ class DriveController < ApplicationController
 
     private
 
+    def delete_aux(file_id)
+      file = UserFile.find_by(user_file_id: file_id)
+      if file.nil?
+        folder1 = UserFolder.find_by(user_folder_id: file_id)
+        parent1 = Parent.find_by(itemid: file_id)
+        possesses1 = Possess.find_by(user_folder_id: folder1.id)
+        hasOwner1 = HasOwner.where(item: folder1.id)
+        hasPermission1 = HasPermission.where(item_id: folder1.id)
+        shareFolder1 = ShareFolder.where(user_folder_id: folder1.id)
+        hasParent = HasParent.where(parent_id: parent1.id)
+        hasParent.each do |item|
+          if item.item_type == 'UserFile'
+            file = UserFile.find_by(id: item.item_id)
+            if file
+              delete_aux(file.user_file_id)
+              file.destroy
+            end
+          else
+            folder = UserFolder.find_by(user_folder_id: item.item_id)
+            possesses = Possess.find_by(user_folder_id: folder.id)
+            parent = Parent.find_by(itemid: folder.user_folder_id)
+            hasOwner = HasOwner.where(item: folder.id)
+            hasPermission = HasPermission.where(item_id: folder.id)
+            shareFolder = ShareFolder.where(user_folder_id: folder.id)
+            delete_aux(item.user_folder_id)
+            if possesses
+              possesses.destroy
+            end
+            if parent
+              parent.destroy
+            end
+            hasOwner.each do |owner|
+              owner.destroy
+            end
+            hasPermission.each do |permission|
+              if permission.item_type == 'UserFolder'
+                permission.destroy
+              end
+            end
+            shareFolder.each do |share|
+              share.destroy
+            end
+            folder.destroy
+          end
+          item.destroy
+        end
+        if possesses1
+          possesses1.destroy
+        end
+        hasOwner1.each do |owner|
+          owner.destroy
+        end
+        hasPermission1.each do |permission|
+          if permission.item_type == 'UserFolder'
+            permission.destroy
+          end
+        end
+        shareFolder1.each do |share|
+          share.destroy
+        end
+        if parent1
+          parent1.destroy
+        end
+        folder1.destroy
+      else
+        contains = Contains.find_by(user_file_id: file.id)
+        hasOwner = HasOwner.where(item: file.id)
+        hasParent = HasParent.where(item_id: file.id)
+        hasPermission = HasPermission.where(item_id: file.id)
+        shareFile = ShareFile.where(user_file_id: file.id)
+        hasOwner.each do |owner|
+          owner.destroy
+        end
+        hasParent.each do |parent|
+          parent.destroy
+        end
+        hasPermission.each do |permission|
+          if permission.item_type == 'UserFile'
+            permission.destroy
+          end
+        end
+        shareFile.each do |share|
+          share.destroy
+        end
+        contains.destroy
+        file.destroy
+      end
+    end
+
+    def get_root_id
+      possess = Possess.where(user_id: current_user.id)
+      possess.each do |item|
+        folder = UserFolder.find_by(id: item.user_folder_id, mime_type: 'root')
+        if folder
+          return folder.user_folder_id
+        end
+      end
+      return 'id'
+    end
+
     def initialize_drive_service
       drive_service = Google::Apis::DriveV3::DriveService.new
       drive_service.authorization = google_credentials
@@ -902,16 +1002,50 @@ class DriveController < ApplicationController
     def get_files_and_folders_in_bin()
       all_items = []
 
-      all_items = UserFolder.where(trashed: true) + UserFile.where(trashed: true)
-
+      possess = Possess.where(user_id: current_user.id)
+      possess.each do |item|
+        folder = UserFolder.find_by(id: item.user_folder_id)
+        if folder
+          all_items << folder if folder.trashed
+          contains = Contains.where(user_folder_id: folder.id)
+          contains.each do |file|
+            file_db = UserFile.find_by(id: file.user_file_id, trashed: true)
+            if file_db
+              all_items << file_db
+            end
+          end
+        end
+      end
       all_items
     end
 
     def get_shared_files_and_folders()
       all_items = []
 
-      all_items = UserFolder.where(sharedWithMe: true) + UserFile.where(sharedWithMe: true)
-
+      possess = Possess.where(user_id: current_user.id)
+      possess.each do |item|
+        folder = UserFolder.find_by(id: item.user_folder_id, mime_type: 'ShareWithMe')
+        puts folder
+        if folder
+          parent = Parent.find_by(itemid: 'ShareWithMe', num: current_user.id)
+          if parent
+            hasParent = HasParent.where(parent_id: parent.id)
+            hasParent.each do |item|
+              if item.item_type == 'UserFile'
+                file = UserFile.find_by(id: item.item_id)
+                if file
+                  all_items << file
+                end
+              else
+                folder = UserFolder.find_by(id: item.item_id)
+                if folder
+                  all_items << folder
+                end
+              end
+            end
+          end
+        end
+      end
       all_items
     end
 
@@ -987,14 +1121,6 @@ class DriveController < ApplicationController
       end
     end
 
-    def get_root_id()
-      folder = UserFolder.find_by(mime_type: 'root')
-      if folder
-        folder.user_folder_id
-      else
-        "id"
-      end
-    end
 
     def create_folder_in_drive(folder_name)
       # Implementa la logica per creare una cartella in Google Drive o altro servizio
@@ -1093,94 +1219,6 @@ class DriveController < ApplicationController
       @google_profile_image = @current_user.profile_picture
     end
 
-    def delete_aux(file_id)
-      file = UserFile.find_by(user_file_id: file_id)
-      if file.nil?
-        folder1 = UserFolder.find_by(user_folder_id: file_id)
-        parent1 = Parent.find_by(itemid: file_id)
-        possesses1 = Possess.find_by(user_folder_id: folder1.id)
-        hasOwner1 = HasOwner.where(item: folder1.id)
-        hasPermission1 = HasPermission.where(item_id: folder1.id)
-        shareFolder1 = ShareFolder.where(user_folder_id: folder1.id)
-        hasParent = HasParent.where(parent_id: parent1.id)
-        hasParent.each do |item|
-          if item.item_type == 'UserFile'
-            file = UserFile.find_by(id: item.item_id)
-            if file
-              delete_aux(file.user_file_id)
-              file.destroy
-            end
-          else
-            folder = UserFolder.find_by(user_folder_id: item.item_id)
-            possesses = Possess.find_by(user_folder_id: folder.id)
-            parent = Parent.find_by(itemid: folder.user_folder_id)
-            hasOwner = HasOwner.where(item: folder.id)
-            hasPermission = HasPermission.where(item_id: folder.id)
-            shareFolder = ShareFolder.where(user_folder_id: folder.id)
-            delete_aux(item.user_folder_id)
-            if possesses
-              possesses.destroy
-            end
-            if parent
-              parent.destroy
-            end
-            hasOwner.each do |owner|
-              owner.destroy
-            end
-            hasPermission.each do |permission|
-              if permission.item_type == 'UserFolder'
-                permission.destroy
-              end
-            end
-            shareFolder.each do |share|
-              share.destroy
-            end
-            folder.destroy
-          end
-          item.destroy
-        end
-        if possesses1
-          possesses1.destroy
-        end
-        hasOwner1.each do |owner|
-          owner.destroy
-        end
-        hasPermission1.each do |permission|
-          if permission.item_type == 'UserFolder'
-            permission.destroy
-          end
-        end
-        shareFolder1.each do |share|
-          share.destroy
-        end
-        if parent1
-          parent1.destroy
-        end
-        folder1.destroy
-      else
-        contains = Contains.find_by(user_file_id: file.id)
-        hasOwner = HasOwner.where(item: file.id)
-        hasParent = HasParent.where(item_id: file.id)
-        hasPermission = HasPermission.where(item_id: file.id)
-        shareFile = ShareFile.where(user_file_id: file.id)
-        hasOwner.each do |owner|
-          owner.destroy
-        end
-        hasParent.each do |parent|
-          parent.destroy
-        end
-        hasPermission.each do |permission|
-          if permission.item_type == 'UserFile'
-            permission.destroy
-          end
-        end
-        shareFile.each do |share|
-          share.destroy
-        end
-        contains.destroy
-        file.destroy
-      end
-    end
 
     def update_database
       drive_service = initialize_drive_service
@@ -1224,7 +1262,7 @@ class DriveController < ApplicationController
         parent = Parent.find_by(itemid: rootFolder.id)
         if parent.nil?
           parent = Parent.create(itemid: rootFolder.id, num: 0)
-        end 
+        end
       end
 
       all_items.each do |item|
@@ -1392,10 +1430,19 @@ class DriveController < ApplicationController
         end
       end
 
+      share = UserFolder.find_by(mime_type: 'ShareWithMe')
+      parent = Parent.find_by(itemid: 'ShareWithMe')
+      if share.nil?
+        share = UserFolder.create(user_folder_id: 'ShareWithMe', name: 'ShareWithMe', mime_type: 'ShareWithMe', size: 0, created_time: Time.current, modified_time: Time.current, shared: false)
+        Possess.create(user_id: @user.id, user_folder_id: share.id)
+        parent = Parent.create(itemid: 'ShareWithMe', num: current_user.id)
+      end
+      item_db = nil
       shared_items.each do |item|
         idString = item.id.to_s
+
         if item.mime_type == 'application/vnd.google-apps.folder'
-          UserFolder.upsert({
+          item_db = UserFolder.upsert({
             user_folder_id: idString,
             name: item.name,
             mime_type: item.mime_type,
@@ -1408,14 +1455,15 @@ class DriveController < ApplicationController
             created_at: item.created_time,  # Aggiungi questo
             updated_at: item.modified_time   # Aggiungi questo
           }, unique_by: :user_folder_id)
+          item_db = UserFolder.find_by(user_folder_id: idString)
           Parent.upsert({
             itemid: idString,
-            num: 0,
+            num: current_user.id,
             created_at: item.created_time,  # Aggiungi questo
             updated_at: item.modified_time   # Aggiungi questo
           }, unique_by: :itemid)
         else
-          UserFile.upsert({
+          item_db = UserFile.upsert({
             user_file_id: idString,
             name: item.name,
             mime_type: item.mime_type,
@@ -1431,6 +1479,22 @@ class DriveController < ApplicationController
             created_at: item.created_time,  # Aggiungi questo
             updated_at: item.modified_time   # Aggiungi questo
           }, unique_by: :user_file_id)
+          item_db = UserFile.find_by(user_file_id: idString)
+        end
+        HasParent.upsert({
+          item_id: item_db.id,
+          parent_id: parent.id,
+          item_type: item_db.mime_type == 'application/vnd.google-apps.folder' ? 'UserFolder' : 'UserFile',
+          created_at: item.created_time,  # Aggiungi questo
+          updated_at: item.modified_time   # Aggiungi questo
+        }, unique_by: %i[item_id parent_id item_type])
+        if item_db.mime_type != 'application/vnd.google-apps.folder'
+          Contains.upsert({
+            user_folder_id: share.id,
+            user_file_id: item_db.id,
+            created_at: item.created_time,  # Aggiungi questo
+            updated_at: item.modified_time   # Aggiungi questo
+            }, unique_by: %i[user_folder_id user_file_id])
         end
       end
     end

@@ -9,9 +9,6 @@ class PagesController < ApplicationController
     if @plan.nil?
       redirect_to pricing_path, alert: t('payment.nothing')
     end
-    if !session[:user_id].present?
-      redirect_to '/auth/google_oauth2'
-    end
     @user = current_user
     if !@user.nil?
       if @user.suspended
@@ -68,7 +65,6 @@ class PagesController < ApplicationController
           trans = PayTransaction.create(data: Date.today, transaction_type: type)
           MakeTransaction.create(user: current_user, pay_transaction: trans)
         end
-        puts "redirecto to root_path"
         redirect_to root_path, notice: t('payment.success')
       rescue Stripe::CardError => e
         flash[:error] = e.message
@@ -100,3 +96,5 @@ class PagesController < ApplicationController
     redirect_to '/auth/google_oauth2' unless session[:user_id].present?
     # If the plan is premium, do not redirect, allowing payment to proceed
   end
+
+end
