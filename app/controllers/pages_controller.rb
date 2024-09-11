@@ -11,6 +11,9 @@ class PagesController < ApplicationController
     if @plan.nil?
       redirect_to pricing_path, alert: t('payment.nothing')
     end
+    if !session[:user_id].present?
+      redirect_to '/auth/google_oauth2'
+    end
   end
   def payment_complete
     plan = params[:plan]
