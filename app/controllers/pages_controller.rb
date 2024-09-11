@@ -14,6 +14,14 @@ class PagesController < ApplicationController
     if !session[:user_id].present?
       redirect_to '/auth/google_oauth2'
     end
+    @user = current_user
+    if @user.suspended
+      if @user.end_suspend < Time.now
+        @user.update(suspended: false,end_suspend: nil)
+      else
+        redirect_to root_path, alert: t('admin.suspend-message') + current_user.end_suspend.strftime("%d/%m/%Y")
+      end
+    end
   end
   def payment_complete
     plan = params[:plan]
