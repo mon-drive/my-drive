@@ -555,12 +555,12 @@ class DriveController < ApplicationController
 
           analyze_response = nil
           sleep(5)
-          20.times do  # Prova per un massimo di 5 volte
-
+          10.times do  # Prova per un massimo di 5 volte
+            sleep(15)
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             break if ['completed', 'failed'].include?(status)
-            sleep(10)  # Attendi 20 secondi tra ogni tentativo
+            # Attendi 20 secondi tra ogni tentativo
           end
 
           if analyze_response['data'] && analyze_response['data']['attributes']
