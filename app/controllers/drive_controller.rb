@@ -821,6 +821,7 @@ class DriveController < ApplicationController
       if file.nil?
         folder1 = UserFolder.find_by(user_folder_id: file_id)
         parent1 = Parent.find_by(itemid: file_id)
+        puts file_id
         possesses1 = Possess.find_by(user_folder_id: folder1.id)
         hasOwner1 = HasOwner.where(item: folder1.id)
         hasPermission1 = HasPermission.where(item_id: folder1.id)
@@ -1131,7 +1132,13 @@ class DriveController < ApplicationController
         mime_type: "application/vnd.google-apps.folder"
       }
       file = drive_service.create_file(metadata, content_type: "application/vnd.google-apps.folder")
-      UserFolder.create(user_folder_id: file.id, name: folder_name, mime_type: 'application/vnd.google-apps.folder', size: 0, created_time: Time.current, modified_time: Time.current, shared: false)
+      folder_db = UserFolder.create(user_folder_id: file.id, name: folder_name, mime_type: 'application/vnd.google-apps.folder', size: 0, created_time: Time.current, modified_time: Time.current, shared: false)
+      parent_id = Parent.find_by(itemid: $current_folder) if $current_folder != 'root'
+      parent_id = Parent.find_by(itemid: get_root_id) if $current_folder == 'root'
+      if parent_id
+        Parent.create(itemid: folder_db.user_folder_id, num: current_user.id)
+        HasParent.create(item_id: folder_db.id, item_type: 'UserFolder', parent_id: parent_id.id)
+      end
       file
     end
 

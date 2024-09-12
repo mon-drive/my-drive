@@ -329,7 +329,6 @@
                 <div class="d-flex align-items-center">
                   <i class="bi bi-folder-fill fs-3 me-2"></i>
                   <% if folder.id.is_a?(Integer) %>
-
                     <% folder_id = folder.user_folder_id %>
                   <% else %>
                     <% folder_id = folder.id %>
@@ -346,10 +345,12 @@
                   <% else %>
                     <% subfolder_id = subfolder.id %>
                   <% end %>
+                    
                     <% parent = Parent.find_by(itemid: folder_id)%>
                     <% son = UserFolder.find_by(user_folder_id: subfolder_id)%>
+                    
                     <% if parent and son %>
-                      <% hasParent = HasParent.find_by(parent_id: parent.id, item_id: son.id) %>
+                      <% hasParent = HasParent.find_by(parent_id: parent.id, item_id: son.id, item_type: 'UserFolder') %>
                       <% if hasParent and hasParent.parent_id != hasParent.item_id %>
                         <div class="list-group-item list-group-item-action">
                           <i class="bi bi-folder-fill fs-3 me-2"></i>
@@ -357,7 +358,6 @@
                         </div>
                       <% end %>
                     <% end %>
-                    
                   <% end %>
                 </div>
               </div>
