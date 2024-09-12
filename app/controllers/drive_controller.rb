@@ -113,10 +113,7 @@ class DriveController < ApplicationController
 
     def export
 
-      unless current_user.premium_valid?
-        render json: { error: 'Utente non premium' }, status: :forbidden
-        return
-      end
+
 
       file_id = params[:id]
       type = params[:type]
@@ -124,6 +121,11 @@ class DriveController < ApplicationController
 
       if type == 'SELF'
         download_file(drive_service, file_id)
+        return
+      end
+
+      unless current_user.premium_valid?
+        render json: { error: 'Utente non premium' }, status: :forbidden
         return
       end
 
@@ -428,12 +430,12 @@ class DriveController < ApplicationController
           scan_id = response_upload['data']['id']
 
           analyze_response = nil
-          20.times do  # Prova per un massimo di 5 volte
-
+          10.times do  # Prova per un massimo di 5 volte
+            sleep(10)
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             break if ['completed', 'failed'].include?(status)
-            sleep(10)  # Attendi 20 secondi tra ogni tentativo
+              # Attendi 20 secondi tra ogni tentativo
           end
           #puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
