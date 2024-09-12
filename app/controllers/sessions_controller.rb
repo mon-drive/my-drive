@@ -11,8 +11,10 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    user = User.find(session[:user_id])
-    user.update(logged_in: false) if user
+    if session[:user_id].present?
+      user = User.find_by(id: session[:user_id]) # Usa find_by per evitare eccezioni
+      user.update(logged_in: false) if user
+    end
     session.delete(:user_id)
     redirect_to root_path
   end
