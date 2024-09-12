@@ -522,14 +522,7 @@ class DriveController < ApplicationController
       puts "File uploaded to Google Drive"
       file_db = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
       if $current_folder == 'root'
-        possess = Possess.where(user_id: current_user.id)
-        folder = UserFolder.find_by(mime_type: 'root')
-        possess.each do |item|
-          temp = UserFolder.find_by(id: item.user_folder_id)
-          if folder.mime_type == 'root'
-            folder = temp
-          end
-        end
+        folder = UserFolder.find_by(user_folder_id: get_root_id)
       else
         folder = UserFolder.find_by(user_folder_id: $current_folder)
       end
