@@ -68,10 +68,13 @@ class DriveController < ApplicationController
       file_metadata = Google::Apis::DriveV3::File.new(name: new_name)
       drive_service.update_file(file_id, file_metadata, fields: 'name')
       file = UserFile.find_by(user_file_id: file_id)
+      folder = UserFolder.find_by(user_folder_id: file_id)
       if file
         file.update(name: new_name)
       end
-
+      if folder
+        folder.update(name: new_name)
+      end
       json_response = { success: true, name: new_name, message: 'Nome file aggiornato con successo.' }
       render json: json_response
     end
