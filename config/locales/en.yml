@@ -123,6 +123,7 @@ en:
     permissions: "Permissions"
     shared: "Shared"
   settings:
+    suspended: "Suspension deadline"
     all-files: "All files"
     info: "INFO"
     nome: "Name"

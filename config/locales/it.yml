@@ -123,6 +123,7 @@ it:
     permissions: "Permissions"
     shared: "Shared"
   settings:
+    suspended: "Scadenza sospensione"
     all-files: "Tutti i file"
     info: "INFORMAZIONI DI BASE"
     nome: "Nome"

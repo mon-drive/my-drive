@@ -67,7 +67,8 @@
           <div class="settings-item">
             <h5><%= t('settings.profile-image')%></h5>
             <div>
-              <img src="<%= current_user.profile_picture %>" onerror="this.style.display='none'; document.getElementById('default-profile-icon').style.display='block';" class="rounded-circle" width="100" height="100" style="display: block;">
+              <img src="<%= current_user.profile_picture %>" onerror="this.style.display='none'; document.getElementById('default-profile-icon-set').style.display='block';" class="rounded-circle" width="30" height="30" style="display: block;">
+              <i id="default-profile-icon-set" class="bi bi-person-circle" style="font-size: 1.5rem; display: none;"></i>
             </div>
           </div>
           <hr>
@@ -97,7 +98,17 @@
             
           <% end %>
 
+          <% if current_user.suspended%>
+            <hr>
+            <div class="settings-item">
+              <h5><%= t('settings.suspended')%></h5>
+                <div>
+                  <span><%= current_user.end_suspend.strftime("%d/%m/%Y")%></span>
+                </div>
+            </div>
+          <% end %>
           <hr>
+          
           <h4><%= t('settings.delete-account')%></h4>
           <hr>
           <div class="settings-item">
