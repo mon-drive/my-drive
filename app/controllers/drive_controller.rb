@@ -833,13 +833,13 @@ class DriveController < ApplicationController
               file.destroy
             end
           else
-            folder = UserFolder.find_by(user_folder_id: item.item_id)
+            folder = UserFolder.find_by(id: item.item_id)
             possesses = Possess.find_by(user_folder_id: folder.id)
             parent = Parent.find_by(itemid: folder.user_folder_id)
             hasOwner = HasOwner.where(item: folder.id)
             hasPermission = HasPermission.where(item_id: folder.id)
             shareFolder = ShareFolder.where(user_folder_id: folder.id)
-            delete_aux(item.user_folder_id)
+            delete_aux(folder.user_folder_id)
             if possesses
               possesses.destroy
             end
