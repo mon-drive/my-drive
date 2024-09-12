@@ -374,12 +374,12 @@ class DriveController < ApplicationController
             FileUtils.mkdir_p(new_folder_path)
 
             # Scarica i file all'interno della sottocartella
-            download_files_from_folder(service, file.id, new_folder_path)
+            download_files_from_folder(service, file.user_folder_id, new_folder_path)
           else
             # Scarica i file all'interno della cartella corrente
             file_path = File.join(parent_path, file.name)
             begin
-              service.get_file(file.id, download_dest: file_path)
+              service.get_file(file.user_file_id, download_dest: file_path)
             rescue Google::Apis::ClientError => e
               puts "Error downloading file: #{file.name} - #{e.message}"
               next
