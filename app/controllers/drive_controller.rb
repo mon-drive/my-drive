@@ -10,7 +10,7 @@ class DriveController < ApplicationController
     require 'json'
     require 'zip'
 
-    $current_folder = ''
+    #$current_folder = ''
 
     def dashboard
       $current_folder = params[:folder_id] || 'root'
@@ -433,13 +433,14 @@ class DriveController < ApplicationController
           scan_id = response_upload['data']['id']
 
           analyze_response = nil
-          10.times do  # Prova per un massimo di 5 volte
+          8.times do  # Prova per un massimo di 5 volte
+            puts "Scan attempt"
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             break if ['completed', 'failed'].include?(status)
-            sleep(10) # Attendi 20 secondi tra ogni tentativo
+            sleep(21) # Attendi 20 secondi tra ogni tentativo
           end
-          #puts "Analyze response"
+          puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
@@ -555,13 +556,13 @@ class DriveController < ApplicationController
           analyze_response = nil
           sleep(5)
           10.times do  # Prova per un massimo di 5 volte
-            sleep(15)
+            puts "Scan attempt"
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             break if ['completed', 'failed'].include?(status)
-            # Attendi 20 secondi tra ogni tentativo
+            sleep(15)# Attendi 20 secondi tra ogni tentativo
           end
-
+          puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
