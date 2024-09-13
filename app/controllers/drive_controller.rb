@@ -424,6 +424,8 @@ class DriveController < ApplicationController
         return
       end
 
+      $current_folder = params[:folder_id] || 'root'
+
       begin
         file_path = params[:file].path
 
