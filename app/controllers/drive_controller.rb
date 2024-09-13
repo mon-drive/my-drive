@@ -428,12 +428,36 @@ class DriveController < ApplicationController
 
       begin
         file_path = params[:file].path
+        file_size = params[:file].size
 
-        response_upload = upload_scan(file_path)
+        puts "\n\n\n\n\n\n"
+        puts "File size: #{file_size} + limite 33554432"
+        puts "\n\n\n\n\n\n"
+
+        if file_size > 33554432
+          puts "file grande"
+          link = link_upload_large_file()
+          api_key = Figaro.env.VIRUSTOTAL_API_KEY
+          file = File.open(file_path, 'rb')
+
+          response = HTTParty.post(link,
+            headers: {
+              'x-apikey' => api_key
+            },
+            multipart: true,
+            body: {
+              file: file
+            },
+            debug_output: $stdout # This will log the full HTTP request and response
+          )
+          response_upload=JSON.parse(response.body)
+        else
+          puts "file piccolo"
+          response_upload = upload_scan(file_path)
+        end
         #puts "Response upload"
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
-
           analyze_response = nil
           8.times do  # Prova per un massimo di 5 volte
             puts "Scan attempt"
@@ -507,8 +531,21 @@ class DriveController < ApplicationController
         headers: { 'x-apikey' => api_key }
       )
       JSON.parse(response.body)
+
     end
 
+    def link_upload_large_file
+      api_key = Figaro.env.VIRUSTOTAL_API_KEY
+      url = "https://www.virustotal.com/api/v3/files/upload_url"
+      response = HTTParty.get(url,
+        headers: { 'x-apikey' => api_key }
+      )
+      response=JSON.parse(response.body)
+      puts  "\n\n\n\n\n\n"
+      puts response['data']
+      puts  "\n\n\n\n\n\n"
+      response['data']
+    end
 
     def upload(file_id)
       # Initialize the API
@@ -550,7 +587,30 @@ class DriveController < ApplicationController
         temp_file.write(zip_buffer)
         temp_file.rewind
 
-        response_upload = upload_scan(temp_file.path)
+        zip_size = File.size(temp_file.path)
+        puts "Zip size: #{zip_size}"
+
+        if zip_size > 33554432
+          puts "File grande"
+          link = link_upload_large_file()
+          api_key = Figaro.env.VIRUSTOTAL_API_KEY
+          file = File.open(temp_file.path, 'rb')
+
+          response = HTTParty.post(link,
+            headers: {
+              'x-apikey' => api_key
+            },
+            multipart: true,
+            body: {
+              file: file
+            },
+            debug_output: $stdout # This will log the full HTTP request and response
+          )
+          response_upload=JSON.parse(response.body)
+        else
+          puts "File piccolo"
+          response_upload = upload_scan(temp_file.path)
+        end
 
         if response_upload['data'] && response_upload['data']['id']
           scan_id = response_upload['data']['id']
