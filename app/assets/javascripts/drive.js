@@ -434,7 +434,7 @@ $(document).ready(function() {
 
 //gestione ordinamento
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('turbolinks:load', function () {
   const orderSelector = document.getElementById('order-selector');
   const itemsContainer = document.getElementById('items-container');
 
