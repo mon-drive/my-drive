@@ -430,12 +430,7 @@ class DriveController < ApplicationController
         file_path = params[:file].path
         file_size = params[:file].size
 
-        puts "\n\n\n\n\n\n"
-        puts "File size: #{file_size} + limite 33554432"
-        puts "\n\n\n\n\n\n"
-
         if file_size > 33554432
-          puts "file grande"
           link = link_upload_large_file()
           api_key = Figaro.env.VIRUSTOTAL_API_KEY
           file = File.open(file_path, 'rb')
@@ -452,7 +447,6 @@ class DriveController < ApplicationController
           )
           response_upload=JSON.parse(response.body)
         else
-          puts "file piccolo"
           response_upload = upload_scan(file_path)
         end
         #puts "Response upload"
@@ -460,13 +454,11 @@ class DriveController < ApplicationController
           scan_id = response_upload['data']['id']
           analyze_response = nil
           8.times do  # Prova per un massimo di 5 volte
-            puts "Scan attempt"
             analyze_response = analyze(scan_id)
             status = analyze_response['data']['attributes']['status']
             break if ['completed', 'failed'].include?(status)
             sleep(21) # Attendi 20 secondi tra ogni tentativo
           end
-          puts "Analyze response"
           if analyze_response['data'] && analyze_response['data']['attributes']
             if analyze_response['data']['attributes']['status'] == 'completed'
               malicious_count = analyze_response['data']['attributes']['stats']['malicious']
