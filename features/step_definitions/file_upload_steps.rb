@@ -9,6 +9,7 @@ Given('a registered user named "Bob"') do
   SCOPES = ['https://www.googleapis.com/auth/drive']
 
   @drive_service = initialize_drive_service('mydrive-430108-3e571c4c5538.json')
+  @test_user = create_test_user()
 end
 
 Given("Bob wants to upload one or more valid files") do
@@ -16,13 +17,13 @@ Given("Bob wants to upload one or more valid files") do
 end
 
 And("Bob has sufficient space") do
-  #assume sufficient space
-  @space_available = true
+  expect(@test_user.total_space > @test_user.used_space).to be true
 end
 
 And("Bob has permission to write in that directory") do
-  # Assume permission granted
-  @permission_granted = true
+  create_permission_test()
+  found_permission = Permission.find_by(emailAddress: @test_user.email)
+  expect(found_permission.permission_type).to eq("write")
 end
 
 When("Bob clicks the “+” button") do
@@ -67,7 +68,7 @@ Then("The file should be successfully uploaded to the server") do
   expect(@uploaded_file_id).not_to be_nil
 
   #DB upload
-  db_file = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
+  db_file = create_file_test(file)
   expect(db_file).not_to be_nil
 
   @file.close
@@ -99,6 +100,8 @@ end
 
 
 
+
+
 def initialize_drive_service(config_filename)
   authorization = Google::Auth::ServiceAccountCredentials.make_creds(
     json_key_io: File.open(Rails.root.join('config', config_filename)),
@@ -111,4 +114,49 @@ def initialize_drive_service(config_filename)
   drive_service.authorization = authorization
 
   drive_service
+end
+
+def create_test_user()
+  User.create(username: "Bob", email: "test@example.com", total_space: 10, used_space: 5)  
+end
+
+def create_permission_test()
+  # Create a permission in the test database
+  permission = Permission.create!(
+    permission_type: "write",
+    role: "user",
+    emailAddress: "test@example.com",
+    permission_id: "12345"
+  )
+
+  folder = UserFolder.create(name: "folder", size: 1, mime_type: "application/vnd.google-apps.folder", created_time: Time.now, modified_time: Time.now)
+
+  hp = HasPermission.upsert({
+    item_id: folder.id,
+    permission_id: permission.id,
+    item_type: 'UserFolder',
+    created_at: Time.now,
+    updated_at: Time.now
+  }, unique_by: %i[item_id permission_id item_type])
+
+  Possess.upsert({
+    user_id: @test_user.id,
+    user_folder_id: folder.id,
+    created_at: Time.now,
+    updated_at: Time.now 
+  }, unique_by: %i[user_id user_folder_id])
+end
+
+def create_file_test(file)
+  db_file = UserFile.create(user_file_id: file.id, name: file.name, size: file.size.to_i, mime_type: file.mime_type, created_time: file.created_time, modified_time: file.modified_time)
+
+  folder = UserFolder.find_by(name: "folder")
+  Contains.upsert({
+    user_folder_id: folder.id,
+    user_file_id: db_file.id,
+    created_at: Time.now,
+    updated_at: Time.now 
+  }, unique_by: %i[user_folder_id user_file_id])
+
+  return db_file
 end
