@@ -145,3 +145,6 @@ it:
     timeout: "L'analisi non è stata completata in tempo. Per favore, riprova più tardi"
     error: "Errore sconosciuto durante l'analisi"
     message: "Si è verificato un errore: "
+  upload:
+    missing-name: "Nome della cartella non fornito"
+    empty-name: "Il nome della cartella non può essere vuoto"

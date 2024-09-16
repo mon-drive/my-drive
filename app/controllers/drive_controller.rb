@@ -674,7 +674,7 @@ class DriveController < ApplicationController
       folder_name = params[:folder_name]
 
       if folder_name.blank?
-        redirect_to dashboard_path, alert: 'Nome della cartella non fornito.'
+        redirect_to dashboard_path, alert: t('upload.missing-name')
         return
       end
 
@@ -718,7 +718,7 @@ class DriveController < ApplicationController
       logger.info "create_folder action called"
       folder_name = params[:folder_name]
       if folder_name.blank?
-        redirect_to dashboard_path, alert: "Il nome della cartella non può essere vuoto."
+        redirect_to dashboard_path, alert: t('upload.empty-name')
         return
       end
 

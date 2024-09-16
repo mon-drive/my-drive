@@ -145,3 +145,6 @@ en:
     timeout: "The analysis has timed out, please try again later"
     error: "Unknown error during analysis"
     message: "An error occurred: "
+  upload:
+    missing-name: "Folder name not provided"
+    empty-name: "Folder name cannot be empty"
