@@ -757,7 +757,10 @@ class DriveController < ApplicationController
 
       begin
         if folder_id == 'bin'
-          drive_service.delete_file(item_id)
+          begin
+            drive_service.delete_file(item_id)
+          rescue => e
+          end
           item = UserFile.find_by(user_file_id: item_id) || UserFolder.find_by(user_folder_id: item_id)
           delete_aux(item_id)
 
@@ -771,7 +774,10 @@ class DriveController < ApplicationController
         file_metadata = {
           trashed: true
         }
-        drive_service.update_file(item_id, file_metadata, fields: 'trashed')
+        begin
+          drive_service.update_file(item_id, file_metadata, fields: 'trashed')
+        rescue => e
+        end
         item = UserFile.find_by(user_file_id: item_id) || UserFolder.find_by(user_folder_id: item_id)
         item.update(trashed: true)
         respond_to do |format|
@@ -863,7 +869,7 @@ class DriveController < ApplicationController
 
     def update_db(user)
       @user = user
-      #update_database
+      update_database
     end
 
     private
