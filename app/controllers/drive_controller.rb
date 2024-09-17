@@ -869,7 +869,7 @@ class DriveController < ApplicationController
 
     def update_db(user)
       @user = user
-      update_database
+      #update_database
     end
 
     private

@@ -374,32 +374,33 @@
           <%= number_to_percentage((@used_space.to_f / @total_space.to_f) * 100, precision: 2) %>
         </div>
       </div>
-
-      <div class="d-flex justify-content-center mt-3">
-        <div class="dropdown">
-          <button class="btn btn-transparent rounded-circle border border-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 50px; height: 50px; padding: 0;">
-            <i class="fas fa-plus text-dark"></i>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal"><%= t('dash.new-folder')%></a></li>
-            <li>
-              <form id="upload-form" action="<%= upload_path(folder_id: $current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
-                <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-                <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
-              </form>
-              <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;"><%= t('dash.upload-file')%></a>
-            </li>
-            <li>
-              <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: $current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
-                <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-                <%= hidden_field_tag :folder_name, '' %>
-                <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect(); apri_modal('md_scan');">
-              </form>
-              <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;"><%= t('dash.upload-folder')%></a>
-            </li>
-          </ul>
+      <% if $current_folder != 'bin' and $current_folder != 'sharedWithMe' %>
+        <div class="d-flex justify-content-center mt-3">
+          <div class="dropdown">
+            <button class="btn btn-transparent rounded-circle border border-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 50px; height: 50px; padding: 0;">
+              <i class="fas fa-plus text-dark"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newFolderModal"><%= t('dash.new-folder')%></a></li>
+              <li>
+                <form id="upload-form" action="<%= upload_path(folder_id: $current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
+                  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                  <input type="file" name="file" id="file-input" onchange="handleFileSelect(); apri_modal('md_scan');">
+                </form>
+                <a class="dropdown-item" href="#" onclick=" document.getElementById('file-input').click(); return false;"><%= t('dash.upload-file')%></a>
+              </li>
+              <li>
+                <form id="upload-folder-form" action="<%= upload_folder_path(folder_id: $current_folder) %>" method="post" enctype="multipart/form-data" style="display: none;">
+                  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                  <%= hidden_field_tag :folder_name, '' %>
+                  <input type="file" name="files[]" id="folder-input" webkitdirectory multiple onchange="handleFolderSelect(); apri_modal('md_scan');">
+                </form>
+                <a class="dropdown-item" href="#" onclick="document.getElementById('folder-input').click(); return false;"><%= t('dash.upload-folder')%></a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+      <% end %>
     </div>
     <div class="col-md-9">
       <h3><%=t('dash.contents')%> <%= $current_folder_name %></h3>
